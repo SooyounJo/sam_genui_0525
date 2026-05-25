@@ -1199,21 +1199,23 @@
     visibility: hidden !important;
     transform: translateY(12px);
   }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-slot {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(12px);
+  }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map {
+    transform: none !important;
+    clip-path: none !important;
+  }
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-leaflet,
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-position-pulse,
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-map-compass,
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed:not(.dot-goal__map-seed--handoff) {
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed--handoff {
     opacity: 0 !important;
     visibility: hidden !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed--handoff {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map {
-    transform: scale(0) !important;
-    transform-origin: center center !important;
-    clip-path: none !important;
+    animation: none !important;
   }
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map::before {
     opacity: 0 !important;
@@ -1260,19 +1262,14 @@
     position: relative;
     overflow: hidden;
   }
-  /* Staged map entrance (first mount only):
-       1) handoff seed dot stays visible (intro → home continuity)
-       2) brief beat → test3-goal-map-ready
-       3) circle blooms from center (map masked in circle)
-       4) radar sweep fades in over 0.5s after bloom
-       5) pulse halo upgrades after entrance settles */
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-seed:not(.dot-goal__map-seed--handoff) {
-    animation: test3GoalMapSeedIn 360ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+  /* Goal map entrance — no separate blue-dot seed; rises with copy (test3GoalCopyRise). */
+  #canvas[data-test-scope="test3"] #test3-goal:not(.test3-goal-copy-enter):not(.test3-goal-entrance-settled) .dot-goal__map-seed,
+  #canvas[data-test-scope="test3"] #test3-goal:not(.test3-goal-copy-enter):not(.test3-goal-entrance-settled) .dot-goal__map-seed--handoff {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
   }
   #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map-seed--handoff {
-    opacity: 1 !important;
-    visibility: visible !important;
-    animation: none !important;
     z-index: 1001;
     left: 50% !important;
     top: 50% !important;
@@ -1283,15 +1280,20 @@
     transform: translate(-50%, -50%) !important;
   }
   #canvas[data-test-scope="test3"] #test3-goal[data-test3-goal-map-hold="1"] .dot-goal__map,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not([data-test3-goal-map-ready="1"]) .dot-goal__map,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not([data-test3-goal-map-ready="1"]) .dot-goal__map {
-    transform: scale(0) !important;
-    transform-origin: center center !important;
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map {
+    transform: none !important;
     clip-path: none !important;
   }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not([data-test3-goal-map-ready="1"]) .dot-goal__map-leaflet,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not([data-test3-goal-map-ready="1"]) .dot-goal__map::before,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not([data-test3-goal-map-ready="1"]) .mlp-map-compass {
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map-slot,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map-slot {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(12px);
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .mlp-map-compass {
     opacity: 0 !important;
     visibility: hidden !important;
   }
@@ -1301,26 +1303,15 @@
   }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-leaflet,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__map-leaflet {
-    opacity: 0;
-    visibility: visible;
-  }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map-leaflet,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map-leaflet {
-    animation: test3GoalMapContentFade 760ms cubic-bezier(0.16, 1, 0.3, 1) 920ms both;
-    will-change: opacity;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-position-pulse,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-map-compass,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-position-pulse,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-map-compass {
-    opacity: 0;
-    visibility: hidden;
-  }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .mlp-map-compass,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-map-ready .mlp-map-compass {
-    visibility: visible;
-    animation: test3GoalMapCompassFade 500ms cubic-bezier(0.16, 1, 0.3, 1) 920ms both;
-    will-change: opacity;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
   @keyframes test3GoalMapSeedIn {
     0%   { opacity: 0; transform: scale(0.35); }
@@ -1350,8 +1341,6 @@
     background: transparent;
     box-shadow: none;
     border-radius: 0;
-    opacity: 1 !important;
-    visibility: visible !important;
     animation: none !important;
     z-index: 1000;
   }
@@ -1447,17 +1436,15 @@
     z-index: 470;
     will-change: opacity, --test3-radar-angle;
   }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-map-ready .dot-goal__map::before,
-  #canvas[data-test-scope="test3"] #test3-goal[data-test3-goal-map-ready="1"] .dot-goal__map::before {
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__map::before {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-entrance-settled .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal[data-test3-goal-map-ready="1"]:not(.test3-goal-enter):not(.test3-goal-enter-ready) .dot-goal__map::before {
     opacity: 1;
     animation: test3MapRadarAngleSweep 3.2s linear infinite;
-  }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map::before,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready[data-test3-goal-map-ready="1"] .dot-goal__map::before {
-    opacity: 0;
-    animation:
-      test3GoalMapRadarReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) 920ms forwards,
-      test3MapRadarAngleSweep 3.2s linear 1420ms infinite;
   }
   @keyframes test3MapRadarAngleSweep {
     from { --test3-radar-angle: 0deg; }
@@ -1591,25 +1578,38 @@
     animation: none !important;
   }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title {
-    visibility: visible !important;
-    opacity: 0;
-    transform: translateY(12px);
-    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both !important;
-  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time {
-    visibility: visible !important;
-    opacity: 0;
-    transform: translateY(12px);
-    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both !important;
-  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance {
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-slot,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-slot {
     visibility: visible !important;
     opacity: 0;
     transform: translateY(12px);
-    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both !important;
+    animation: test3GoalCopyRise 520ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-seed,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-seed--handoff,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .mlp-position-pulse,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .mlp-map-compass,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-seed,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-seed--handoff,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .mlp-position-pulse,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .mlp-map-compass {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+  /* Radar sweep rises locked to map-slot — same beat as title/time/map copy. */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map::before {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: test3MapRadarAngleSweep 3.2s linear 520ms infinite !important;
   }
   @keyframes test3GoalCopyRise {
     0%   { opacity: 0; transform: translateY(12px); }
@@ -1735,26 +1735,21 @@
   @keyframes test3MusicCompactHold {
     0%, 100% { opacity: 1; }
   }
-  /* Player chrome builds in from vertical expand — same surface, no layer swap. */
+  /* Player chrome stays hidden until settle crossfade — no 68% pre-reveal. */
   @keyframes test3MusicIconReveal {
-    0%, 68% { opacity: 0; pointer-events: none; visibility: hidden; }
-    69% { opacity: 0; pointer-events: none; visibility: visible; }
-    74%, 100% { opacity: 1; pointer-events: auto; visibility: visible; }
+    0%, 100% { opacity: 0; pointer-events: none; visibility: hidden; }
   }
   @keyframes test3MusicPlayerCopyIn {
-    0%, 68% { opacity: 0; transform: translateY(4px); visibility: hidden; }
-    69%, 100% { opacity: 1; transform: translateY(0); visibility: visible; }
+    0%, 100% { opacity: 0; transform: translateY(0); visibility: hidden; }
   }
   @keyframes test3MusicPlayDiscIn {
-    0%, 68% { opacity: 0; visibility: hidden; }
-    69%, 100% { opacity: 1; visibility: visible; }
+    0%, 100% { opacity: 0; visibility: hidden; }
   }
   @keyframes test3MusicCompactOrbOut {
     0%, 100% { opacity: 1; visibility: visible; }
   }
   @keyframes test3MusicPlayBtnIn {
-    0%, 68% { opacity: 0; visibility: hidden; }
-    69%, 100% { opacity: 1; visibility: visible; }
+    0%, 100% { opacity: 0; visibility: hidden; }
   }
   @keyframes test3MusicSearchLine1 {
     0%, 23% { opacity: 0; transform: translateX(6px); }
@@ -1815,19 +1810,18 @@
       opacity: 1;
     }
     68%, 100% {
-      width: var(--test3-disc-size, 64px);
-      height: var(--test3-disc-size, 64px);
-      left: var(--test3-disc-x, 16px);
-      top: var(--test3-disc-y, 20px);
+      width: var(--test3-orb-size, 56px);
+      height: var(--test3-orb-size, 56px);
+      left: var(--test3-orb-x, 12px);
+      top: 13px;
       margin: 0;
-      border-radius: 99px;
+      border-radius: 50%;
       opacity: 1;
     }
   }
   /* Phase A (0–42%): loading ring only — no gradient orb.
-     Phase B (43%+): radial glow orb until native play-disc takes over.
-     Phase C (68%+): icon-slot play disc fades in; compact orb keeps glow
-     underneath until JS handoff — avoids the 68% “blank disc” gap. */
+     Phase B (43%+): radial glow orb held top-left through expand end.
+     Phase C: JS settle crossfade shrinks orb → Spotify, photo + chrome fade in. */
   @keyframes test3MusicOrbBodyFill {
     0%, 42% {
       background-color: rgba(255, 255, 255, 0.14);
@@ -2101,23 +2095,46 @@
     background: rgba(255, 255, 255, 0.18);
     animation: test3MusicPlayDiscIn 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg,
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__icon .dot-music3__iconBg {
-    opacity: 1 !important;
-    visibility: visible !important;
-    animation: none !important;
-    background: rgba(255, 255, 255, 0.18) !important;
-    box-shadow: none !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout,
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__compact--layout {
+  /* Hide compact orb only after settle — keep visible for Image 1 hold + handoff. */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__compact--layout,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-test3-music-settling="1"]) .dot-music1__compact--layout,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"]:not([data-test3-music-settling="1"]):not([data-test3-music-loading="1"]) .dot-music1__compact--layout {
     opacity: 0 !important;
     pointer-events: none !important;
     visibility: hidden !important;
+    transition: opacity 420ms ease, visibility 0s linear 420ms !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg,
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__compact--layout .dot-music1__iconBg {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__compact--layout .dot-music1__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]) .dot-music1__compact--layout .dot-music1__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"]:not([data-test3-music-settling="1"]):not([data-test3-music-loading="1"]) .dot-music1__compact--layout .dot-music1__iconBg {
     display: none !important;
+  }
+  /* Image 1 — expanded orange shell + top-left orb only (4423 pre-settle) */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]):not([data-test3-music-settled="1"]) .dot-music1 {
+    background-color: #FF7F24 !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]):not([data-test3-music-settled="1"]) .dot-music1__compact--layout {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]):not([data-test3-music-settled="1"]) .dot-music1__icon {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__bottom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"]:not([data-test3-music-settled="1"]) .dot-music1__icon .dot-music3__playBtn {
+    animation: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3 {
     padding: var(--test3-disc-y, 20px) 20px 16px var(--test3-disc-x, 16px);
@@ -2162,8 +2179,74 @@
     background: rgba(255, 255, 255, 0.18) !important;
     box-shadow: none !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3::before {
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__icon .dot-music3::before {
     animation: dotMusicHorizontalBgFlowIn 4.2s linear 7.98s forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-expand-ready="1"] .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__icon .dot-music3::before {
+    animation: none !important;
+  }
+  /* Post-expand normal player — dark photo + white chrome (4423:17126).
+     Only after settle completes; crossfade rules own the handoff window. */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3 {
+    padding: 12px 20px 10px !important;
+    gap: 0 !important;
+    background: transparent !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3::before {
+    animation: none !important;
+    inset: 0 !important;
+    filter: none !important;
+    opacity: 1 !important;
+    background: url('/assets/test3-music-player-bg.jpg') center / cover no-repeat !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3::after,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3::after {
+    content: '' !important;
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__compactHeader {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__spotify,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__spotify {
+    display: block !important;
+    width: 18px !important;
+    height: 18px !important;
+    background: url('/assets/test3-music-spotify-white.png') center / contain no-repeat !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__transport,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music3__transport {
+    display: block !important;
+    background-image: url('/assets/test3-music-transport-white.png') !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="compact"]) .dot-music1__icon .dot-music3__top {
+    gap: 0 !important;
+    align-items: flex-start !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"] .dot-music1__icon .dot-music3__playBtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="compact"]) .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="compact"]) .dot-music1__icon .dot-music3__bottom {
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="compact"]) .dot-music1__icon .dot-music3__title {
+    color: #FFFFFF !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
     position: absolute;
@@ -2419,15 +2502,15 @@
     display: none;
     pointer-events: none;
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill),
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__main,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__main {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill) .dot-w21__main,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) .dot-steps21__main {
     flex: 0 1 auto;
     min-width: 0;
     display: flex;
@@ -2436,8 +2519,8 @@
     justify-content: center;
     gap: 4px;
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill) .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) .dot-steps21__expandDetail {
     display: block;
     flex: 1 1 0;
     min-width: 0;
@@ -2461,8 +2544,8 @@
   #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
     color: rgba(255, 255, 255, 0.58);
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill) .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) .dot-steps21__expandDetail {
     opacity: 1;
     transform: translateX(0);
   }
@@ -3344,7 +3427,8 @@
     pointer-events: none;
   }
   #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-map-seed {
-    animation: test3GoalMapSeedIn 360ms cubic-bezier(0.16, 1, 0.3, 1) 820ms both;
+    opacity: 0 !important;
+    animation: none !important;
   }
   /* Fade-in for the goal preview overlay — only runs during the
      intro-run exit (morph) phase. Hidden by default (opacity 0) so
@@ -3390,7 +3474,8 @@
     }
     #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title,
     #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time,
-    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance {
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__map-slot {
       animation: none !important;
       opacity: 1;
       visibility: visible;
@@ -3398,12 +3483,13 @@
     }
     #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map {
       animation: none !important;
-      transform: scale(1) !important;
+      transform: none !important;
       clip-path: none !important;
     }
     #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-leaflet,
     #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-position-pulse,
-    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-map-compass {
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-map-compass,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map::before {
       animation: none !important;
       opacity: 1;
     }
@@ -5480,6 +5566,15 @@
   .dot-music3__foldTitle {
     display: none;
   }
+  .dot-music3__compactHeader {
+    display: none;
+  }
+  .dot-music3__playlistPill {
+    display: none;
+  }
+  .dot-music3__transport {
+    display: none;
+  }
   .dot-music3__lyrics {
     display: none;
     width: 292px;
@@ -5492,252 +5587,1189 @@
     color: #000000;
     pointer-events: none;
   }
-  /* Tap-cycle states on #test3-music:
-       normal  — fully-revealed recommendation, 340×168 (default-after-shift look)
-       lyrics  — taller card with the lyric block exposed
-       compact — square 168×168, just the play button
-     Each state forces explicit dimensions with !important so the
-     existing dotMusicRevealCard animation (which holds the card at
-     168×168 for ~11.5s during the loading phase) doesn't fight the
-     tap-cycle once the user takes control. */
-  #test3-music[data-music-state="lyrics"] .dot-music3__lyrics {
-    display: block;
-    margin: 2px 0 0;
-    flex: 0 0 auto;
-    overflow: visible;
+  /* === test3 settled player — Figma 4423:17126 / 4369:15848 / 15701 ===
+     normal  = 기본형 340×168  dark photo + white UI
+     lyrics  = 확장형 340×280  orange #f8953d + playlist pill
+     compact = 소형   168×168  dark photo + white UI (same chrome as normal) */
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1 {
+    animation: none !important;
+    background-color: #f8953d !important;
+    clip-path: inset(0 0 0 0 round 32px) !important;
+    border-radius: 32px !important;
   }
-  /* test3 lyrics — bottom-to-top scroll in the expanded card slot. */
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics--flow {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    flex: 1 1 auto;
-    min-height: 0;
-    width: 292px;
-    height: 78px;
-    margin: 0;
-    overflow: hidden;
-    position: relative;
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      #000 14%,
-      #000 86%,
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      #000 14%,
-      #000 86%,
-      transparent 100%
-    );
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics-scroller {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    --lyrics-line-h: 20px;
-    animation: test3LyricsFlowUp 14s linear infinite;
-    will-change: transform;
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics-line {
-    flex-shrink: 0;
-    height: var(--lyrics-line-h);
-    line-height: var(--lyrics-line-h);
-    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.02px;
-    color: #000000;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-playing="0"] .dot-music3__lyrics-scroller {
-    animation-play-state: paused;
-  }
-  @keyframes test3LyricsFlowUp {
-    0%   { transform: translateY(0); }
-    100% { transform: translateY(-50%); }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music1,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music1 {
+    animation: none !important;
+    background-color: transparent !important;
+    clip-path: inset(0 0 0 0 round 32px) !important;
+    border-radius: 32px !important;
   }
   #test3-music[data-music-state="normal"] .dot-music1,
   #test3-music[data-music-state="lyrics"] .dot-music1 {
     width: 340px !important;
   }
-  /* Card height grows to fit the lyrics block. Width stays 340px so
-     the bar + name don't reflow. */
-  #test3-music[data-music-state="lyrics"] .dot-music1 {
-    height: 280px !important;
-  }
+  #test3-music[data-music-state="lyrics"] .dot-music1,
   #test3-music[data-music-state="lyrics"] .dot-music1__icon {
     height: 280px !important;
   }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
-    height: 280px !important;
-    min-height: 280px;
-    gap: 10px;
-    justify-content: flex-start;
-    overflow: hidden;
+  #test3-music[data-music-state="compact"] .dot-music1 {
+    width: 168px !important;
+    height: 168px !important;
   }
-  #test3-music[data-music-state="lyrics"] .dot-music3__bottom {
-    margin-top: auto;
+  #test3-music[data-music-state="normal"] .dot-music1,
+  #test3-music[data-music-state="normal"] .dot-music1__icon {
+    height: 168px !important;
+  }
+  #test3-music[data-music-state="compact"] .dot-music1__icon {
+    width: 168px !important;
+    height: 168px !important;
+    left: 0 !important;
+    right: auto !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 12px 20px 10px;
+    gap: 0;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+    border-radius: 32px;
+    background: #f8953d !important;
+    color: #000000;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]):not([data-music-state="compact"]) .dot-music1__icon .dot-music3 {
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 12px 20px 10px;
+    gap: 0;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+    border-radius: 32px;
+    background: transparent !important;
+    color: #FFFFFF;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 12px 14px 10px;
+    gap: 0;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+    border-radius: 32px;
+    background: transparent !important;
+    color: #FFFFFF;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]):not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::before {
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: url('/assets/test3-music-player-bg.jpg') center / cover no-repeat !important;
+    z-index: 0;
+    animation: none !important;
+    opacity: 1 !important;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]):not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::after {
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(109, 109, 109, 0.54);
+    z-index: 1;
+    animation: none !important;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3 > *,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 > *,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3 > * {
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3::after {
+    content: none !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__icon,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__playBtn,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]) .dot-music3__icon,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]) .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]) .dot-music3__playBtn,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"] .dot-music3__icon,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"] .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"] .dot-music3__playBtn {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-expand-ready="1"]:not([data-test3-music-settling="1"]) .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="compact"]) .dot-music3__compactHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 18px;
+    margin-bottom: 10px;
     flex-shrink: 0;
   }
-  /* Stop the reveal/shimmer animations fighting tap-cycle sizing once
-     the v2 entrance sequence has finished. */
-  #test3-music[data-test3-music-phase="playing"] .dot-music1 {
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__spotify,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__spotify {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: block;
+    background: url('/assets/test3-music-spotify.png') center / contain no-repeat;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__mediaPill,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__mediaPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.32);
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.1px;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__top,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__top {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__title,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__title {
+    display: flex !important;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin: 0 0 8px;
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0;
+    color: #000000;
+    white-space: pre-line;
+    align-items: flex-start;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__title,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__title {
+    color: #FFFFFF;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__title {
+    color: #000000;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__title {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__top {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__foldTitle {
+    display: block !important;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    margin: 0 0 6px;
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #FFFFFF;
+    white-space: pre-line;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__compactHeader {
+    display: flex !important;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__mediaPill {
+    margin-left: auto;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics--flow {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistPill {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+    width: 249px;
+    max-width: 100%;
+    min-height: 48px;
+    margin: 0 auto 10px;
+    padding: 8px 11px 8px 9px;
+    border-radius: 28px;
+    background: rgba(23, 23, 26, 0.3);
+    box-sizing: border-box;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistThumb {
+    position: relative;
+    flex-shrink: 0;
+    width: 31px;
+    height: 31px;
+    border-radius: 50%;
+    background: url('/assets/test3-music-playlist-thumb.png') center / cover no-repeat;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistThumb::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: url('/assets/test3-music-playlist-badge.png') center / cover no-repeat;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistTitle {
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #efeef2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistMeta {
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.92);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__playlistChevron {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    background: url('/assets/test3-music-chevron.png') center / contain no-repeat;
+    opacity: 0.8;
+    transform: rotate(-90deg);
+  }
+  /* lyrics expanded chrome — Figma 4369:15848 */
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__compactHeader {
+    display: flex !important;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__spotify {
+    display: block !important;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    background-image: url('/assets/test3-music-spotify.png') !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__mediaPill {
+    margin-left: auto;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__top {
+    display: flex !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__title {
+    display: flex !important;
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #000000 !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__name {
+    color: #000000;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    order: 1;
+    width: 100%;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__albumCredit {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__time--total {
+    color: rgba(0, 0, 0, 0.68);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bar {
+    order: 2;
+    width: 100% !important;
+    --bar-w: 246px;
+    --bar-track: 188px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bar .dot-music__barFill {
+    background: rgba(0, 0, 0, 0.32) !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bar .dot-music__barTrack {
+    background: rgba(0, 0, 0, 0.83) !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bar .dot-music__barTrack::after {
+    background: #000000 !important;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__transport {
+    display: block !important;
+    order: 4;
+    width: 90px;
+    height: 18px;
+    margin: 6px auto 0;
+    background-image: url('/assets/test3-music-transport.png') !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 12px 20px 10px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin-top: auto;
+    position: relative;
+    z-index: 2;
+    width: 100% !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__nameRow {
+    display: contents !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__times {
+    order: 3;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    margin-top: 2px;
+    font-size: 9px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state]:not([data-music-state="lyrics"]) .dot-music3__bottom,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-music-state="lyrics"]) .dot-music3__bottom {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto;
+    width: 100% !important;
+    height: auto !important;
+    margin-top: auto;
+    gap: 4px 0;
+    flex-shrink: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__nameRow,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__nameRow {
+    display: contents;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__name,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__name {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #000000;
+    -webkit-mask-image: none;
+            mask-image: none;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__name,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__name,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__name {
+    color: #FFFFFF;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__name-inner,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__name-inner {
     animation: none !important;
-    background-color: #FF7F24 !important;
-    clip-path: inset(0 0 0 0 round 32px) !important;
+    gap: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__name-text + .dot-music3__name-text,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__name-text + .dot-music3__name-text {
+    display: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100% !important;
+    height: 7px !important;
+    margin-top: 2px;
+    position: relative;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar .dot-music__barFill,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar .dot-music__barTrack,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar .dot-music__barFill,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar .dot-music__barTrack {
+    height: 7px !important;
+    border-radius: 999px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar .dot-music__barFill,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar .dot-music__barFill {
+    background: rgba(0, 0, 0, 0.32);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__bar .dot-music__barFill,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bar .dot-music__barFill,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__bar .dot-music__barFill {
+    background: rgba(255, 255, 255, 0.32);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__bar .dot-music__barTrack,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bar .dot-music__barTrack,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__bar .dot-music__barTrack {
+    background: rgba(255, 255, 255, 0.69);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__bar .dot-music__barTrack {
+    background: rgba(0, 0, 0, 0.83);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__bar .dot-music__barTrack::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bar .dot-music__barTrack::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__bar .dot-music__barTrack::after {
+    background: #FFFFFF;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar .dot-music__barTrack,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar .dot-music__barTrack {
+    position: relative;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__bar .dot-music__barTrack::after,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__bar .dot-music__barTrack::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #000000;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    padding: 12px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bottom {
+    width: 100% !important;
+    margin-top: auto;
+    position: relative;
+    z-index: 2;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 3px 0;
+  }
+  .dot-music3__albumCredit {
+    display: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__albumCredit {
+    display: block;
+    grid-column: 1 / -1;
+    grid-row: 5;
+    width: 100%;
+    margin-top: 1px;
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 8px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.05px;
+    color: rgba(255, 255, 255, 0.42);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__spotify {
+    width: 16px;
+    height: 16px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__mediaPill {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__name {
+    font-size: 11px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bar {
+    width: 100% !important;
+    --bar-w: 140px;
+    --bar-track: 107px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__times {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    display: flex !important;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgba(0, 0, 0, 0.68);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__time--total,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__time--total {
+    color: rgba(0, 0, 0, 0.68);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__time--total,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__time--total,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__time--total {
+    color: rgba(255, 255, 255, 0.68);
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__times,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__time--total {
+    font-size: 10px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__time--sep,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__time--sep {
+    display: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state] .dot-music3__transport,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] .dot-music3__transport {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: block !important;
+    width: 90px;
+    height: 18px;
+    margin: 6px auto 0;
+    background: url('/assets/test3-music-transport.png') center / contain no-repeat;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__transport {
+    width: 89px;
+    height: 18px;
+    margin-top: 4px;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__spotify,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__spotify,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__spotify,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]) .dot-music3__spotify {
+    background-image: url('/assets/test3-music-spotify-white.png') !important;
+    display: block !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__transport,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__transport,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music3__transport,
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-test3-music-loading="1"]):not([data-music-state="lyrics"]) .dot-music3__transport {
+    background-image: url('/assets/test3-music-transport-white.png') !important;
+  }
+  #test3-music[data-music-state="compact"] .dot-music3__lyrics,
+  #test3-music[data-music-state="compact"] .dot-music3__playlistPill {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"][data-test3-music-phase="playing"] {
+    height: 168px !important;
+    width: 168px !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"][data-test3-music-phase="playing"] {
+    height: 280px !important;
+    width: 340px !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"]:not([data-music-state="compact"]):not([data-music-state="lyrics"]) {
+    height: 168px !important;
+  }
+  #test3-music[data-music-state="lyrics"][data-test3-music-phase="playing"] .dot-music1 {
+    width: 340px !important;
+    height: 280px !important;
+  }
+  #test3-music[data-music-state="compact"][data-test3-music-phase="playing"] .dot-music1 {
+    width: 168px !important;
+    height: 168px !important;
+  }
+  #test3-music[data-music-state]:not([data-music-state="compact"]):not([data-music-state="lyrics"])[data-test3-music-phase="playing"] .dot-music1 {
     width: 340px !important;
     height: 168px !important;
   }
-  #test3-music[data-test3-music-phase="playing"] {
-    --test3-disc-size: 64px;
-    --test3-disc-x: 16px;
-    --test3-disc-y: 20px;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3 {
-    padding: var(--test3-disc-y, 20px) 20px 16px var(--test3-disc-x, 16px);
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__top {
-    gap: 12px;
-    align-items: center;
-    height: var(--test3-disc-size, 64px);
-    min-height: var(--test3-disc-size, 64px);
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__icon {
-    width: var(--test3-disc-size, 64px);
-    height: var(--test3-disc-size, 64px);
-    display: grid;
-    place-items: center;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg {
-    position: relative;
-    inset: auto;
-    grid-area: 1 / 1;
-    width: 100%;
-    height: 100%;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__playBtn,
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__icon .dot-music3__playBtn {
-    opacity: 1 !important;
-    visibility: visible !important;
-    animation: none !important;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__playBtn {
-    position: relative;
-    inset: auto;
-    grid-area: 1 / 1;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    place-items: center;
-    transform: none !important;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg {
-    background: rgba(255, 255, 255, 0.18) !important;
-    box-shadow: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    animation: none !important;
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
+    height: 280px !important;
+    min-height: 280px !important;
   }
   #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout {
     opacity: 0 !important;
     pointer-events: none !important;
     visibility: hidden !important;
   }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg {
-    display: none !important;
-    animation: none !important;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg::before,
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg::after {
-    animation: none !important;
-    opacity: 0 !important;
-  }
-  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon {
-    opacity: 1 !important;
-    visibility: visible !important;
-    height: 168px !important;
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] {
-    height: 168px !important;
-  }
-  #test3-music[data-music-state][data-test3-music-phase="playing"] .dot-music1 {
-    animation: none !important;
-    width: 340px !important;
-    height: 168px !important;
-    border-radius: 32px !important;
-    background-color: #FF7F24 !important;
-    clip-path: inset(0 0 0 0 round 32px) !important;
-  }
   #test3-music[data-music-state="normal"][data-test3-music-phase="playing"] .dot-music1 {
     height: 168px !important;
   }
-  #test3-music[data-music-state="normal"] .dot-music1__icon,
-  #test3-music[data-music-state="compact"] .dot-music1__icon {
-    height: 168px !important;
-  }
-  #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3,
-  #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
-    height: 168px !important;
-    min-height: 168px;
-    gap: 32px;
-    justify-content: space-between;
-  }
-  /* Compact: card shrinks back to a 168×168 square and only the icon
-     (with the play/pause button) remains visible. The other content —
-     title, lyrics, name, bar — collapses via display: none. */
-  #test3-music[data-music-state="compact"] .dot-music1 {
-    width: 168px !important;
-    height: 168px !important;
-  }
-  #test3-music[data-music-state="compact"] .dot-music3__lyrics,
-  #test3-music[data-music-state="compact"] .dot-music3__bottom {
-    display: none;
-  }
-  /* Compact — play disc on top, track title (not the promo sentence) at bottom. */
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
-    padding: 14px 12px 12px;
-    justify-content: space-between;
-    gap: 0;
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__top {
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    flex: 0 0 auto;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 0;
-  }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__title {
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="normal"] .dot-music3__foldTitle,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__foldTitle {
     display: none !important;
   }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__icon {
-    flex-shrink: 0;
+  /* Entrance → settled crossfade (orange orb player → dark photo normal) */
+  @keyframes test3MusicOrbHandoffShrink {
+    0% {
+      width: 56px;
+      height: 56px;
+      left: var(--test3-orb-x, 12px);
+      top: 13px;
+      opacity: 1;
+      transform: scale(1);
+      border-radius: 50%;
+    }
+    55% {
+      opacity: 0.5;
+    }
+    100% {
+      width: 18px;
+      height: 18px;
+      left: 20px;
+      top: 12px;
+      opacity: 0;
+      transform: scale(0.88);
+      border-radius: 50%;
+    }
   }
-  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__foldTitle {
+  @keyframes test3MusicSettleFadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1 {
+    background-color: #FF7F24 !important;
+    animation: none !important;
+    transition: background-color 680ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-settle-active .dot-music1 {
+    background-color: transparent !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__compact--layout {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__compact--layout .dot-music1__player,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__compact--layout .dot-music1__searchText {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__compact--layout .dot-music1__iconBg {
+    position: absolute !important;
+    left: var(--test3-orb-x, 12px) !important;
+    top: 13px !important;
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 !important;
+    animation: test3MusicOrbHandoffShrink 680ms cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    z-index: 5 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    animation: none !important;
+    z-index: 5 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3 {
+    padding: 12px 20px 10px !important;
+    gap: 0 !important;
+    background: transparent !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3::before {
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: url('/assets/test3-music-player-bg.jpg') center / cover no-repeat !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: opacity 680ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 0;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3::after {
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(109, 109, 109, 0.54) !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: opacity 680ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-settle-active .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-settle-active .dot-music1__icon .dot-music3::after {
+    opacity: 1 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3 > * {
+    position: relative;
+    z-index: 2;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3__top,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music1__icon .dot-music3__playBtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__compactHeader {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__spotify {
     display: block !important;
-    flex: 0 0 auto;
-    width: 100%;
-    margin: 0;
-    padding-top: 8px;
-    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: 0.02px;
-    color: #000000;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    opacity: 0;
+    position: relative;
+    z-index: 6;
+    background-image: url('/assets/test3-music-spotify-white.png') !important;
+    transition: opacity 480ms ease 520ms;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__mediaPill {
+    opacity: 0;
+    transition: opacity 480ms ease 560ms;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-settle-active .dot-music3__spotify,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-settle-active .dot-music3__mediaPill {
+    opacity: 1;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__bottom {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-content-enter .dot-music3__compactHeader {
+    visibility: visible !important;
+    opacity: 0;
+    animation: test3MusicSettleFadeIn 520ms ease 480ms both !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-content-enter .dot-music3__title {
+    visibility: visible !important;
+    opacity: 0;
+    animation: test3MusicSettleFadeIn 520ms ease 540ms both !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"].test3-music-content-enter .dot-music3__bottom {
+    visibility: visible !important;
+    opacity: 0;
+    animation: test3MusicSettleFadeIn 520ms ease 580ms both !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__title {
+    display: flex !important;
+    color: #FFFFFF !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__name,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__times,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__time--current,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__time--total {
+    color: rgba(255, 255, 255, 0.68) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__bar .dot-music__barFill {
+    background: rgba(255, 255, 255, 0.32) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__bar .dot-music__barTrack {
+    background: rgba(255, 255, 255, 0.69) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__bar .dot-music__barTrack::after {
+    background: #FFFFFF !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__transport {
+    background-image: url('/assets/test3-music-transport-white.png') !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settling="1"] .dot-music3__name {
+    color: #FFFFFF !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-settled="1"]:not([data-music-state="lyrics"]) .dot-music1__icon .dot-music3::before {
+    inset: 0 !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  /* normal settled — override legacy 14 s entrance (orb/disc/recommendation) */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] {
+    height: 168px !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1 {
+    width: 340px !important;
+    height: 168px !important;
+    background-color: transparent !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3 {
+    padding: 12px 20px 10px !important;
+    gap: 0 !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3::before {
+    animation: none !important;
+    opacity: 1 !important;
+    background: url('/assets/test3-music-player-bg.jpg') center / cover no-repeat !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__top {
+    gap: 0 !important;
+    align-items: flex-start !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__playBtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="normal"][data-test3-music-settled="1"] .dot-music1__icon .dot-music3__bottom {
+    animation: none !important;
+  }
+  /* lyrics expanded — Figma 4369:15848, override legacy entrance disc layout */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] {
+    height: 280px !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1 {
+    width: 340px !important;
+    height: 280px !important;
+    background-color: #f8953d !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon {
+    height: 280px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
+    padding: 12px 20px 10px !important;
+    gap: 0 !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    animation: none !important;
+    background: #f8953d !important;
+    color: #000000 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3::before,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3::after {
+    content: none !important;
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music3__compactHeader {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__top {
+    gap: 0 !important;
+    align-items: flex-start !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__playBtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__bottom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__playlistPill {
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3__playlistPill {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music3__spotify {
+    display: block !important;
+    background-image: url('/assets/test3-music-spotify.png') !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="lyrics"] .dot-music3__transport {
+    display: block !important;
+    background-image: url('/assets/test3-music-transport.png') !important;
+  }
+  /* compact 1×1 — Figma 4369:15701, override legacy entrance disc layout */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] {
+    height: 168px !important;
+    width: 168px !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1 {
+    width: 168px !important;
+    height: 168px !important;
+    background-color: transparent !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon {
+    width: 168px !important;
+    height: 168px !important;
+    left: 0 !important;
+    right: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    padding: 12px 14px 10px !important;
+    gap: 0 !important;
+    width: 100% !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    max-height: 168px !important;
+    animation: none !important;
+    background: transparent !important;
+    color: #FFFFFF !important;
+    border-radius: 32px !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3::before {
+    content: '' !important;
+    position: absolute;
+    inset: 0 !important;
+    border-radius: inherit;
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    background: url('/assets/test3-music-player-bg.jpg') center / cover no-repeat !important;
+    z-index: 0;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3::after {
+    content: '' !important;
+    position: absolute;
+    inset: 0 !important;
+    border-radius: inherit;
+    animation: none !important;
+    opacity: 1 !important;
+    background: rgba(109, 109, 109, 0.54) !important;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__compactHeader {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__top {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__icon,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__playBtn {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__bottom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__foldTitle,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__compactHeader {
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__spotify {
+    background-image: url('/assets/test3-music-spotify-white.png') !important;
+  }
+  /* compact 1×1 — force full Figma 4369:15701 chrome (Spotify + pill + transport) */
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    overflow: visible !important;
+    padding: 12px 14px 10px !important;
+    width: 100% !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    max-height: 168px !important;
+    box-sizing: border-box !important;
+    border-radius: 32px !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__compactHeader,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__compactHeader {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    min-height: 18px !important;
+    margin: 0 0 6px !important;
+    position: relative !important;
+    z-index: 3 !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__spotify,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__spotify {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    background-image: url('/assets/test3-music-spotify-white.png') !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__mediaPill,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__mediaPill {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-left: auto !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__foldTitle,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__foldTitle {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-shrink: 0 !important;
+    margin: 0 0 4px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__top {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__bottom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3__bottom {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+    grid-template-rows: auto auto auto auto auto !important;
+    gap: 2px 0 !important;
+    position: relative !important;
+    z-index: 3 !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__transport,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__transport {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    width: 89px !important;
+    height: 18px !important;
+    margin: 2px auto 0 !important;
+    background: url('/assets/test3-music-transport-white.png') center / contain no-repeat !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__albumCredit,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__albumCredit {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__times,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-music-state="compact"] .dot-music3__times {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    grid-row: 3 !important;
   }
   /* Tap target — anywhere on the card BODY (not the play button) cycles
      the state. Cursor cue tells the user the card is interactive. */
@@ -7347,6 +8379,180 @@
     left: 24px;
     top: 21px;
   }
+  /* test3 running party / pace pills — Figma 4466:23718 / 4466:23719 */
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--party-pill,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--pace-pill {
+    width: 100%;
+    height: 82px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 41px;
+    position: relative;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--party-pill {
+    background: #525252;
+    padding: 9px 10px 8px 14px;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--pace-pill {
+    background: #e7e4de;
+    padding: 9px 10px 8px 14px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__compact,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__compact,
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__expanded,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__expanded {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__expanded,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__expanded {
+    display: none;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 6px 0 2px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--party-pill .dot-w21__compact,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--pace-pill .dot-steps21__compact {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--party-pill .dot-w21__expanded,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--pace-pill .dot-steps21__expanded {
+    display: flex !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillRow,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillRow {
+    gap: 8px;
+    justify-content: flex-start;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillRow {
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillCopy,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillCopy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillTitle,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillTitle {
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+    color: #ff9749;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillSub,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillSub {
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.15px;
+    color: #ff9749;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillBody {
+    font-family: 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.15px;
+    color: #ff9749;
+    white-space: normal;
+    word-break: keep-all;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--party-pill {
+    padding: 10px 14px 10px 16px;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--pace-pill {
+    padding: 10px 12px 10px 16px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expanded .dot-w21__pillCopy {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 8px;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillTitle--solo {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__paceWave {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 120px;
+    height: 28px;
+    display: block;
+    margin: 0 auto;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillIcon,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillIcon {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__compact .dot-w21__pillIcon,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__compact .dot-steps21__pillIcon {
+    width: 44px;
+    height: 44px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillIconBg,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillIconBg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: url('/assets/test3-running-icon-bg.png') center / cover no-repeat;
+    background-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillIconBg {
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__pillIconMark,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__pillIconMark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 22px;
+    height: 17px;
+    transform: translate(-50%, -50%);
+    display: block;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--party-pill.dot-w21--expandable,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--pace-pill.dot-steps21--expandable {
+    cursor: pointer;
+  }
+  /* Legacy expandDetail — not used on party/pace pills */
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--party-pill .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--pace-pill .dot-steps21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--party-pill .dot-w21__main,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--pace-pill .dot-steps21__main {
+    display: none !important;
+  }
   /* Per user direction the dotted weather icon is HIDDEN entirely on
      test3 and the advisory text expands into the full card width.
      Was previously dimmed to 0.32 opacity but the dots still occupied
@@ -7384,19 +8590,19 @@
   }
   /* Expanded tap — keep left + right copy vertically centered in the pill.
      Row layout must win over the default column stack rule above. */
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21.dot-w21--expandable,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21.dot-steps21--expandable {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21.dot-w21--expandable:not(.dot-w21--party-pill),
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21.dot-steps21--expandable:not(.dot-steps21--pace-pill) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__main,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__main {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill) .dot-w21__main,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) .dot-steps21__main {
     align-self: center;
     justify-content: center;
   }
-  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
-  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable:not(.dot-w21--party-pill) .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable:not(.dot-steps21--pace-pill) .dot-steps21__expandDetail {
     align-self: center;
     margin-top: 0;
     margin-bottom: 0;

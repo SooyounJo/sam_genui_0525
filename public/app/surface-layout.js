@@ -25,13 +25,16 @@ var TEST3_GOAL_TOP = 42;
 var TEST3_GOAL_H = 168;
 var TEST3_CARD_GAP = 4;
 var TEST3_ROW2_TOP = TEST3_GOAL_TOP + TEST3_GOAL_H + TEST3_CARD_GAP;
-var TEST3_GOAL_MAP_BLOOM_MS = 920;
-var TEST3_GOAL_COPY_RISE_MS = 680;
+// Grid 1×1 half-column — outer shell must match weather/steps column (168px).
+var TEST3_MUSIC_COMPACT = 168;
+var TEST3_GOAL_UNIFIED_RISE_MS = 520;
 var TEST3_MUSIC_MOTION_MS = 14000;
 var TEST3_MUSIC_PRE_DELAY_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.10);
 var TEST3_MUSIC_EXPAND_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.57);
 var TEST3_MUSIC_EXPAND_DUR_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.11);
 var TEST3_MUSIC_EXPAND_END_MS = TEST3_MUSIC_EXPAND_START_MS + TEST3_MUSIC_EXPAND_DUR_MS;
+var TEST3_MUSIC_IMAGE1_HOLD_MS = 320;
+var TEST3_MUSIC_SETTLE_MS = 960;
 var TEST3_MUSIC_ENTRANCE_END_MS = TEST3_MUSIC_MOTION_MS;
 
 /** Themes set `--oneui-chroma: mono` (e.g. Mono · Grayscale) so skies/icons stay neutral — no chroma accents in markup. */
@@ -451,55 +454,29 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
             musicShifted ? { id: 'test3-music', role: 'dot-music-1x1', zone: 'viewing',
               variant: {
                 compactTitle: '러닝을 위한 음악을 찾고 있어요',
-                // Pull from the LLM-prefetched recommendation cache if
-                // available (set by _fetchTest3MusicRecommendation in
-                // __mlpTest3GoHome). Falls back to the original curated
-                // copy when the API hasn't returned yet or the key is
-                // missing — so the prototype still works offline.
-                iconTitle:    (window.__mlpTest3MusicRec && window.__mlpTest3MusicRec.iconTitle)    || '가벼운 러닝에 어울리는\nConcierto 재생 중이에요',
-                iconSubtitle: (window.__mlpTest3MusicRec && window.__mlpTest3MusicRec.iconSubtitle) || 'Jim Hall - Concierto',
-                // Bar starts empty — the just-recommended track is at the
-                // beginning of playback. Bar then grows over 180s via the
-                // dotMusicBarProgress animation in theme-page.css.
-                expandedBarTrack: 0
+                iconTitle:    '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트',
+                iconSubtitle: 'M83 - Midnight City',
+                expandedBarFull: 246,
+                expandedBarTrack: 188
               },
               _rect: { x: 24, y: test3Row2Y, w: 340, h: 168 } } : null,
             { id: 'test3-weather', role: 'dot-weather-2x1-v1-1', zone: 'viewing',
-              /* Live weather from /api/p3/weather — three compact lines
-                 (온도 / 습도 / 미세먼지) rotate one-at-a-time via the
-                 default scroll-float slot animation. */
-              variant: (function () {
-                var w = window.__mlpTest3Weather;
-                return {
-                  title: 'Weather',
-                  location: (w && w.location)   || 'Seoul',
-                  weather:  (w && w.weather)    || 'Rainy',
-                  sunIcon:  (w && w.sunIcon)    || 'pair-raindrop-dual',
-                  cycleLines: (w && w.cycleLines && w.cycleLines.length) ? w.cycleLines : [
-                    '온도 18°',
-                    '습도 58%',
-                    '미세먼지 보통'
-                  ],
-                  expandDetail: '실외 러닝에 적합한 조건이에요.'
-                };
-              })(),
+              variant: {
+                partyPill: {
+                  title: '러닝 파티 모드',
+                  subtitle: '실시간 경로 수정 중',
+                  expandTitle: '러닝 아일랜드 모드',
+                  expandBody: '고요한 러닝을 위해 현재 사람이 적은\n한강 공원으로 경로를 수정했어요'
+                }
+              },
               _rect: { x: 24, y: test3Row2Y, w: 168, h: 82 } },
             { id: 'test3-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
-              /* "Today Progress" mode: the steps card now talks about
-                 the run goal directly. cycleMode: 'fade' reverts the
-                 rotating text back to the pre-scroll-float opacity cross-
-                 fade (the scroll-float still applies to Weather, which
-                 has 3 longer wrappable lines that benefit from the
-                 vertical scroller). First line surfaces the current
-                 pace; second keeps the status note. */
               variant: {
-                title: 'Today Progress',
-                cycleMode: 'fade',
-                cycleLines: [
-                  "현재 페이스 5'00\"/km",
-                  'Warm-up achieved'
-                ],
-                expandDetail: '목표 페이스 안정'
+                pacePill: {
+                  title: '러닝 페이스',
+                  subtitle: '현재 7\'00"',
+                  expandTitle: '러닝 페이스'
+                }
               },
               _rect: { x: 196, y: test3Row2Y, w: 168, h: 82 } },
             { id: 'test3-page-dots', role: 'test3-page-dots', zone: 'viewing',
@@ -4183,10 +4160,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
     case 'dot-music-1x1': {
       var mv = (comp && comp.variant) || {};
+      var isTest3Music =
+        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
       var expandedBarW = mv.expandedBarFull != null ? mv.expandedBarFull : 292;
       var expandedBarTrack = mv.expandedBarTrack != null ? mv.expandedBarTrack : 77;
       var iconTitle = mv.iconTitle || '가벼운 러닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!';
       var iconSubtitle = mv.iconSubtitle || 'Jim Hall - Concierto';
+      if (isTest3Music) {
+        iconTitle = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
+        iconSubtitle = 'M83 - Midnight City';
+      }
       var iconHtml = window.renderAtomicForRole({
         role: 'dot-music-1x2-icon',
         variant: {
@@ -4207,9 +4191,6 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var _sw = mv.searchWeather  || '비 오는 날';
       var _sd = mv.searchDistance || '5km';
       var compactTitle = mv.compactTitle || (_sw + ' ' + _sd + ' 러닝에 맞는\nBPM과 선호 톤으로\n트랙을 찾고 있어요');
-      var isTest3Music =
-        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
-        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
       var compactIconHtml = '' +
         '<svg class="dot-music1__noteSvg" width="32" height="32" viewBox="-2 -2 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
           '<circle cx="19.85" cy="3.49" r="3.5" fill="#000000"/><circle cx="27.98" cy="3.49" r="3.5" fill="#000000"/><circle cx="35.66" cy="3.49" r="3.5" fill="#000000"/><circle cx="44.25" cy="3.49" r="3.5" fill="#000000"/><circle cx="52.39" cy="3.49" r="3.5" fill="#000000"/><circle cx="60.52" cy="3.49" r="3.5" fill="#000000"/>' +
@@ -4347,24 +4328,34 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
     case 'dot-music-1x2-icon': {
       var mv3 = (comp && comp.variant) || {};
-      var title3 = (mv3.title || '오늘 날씨에 딱 맞는\n플레이리스트');
-      var subtitle3 = (mv3.subtitle || 'Jim Hall - Concierto');
+      var isTest3Lyrics =
+        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+      var title3 = mv3.title || (isTest3Lyrics
+        ? '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트'
+        : '오늘 날씨에 딱 맞는\n플레이리스트');
+      var subtitle3 = mv3.subtitle || (isTest3Lyrics ? 'M83 - Midnight City' : 'Jim Hall - Concierto');
+      if (isTest3Lyrics) {
+        title3 = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
+        subtitle3 = 'M83 - Midnight City';
+      }
       var foldTitle3 = mv3.foldTitle;
       if (!foldTitle3) {
-        var foldDash = subtitle3.indexOf(' - ');
-        foldTitle3 = foldDash >= 0 ? subtitle3.slice(foldDash + 3).trim() : subtitle3;
+        foldTitle3 = isTest3Lyrics
+          ? '저녁 한강 러닝\n플레이리스트'
+          : (function () {
+              var foldDash = subtitle3.indexOf(' - ');
+              return foldDash >= 0 ? subtitle3.slice(foldDash + 3).trim() : subtitle3;
+            })();
       }
-      var barW3 = mv3.barFull != null ? mv3.barFull : 292;
-      var barTrack3 = mv3.barTrack != null ? mv3.barTrack : 77;
+      var barW3 = mv3.barFull != null ? mv3.barFull : (isTest3Lyrics ? 246 : 292);
+      var barTrack3 = mv3.barTrack != null ? mv3.barTrack : (isTest3Lyrics ? 188 : 77);
       var safeTitle = String(title3).replace(/\n/g, '<br/>');
       // Placeholder lyrics block — visible only when the user taps the
       // card to enter the `lyrics` state. The LLM endpoint can supply
       // real lyrics via mv3.lyrics; otherwise a generic 3-line stand-in.
       var lyrics3 = mv3.lyrics ||
         '♪\n흐르는 빗방울을 따라\n페이스를 맞춰 가면\n오늘도 한 걸음 더 멀리';
-      var isTest3Lyrics =
-        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
-        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
       var lyricsLines = String(lyrics3).split('\n').filter(function (line) { return line.length > 0; });
       if (!lyricsLines.length) lyricsLines = ['♪'];
       function _escLyricLine(s) {
@@ -4407,8 +4398,15 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<path d="M9 6.5 L21 14 L9 21.5 Z" fill="#FFFFFF"/>' +
           '</svg>' +
         '</button>';
+      var compactHeaderHtml = isTest3Lyrics
+        ? ('<div class="dot-music3__compactHeader" aria-hidden="true">' +
+            '<span class="dot-music3__spotify" aria-hidden="true"></span>' +
+            '<span class="dot-music3__mediaPill">미디어 출력</span>' +
+          '</div>')
+        : '';
       return '' +
         '<div class="dot-card dot-music dot-music3 dot-music3--icon" data-state="' + (mv3.state || 'idle') + '">' +
+          compactHeaderHtml +
           '<div class="dot-music3__top">' +
             '<div class="dot-music3__icon">' +
               '<span class="dot-music3__iconBg"></span>' +
@@ -4468,7 +4466,15 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           // tap cycle is: normal → lyrics (tap 1) → square (tap 2) →
           // normal (tap 3). Cycle handler lives in surface-layout.js.
           lyricsBlockHtml +
-          '<div class="dot-music3__foldTitle" aria-hidden="true">' + foldTitle3 + '</div>' +
+          '<div class="dot-music3__playlistPill" aria-hidden="true">' +
+            '<span class="dot-music3__playlistThumb" aria-hidden="true"></span>' +
+            '<div class="dot-music3__playlistCopy">' +
+              '<span class="dot-music3__playlistTitle">3,2,1 러닝 시작</span>' +
+              '<span class="dot-music3__playlistMeta">10곡 • 38분 34초</span>' +
+            '</div>' +
+            '<span class="dot-music3__playlistChevron" aria-hidden="true"></span>' +
+          '</div>' +
+          '<div class="dot-music3__foldTitle" aria-hidden="true">' + String(foldTitle3).replace(/\n/g, '<br/>') + '</div>' +
           '<div class="dot-music__bottom dot-music3__bottom">' +
             // Name row pairs the artist/song marquee on the left with
             // the current/total track time on the right end, both
@@ -4489,15 +4495,19 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
               // 180s playback animation; current is a placeholder for
               // now and can be ticked live later.
               '<div class="dot-music3__times" aria-hidden="true">' +
-                '<span class="dot-music3__time--current">0:00</span>' +
+                '<span class="dot-music3__time--current">' + (isTest3Lyrics ? '01:35' : '0:00') + '</span>' +
                 '<span class="dot-music3__time--sep"> / </span>' +
-                '<span class="dot-music3__time--total">3:00</span>' +
+                '<span class="dot-music3__time--total">' + (isTest3Lyrics ? '02:30' : '3:00') + '</span>' +
               '</div>' +
             '</div>' +
             '<div class="dot-music__bar dot-music__bar--wide dot-music3__bar" style="--bar-w:' + barW3 + 'px;--bar-track:' + barTrack3 + 'px;">' +
               '<div class="dot-music__barFill" aria-hidden="true"></div>' +
               '<div class="dot-music__barTrack" aria-hidden="true"></div>' +
             '</div>' +
+            '<div class="dot-music3__transport" aria-hidden="true"></div>' +
+            (isTest3Lyrics
+              ? '<div class="dot-music3__albumCredit" aria-hidden="true">Hurry Up, We\'re Dreaming.</div>'
+              : '') +
           '</div>' +
         '</div>';
     }
@@ -4758,14 +4768,56 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     }
 
     case 'dot-total-steps-2x1': {
-      // Two render modes, switched by variant:
-      //   default (legacy):  title + single count line  (e.g. "TOTAL STEPS / 5,543")
-      //   cycleLines mode:   title + stacked rotating subtitles
-      // Cycle is opacity-staggered (same pattern as .dot-music1__reason).
-      // Test3 uses this mode with title="Today Progress" and lines like
-      // "37% of run goal" / "Warm-up achieved" — connecting the steps
-      // metric to the user's daily goal instead of a raw count.
       var st = (comp && comp.variant) || {};
+      if (st.pacePill) {
+        var pp = st.pacePill;
+        var ppTitle = pp.title || '러닝 페이스';
+        var ppSub = pp.subtitle || '현재 7\'00"';
+        var ppExpandTitle = pp.expandTitle || ppTitle;
+        var ppIconHtml =
+          '<div class="dot-steps21__pillIcon" aria-hidden="true">' +
+            '<span class="dot-steps21__pillIconBg"></span>' +
+            '<img class="dot-steps21__pillIconMark" src="/assets/test3-running-icon.svg" alt="" aria-hidden="true">' +
+          '</div>';
+        var ppCompactHtml =
+          '<div class="dot-steps21__compact" aria-hidden="false">' +
+            '<div class="dot-steps21__pillRow">' +
+              '<div class="dot-steps21__pillCopy">' +
+                '<div class="dot-steps21__pillTitle">' + ppTitle + '</div>' +
+                '<div class="dot-steps21__pillSub">' + ppSub + '</div>' +
+              '</div>' +
+              ppIconHtml +
+            '</div>' +
+          '</div>';
+        var ppWaveHtml =
+          '<svg class="dot-steps21__paceWave" width="92" height="28" viewBox="0 0 92 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<defs>' +
+              '<linearGradient id="test3PaceWaveGrad" x1="0" y1="14" x2="92" y2="14" gradientUnits="userSpaceOnUse">' +
+                '<stop stop-color="#FF6B4A"/><stop offset="0.35" stop-color="#FF4FA3"/>' +
+                '<stop offset="0.65" stop-color="#8B5CF6"/><stop offset="1" stop-color="#2563EB"/>' +
+              '</linearGradient>' +
+            '</defs>' +
+            '<ellipse cx="12" cy="14" rx="5" ry="11" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="24" cy="14" rx="4" ry="8" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="36" cy="14" rx="6" ry="13" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="50" cy="14" rx="5" ry="10" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="62" cy="14" rx="4" ry="7" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="74" cy="14" rx="6" ry="12" fill="url(#test3PaceWaveGrad)"/>' +
+            '<ellipse cx="86" cy="14" rx="4" ry="9" fill="url(#test3PaceWaveGrad)"/>' +
+          '</svg>';
+        var ppExpandedHtml =
+          '<div class="dot-steps21__expanded" aria-hidden="true">' +
+            '<div class="dot-steps21__pillTitle dot-steps21__pillTitle--solo">' + ppExpandTitle + '</div>' +
+            ppWaveHtml +
+            ppIconHtml +
+          '</div>';
+        return '' +
+          '<div class="dot-card dot-steps21 dot-steps21--pace-pill dot-steps21--expandable" data-state="' + (st.state || 'idle') + '">' +
+            ppCompactHtml +
+            ppExpandedHtml +
+          '</div>';
+      }
+      // Two render modes, switched by variant:
       var stTitle = st.title || 'TOTAL STEPS';
       var stCycle = (st.cycleLines && st.cycleLines.length) ? st.cycleLines : null;
       var contentHtml;
@@ -5037,6 +5089,41 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
     case 'dot-weather-2x1-v1-1': {
       var w2 = (comp && comp.variant) || {};
+      if (w2.partyPill) {
+        var pl = w2.partyPill;
+        var plTitle = pl.title || '러닝 파티 모드';
+        var plSub = pl.subtitle || '실시간 경로 수정 중';
+        var plExpandTitle = pl.expandTitle || plTitle;
+        var plExpandBody = pl.expandBody || plSub;
+        var plIconHtml =
+          '<div class="dot-w21__pillIcon" aria-hidden="true">' +
+            '<span class="dot-w21__pillIconBg"></span>' +
+            '<img class="dot-w21__pillIconMark" src="/assets/test3-running-icon.svg" alt="" aria-hidden="true">' +
+          '</div>';
+        var plCompactHtml =
+          '<div class="dot-w21__compact" aria-hidden="false">' +
+            '<div class="dot-w21__pillRow">' +
+              '<div class="dot-w21__pillCopy">' +
+                '<div class="dot-w21__pillTitle">' + plTitle + '</div>' +
+                '<div class="dot-w21__pillSub">' + plSub + '</div>' +
+              '</div>' +
+              plIconHtml +
+            '</div>' +
+          '</div>';
+        var plExpandedHtml =
+          '<div class="dot-w21__expanded" aria-hidden="true">' +
+            '<div class="dot-w21__pillCopy">' +
+              '<div class="dot-w21__pillTitle">' + plExpandTitle + '</div>' +
+              '<div class="dot-w21__pillBody">' + String(plExpandBody).replace(/\n/g, '<br/>') + '</div>' +
+            '</div>' +
+            plIconHtml +
+          '</div>';
+        return '' +
+          '<div class="dot-card dot-w21 dot-w21--party-pill dot-w21--expandable" data-state="' + (w2.state || 'idle') + '">' +
+            plCompactHtml +
+            plExpandedHtml +
+          '</div>';
+      }
       var loc = w2.location || 'Sydney';
       var wt = w2.weather || 'Sunny';
       var darkClass = w2.theme === 'dark' ? ' dot-w21--dark' : '';
@@ -6145,26 +6232,9 @@ function _fetchTest3MusicRecommendation(ctx) {
           song:         data.song   || '',
           source:       data.source || 'unknown'
         };
-        // If the music card has ALREADY been rendered (= recommendation
-        // arrived AFTER the music shift), patch it in-place so the user
-        // sees the LLM result without waiting for another re-render.
-        // Patches BOTH name-text copies (the visible one + the aria-hidden
-        // marquee clone) so the scroller still loops seamlessly with the
-        // new artist/song, then re-measures overflow so .is-scrolling is
-        // updated for the new text length.
-        try {
-          var musicEl = document.querySelector('#test3-music .dot-music1__icon .dot-music3__title');
-          if (musicEl) musicEl.innerText = data.iconTitle.replace(/\\n/g, '\n');
-          var nameSpans = document.querySelectorAll('#test3-music .dot-music1__icon .dot-music3__name-text');
-          if (nameSpans && nameSpans.length) {
-            nameSpans.forEach(function (s) { s.textContent = data.iconSubtitle; });
-          } else {
-            // Fallback for any legacy structure without the inner spans.
-            var musicName = document.querySelector('#test3-music .dot-music1__icon .dot-music3__name');
-            if (musicName) musicName.innerText = data.iconSubtitle;
-          }
-          if (typeof _setupMusicNameMarquee === 'function') _setupMusicNameMarquee(document);
-        } catch (_) {}
+        if (typeof _resetTest3MusicCopy === 'function') {
+          _resetTest3MusicCopy(document.querySelector('#test3-music'));
+        }
       })
       .catch(function () { /* silent — fallback handles it */ });
   } catch (_) {}
@@ -6292,8 +6362,13 @@ function _upgradeTest3GoalMapSeed(soft) {
   var isHandoff = seedEl.classList.contains('dot-goal__map-seed--handoff');
   seedEl.classList.remove('dot-goal__map-seed');
   seedEl.classList.add('mlp-position-pulse', 'dot-goal__map-seed--from-seed');
-  seedEl.style.opacity = '1';
-  seedEl.style.visibility = 'visible';
+  if (isHandoff || soft) {
+    seedEl.style.removeProperty('opacity');
+    seedEl.style.removeProperty('visibility');
+  } else {
+    seedEl.style.opacity = '1';
+    seedEl.style.visibility = 'visible';
+  }
   seedEl.style.animation = 'none';
 
   if (!seedEl.querySelector('.mlp-position-pulse__core')) {
@@ -6323,10 +6398,35 @@ function _upgradeTest3GoalMapSeed(soft) {
   _pinTest3GoalMapPulseCenter(seedEl);
   return seedEl;
 }
-function _triggerTest3GoalCopyEnter(goalEl) {
+function _triggerTest3GoalUnifiedEnter(goalEl) {
   if (!goalEl || !goalEl.isConnected) return;
   if (goalEl.classList.contains('test3-goal-copy-enter')) return;
   if (!goalEl.classList.contains('test3-goal-enter-ready')) return;
+
+  goalEl.removeAttribute('data-test3-goal-map-hold');
+
+  if (typeof _upgradeTest3GoalMapSeed === 'function') {
+    _upgradeTest3GoalMapSeed(true);
+  }
+
+  var mapEl = goalEl.querySelector('.dot-goal__map');
+  if (mapEl) {
+    if (typeof _revealTest3GoalMapContentDuringBloom === 'function') {
+      _revealTest3GoalMapContentDuringBloom(goalEl, mapEl);
+    }
+    mapEl.style.removeProperty('transform');
+    mapEl.style.removeProperty('clip-path');
+    mapEl.style.removeProperty('will-change');
+  }
+
+  var mapSlot = goalEl.querySelector('.dot-goal__map-slot');
+  if (mapSlot) {
+    mapSlot.style.removeProperty('opacity');
+    mapSlot.style.removeProperty('visibility');
+    mapSlot.style.removeProperty('transform');
+    mapSlot.style.removeProperty('animation');
+  }
+
   var copies = goalEl.querySelectorAll('.dot-goal__title, .dot-goal__time, .dot-goal__distance');
   copies.forEach(function (el) {
     el.style.removeProperty('opacity');
@@ -6334,45 +6434,11 @@ function _triggerTest3GoalCopyEnter(goalEl) {
     el.style.removeProperty('transform');
     el.style.removeProperty('animation');
   });
+
   goalEl.classList.add('test3-goal-copy-enter');
   void goalEl.offsetWidth;
-  copies.forEach(function (el) {
-    void el.offsetWidth;
-  });
-}
-function _scheduleTest3GoalCopyEnter(goalEl) {
-  if (!goalEl) return;
-  var fired = false;
-  function fire() {
-    if (fired || !goalEl.isConnected) return;
-    fired = true;
-    _triggerTest3GoalCopyEnter(goalEl);
-    setTimeout(function () {
-      _finalizeTest3GoalEntrance(goalEl);
-    }, TEST3_GOAL_COPY_RISE_MS + 80);
-  }
-  function afterBloom() {
-    setTimeout(fire, TEST3_GOAL_MAP_BLOOM_MS);
-  }
-  if (goalEl.getAttribute('data-test3-goal-map-ready') === '1' ||
-      goalEl.classList.contains('test3-goal-map-ready')) {
-    afterBloom();
-    return;
-  }
-  var deadline = setTimeout(fire, 2800);
-  var poll = setInterval(function () {
-    if (!goalEl.isConnected) {
-      clearInterval(poll);
-      clearTimeout(deadline);
-      return;
-    }
-    if (goalEl.getAttribute('data-test3-goal-map-ready') === '1' ||
-        goalEl.classList.contains('test3-goal-map-ready')) {
-      clearInterval(poll);
-      clearTimeout(deadline);
-      afterBloom();
-    }
-  }, 40);
+  copies.forEach(function (el) { void el.offsetWidth; });
+  if (mapSlot) void mapSlot.offsetWidth;
 }
 function _finalizeTest3GoalEntrance(goalEl) {
   if (!goalEl || !goalEl.isConnected) return;
@@ -6380,6 +6446,7 @@ function _finalizeTest3GoalEntrance(goalEl) {
   var timeEl = goalEl.querySelector('.dot-goal__time');
   var distEl = goalEl.querySelector('.dot-goal__distance');
   var mapEl = goalEl.querySelector('.dot-goal__map');
+  var mapSlot = goalEl.querySelector('.dot-goal__map-slot');
   [titleEl, timeEl, distEl].forEach(function (el) {
     if (!el) return;
     el.style.opacity = '1';
@@ -6387,14 +6454,22 @@ function _finalizeTest3GoalEntrance(goalEl) {
     el.style.transform = 'translateY(0)';
     el.style.removeProperty('animation');
   });
+  if (mapSlot) {
+    mapSlot.style.opacity = '1';
+    mapSlot.style.visibility = 'visible';
+    mapSlot.style.transform = 'translateY(0)';
+    mapSlot.style.removeProperty('animation');
+  }
   if (mapEl) {
-    mapEl.style.transform = 'scale(1)';
+    mapEl.style.transform = 'none';
     mapEl.style.removeProperty('animation');
     mapEl.style.removeProperty('clip-path');
     mapEl.style.removeProperty('will-change');
   }
   goalEl.removeAttribute('data-test3-goal-map-hold');
   goalEl.removeAttribute('data-test3-goal-map-bloomed');
+  goalEl.setAttribute('data-test3-goal-map-ready', '1');
+  goalEl.classList.add('test3-goal-map-ready');
   goalEl.classList.remove('test3-goal-enter', 'test3-goal-enter-ready', 'test3-goal-copy-enter');
   goalEl.classList.add('test3-goal-entrance-settled');
   var canvas = document.getElementById('canvas');
@@ -6419,7 +6494,6 @@ function _orchestrateTest3GoalEntrance(goalEl) {
           try {
             if (!goalEl.isConnected) return;
             goalEl.classList.add('test3-goal-enter-ready');
-            goalEl.setAttribute('data-test3-goal-map-hold', '1');
             void goalEl.offsetWidth;
             try {
               if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
@@ -6427,83 +6501,34 @@ function _orchestrateTest3GoalEntrance(goalEl) {
             setTimeout(function () {
               try {
                 if (!goalEl.isConnected) return;
-                if (typeof _signalTest3GoalMapReady === 'function') _signalTest3GoalMapReady();
+                if (typeof _triggerTest3GoalUnifiedEnter === 'function') {
+                  _triggerTest3GoalUnifiedEnter(goalEl);
+                }
+                setTimeout(function () {
+                  if (typeof _finalizeTest3GoalEntrance === 'function') {
+                    _finalizeTest3GoalEntrance(goalEl);
+                  }
+                }, TEST3_GOAL_UNIFIED_RISE_MS + 80);
               } catch (_) {}
             }, 360);
-            if (typeof _scheduleTest3GoalCopyEnter === 'function') {
-              _scheduleTest3GoalCopyEnter(goalEl);
-            }
           } catch (_) {}
         });
       } catch (_) {}
     });
   });
 }
-function _triggerTest3GoalMapBloom(goalEl) {
-  if (!goalEl || !goalEl.isConnected) return false;
-  if (!goalEl.classList.contains('test3-goal-enter-ready')) return false;
-  if (goalEl.getAttribute('data-test3-goal-map-ready') === '1') return false;
-  var mapEl = goalEl.querySelector('.dot-goal__map');
-  if (!mapEl) return false;
-  if (goalEl.__test3GoalMapBloomAnim && typeof goalEl.__test3GoalMapBloomAnim.cancel === 'function') {
-    try { goalEl.__test3GoalMapBloomAnim.cancel(); } catch (_) {}
-    goalEl.__test3GoalMapBloomAnim = null;
+function _revealTest3GoalMapContentDuringBloom(goalEl, mapEl) {
+  if (!mapEl) return;
+  var leafletEl = mapEl.querySelector('.dot-goal__map-leaflet');
+  if (leafletEl) {
+    leafletEl.style.removeProperty('opacity');
+    leafletEl.style.removeProperty('visibility');
+    leafletEl.style.removeProperty('animation');
   }
-  goalEl.removeAttribute('data-test3-goal-map-hold');
-  goalEl.setAttribute('data-test3-goal-map-ready', '1');
-  goalEl.classList.add('test3-goal-map-ready');
-  mapEl.style.removeProperty('clip-path');
-  mapEl.style.transformOrigin = 'center center';
-  mapEl.style.willChange = 'transform';
-  mapEl.style.transform = 'scale(0)';
-  void mapEl.offsetWidth;
-  try {
-    var bloomAnim = mapEl.animate(
-      [
-        { transform: 'scale(0)' },
-        { transform: 'scale(1)' }
-      ],
-      {
-        duration: TEST3_GOAL_MAP_BLOOM_MS,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards'
-      }
-    );
-    goalEl.__test3GoalMapBloomAnim = bloomAnim;
-    bloomAnim.onfinish = function () {
-      if (!mapEl.isConnected) return;
-      mapEl.style.transform = 'scale(1)';
-      mapEl.style.removeProperty('will-change');
-      goalEl.setAttribute('data-test3-goal-map-bloomed', '1');
-      goalEl.__test3GoalMapBloomAnim = null;
-    };
-  } catch (_) {
-    mapEl.style.transform = 'scale(1)';
-    mapEl.style.removeProperty('will-change');
-    goalEl.setAttribute('data-test3-goal-map-bloomed', '1');
-  }
-  void goalEl.offsetWidth;
-  void mapEl.offsetWidth;
-  return true;
+  mapEl.style.background = '#0F1F3D';
 }
 function _signalTest3GoalMapReady() {
-  var goal = document.querySelector('#test3-goal');
-  if (!goal || goal.getAttribute('data-test3-goal-map-ready') === '1') return;
-  if (!goal.classList.contains('test3-goal-enter-ready')) {
-    var tries = 0;
-    (function retry() {
-      tries += 1;
-      var retryGoal = document.querySelector('#test3-goal');
-      if (!retryGoal || retryGoal.getAttribute('data-test3-goal-map-ready') === '1') return;
-      if (retryGoal.classList.contains('test3-goal-enter-ready')) {
-        _triggerTest3GoalMapBloom(retryGoal);
-        return;
-      }
-      if (tries < 12) setTimeout(retry, 48);
-    })();
-    return;
-  }
-  _triggerTest3GoalMapBloom(goal);
+  /* Unified slide-up entrance handles map reveal in _triggerTest3GoalUnifiedEnter. */
 }
 function _initTest3GoalMap() {
   if (typeof window.L !== 'function' && typeof window.L !== 'object') return;
@@ -6643,8 +6668,7 @@ function _initTest3GoalMap() {
         if (signaled) return;
         var liveGoal = document.querySelector('#test3-goal');
         if (!liveGoal) return;
-        if (liveGoal.dataset.test3GoalEntrance === '1' &&
-            !liveGoal.classList.contains('test3-goal-enter-ready')) return;
+        if (liveGoal.dataset.test3GoalEntrance === '1') return;
         signaled = true;
         _signalTest3GoalMapReady();
       }
@@ -6754,6 +6778,112 @@ function _stopTest3GoalDistanceTicker() {
 }
 
 // Music card current-time ticker. The progress bar animates from 0 to
+// test3 home music — fade-in playback when #test3-music mounts.
+var TEST3_MUSIC_AUDIO_TARGET_VOL = 0.8;
+var TEST3_MUSIC_AUDIO_FADE_MS = 2000;
+function _test3MusicAudioSrc() {
+  return encodeURI('/music/Majestic-12 - Alex Jones _ Xander Jones.mp3');
+}
+function _stopTest3MusicAudioFade() {
+  if (window.__mlpTest3MusicAudioFadeId) {
+    cancelAnimationFrame(window.__mlpTest3MusicAudioFadeId);
+    window.__mlpTest3MusicAudioFadeId = null;
+  }
+}
+function _ensureTest3MusicAudio() {
+  if (window.__mlpTest3MusicAudio) return window.__mlpTest3MusicAudio;
+  var audio = new Audio(_test3MusicAudioSrc());
+  audio.preload = 'auto';
+  audio.loop = false;
+  audio.volume = 0;
+  window.__mlpTest3MusicAudio = audio;
+  return audio;
+}
+function _fadeTest3MusicAudioTo(targetVol, durationMs) {
+  var audio = window.__mlpTest3MusicAudio;
+  if (!audio) return;
+  _stopTest3MusicAudioFade();
+  var startVol = audio.volume;
+  var start = performance.now();
+  function tick(now) {
+    if (!window.__mlpTest3MusicAudio) return;
+    var t = Math.min(1, (now - start) / durationMs);
+    audio.volume = startVol + (targetVol - startVol) * t;
+    if (t < 1) {
+      window.__mlpTest3MusicAudioFadeId = requestAnimationFrame(tick);
+    } else {
+      window.__mlpTest3MusicAudioFadeId = null;
+    }
+  }
+  window.__mlpTest3MusicAudioFadeId = requestAnimationFrame(tick);
+}
+function _startTest3MusicAudioFadeIn() {
+  var stillTest3 =
+    (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+    (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+  if (!stillTest3) return;
+  var audio = _ensureTest3MusicAudio();
+  _stopTest3MusicAudioFade();
+  audio.volume = 0;
+  window.__mlpTest3MusicAudioPending = false;
+  var playPromise = audio.play();
+  if (playPromise && typeof playPromise.then === 'function') {
+    playPromise.then(function () {
+      _fadeTest3MusicAudioTo(TEST3_MUSIC_AUDIO_TARGET_VOL, TEST3_MUSIC_AUDIO_FADE_MS);
+    }).catch(function () {
+      window.__mlpTest3MusicAudioPending = true;
+    });
+  } else {
+    _fadeTest3MusicAudioTo(TEST3_MUSIC_AUDIO_TARGET_VOL, TEST3_MUSIC_AUDIO_FADE_MS);
+  }
+}
+function _setTest3MusicAudioPlaying(playing) {
+  var stillTest3 =
+    (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+    (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+  if (!stillTest3) return;
+  var audio = window.__mlpTest3MusicAudio;
+  if (!audio) {
+    if (playing && typeof _startTest3MusicAudioFadeIn === 'function') {
+      _startTest3MusicAudioFadeIn();
+    }
+    return;
+  }
+  if (playing) {
+    if (window.__mlpTest3MusicAudioPending) {
+      window.__mlpTest3MusicAudioPending = false;
+      _startTest3MusicAudioFadeIn();
+      return;
+    }
+    _stopTest3MusicAudioFade();
+    var resumePromise = audio.play();
+    if (resumePromise && typeof resumePromise.catch === 'function') {
+      resumePromise.catch(function () {
+        window.__mlpTest3MusicAudioPending = true;
+      });
+    }
+    if (audio.volume < TEST3_MUSIC_AUDIO_TARGET_VOL * 0.5) {
+      _fadeTest3MusicAudioTo(TEST3_MUSIC_AUDIO_TARGET_VOL, 400);
+    } else {
+      audio.volume = TEST3_MUSIC_AUDIO_TARGET_VOL;
+    }
+  } else {
+    _stopTest3MusicAudioFade();
+    audio.pause();
+  }
+}
+function _stopTest3MusicAudio() {
+  _stopTest3MusicAudioFade();
+  window.__mlpTest3MusicAudioPending = false;
+  var audio = window.__mlpTest3MusicAudio;
+  if (!audio) return;
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  } catch (_) {}
+  window.__mlpTest3MusicAudio = null;
+}
 // full width over 180s (= 3:00) via the CSS animation
 // `dotMusicBarProgress`; this ticker tracks the same 180s window and
 // updates the .dot-music3__time--current text once per second so the
@@ -6772,7 +6902,7 @@ function _startTest3MusicTimeTicker() {
   function fmt(s) {
     var m  = Math.floor(s / 60);
     var ss = s % 60;
-    return m + ':' + (ss < 10 ? '0' + ss : ss);
+    return (m < 10 ? '0' + m : String(m)) + ':' + (ss < 10 ? '0' + ss : String(ss));
   }
   function paint() {
     var el = document.querySelector('#test3-music .dot-music3__time--current');
@@ -6956,8 +7086,33 @@ function _layoutTest3Cards() {
   // the inner card area to fall OUTSIDE the wrapper and miss the tap
   // handler that cycles the card state.
   if (music && !inMusicEntrance) {
-    var mW = musicCompact ? 168 : 340;
+    var mW = musicCompact ? TEST3_MUSIC_COMPACT : 340;
     apply(music, 24, TEST3_ROW2_TOP, mW, musicH);
+    if (musicCompact) {
+      music.style.setProperty('animation', 'none', 'important');
+    }
+    var shell = music.querySelector('.dot-music1');
+    if (shell) {
+      shell.style.setProperty('width', mW + 'px', 'important');
+      shell.style.setProperty('height', musicH + 'px', 'important');
+      shell.style.setProperty('animation', 'none', 'important');
+    }
+    var iconWrap = music.querySelector('.dot-music1__icon');
+    if (iconWrap) {
+      if (musicState === 'lyrics') {
+        iconWrap.style.setProperty('width', '340px', 'important');
+        iconWrap.style.setProperty('height', '280px', 'important');
+      } else if (musicCompact) {
+        iconWrap.style.setProperty('width', TEST3_MUSIC_COMPACT + 'px', 'important');
+        iconWrap.style.setProperty('height', TEST3_MUSIC_COMPACT + 'px', 'important');
+        iconWrap.style.setProperty('left', '0', 'important');
+        iconWrap.style.setProperty('right', 'auto', 'important');
+      } else {
+        iconWrap.style.setProperty('width', '340px', 'important');
+        iconWrap.style.removeProperty('height');
+      }
+      iconWrap.style.setProperty('animation', 'none', 'important');
+    }
   }
 }
 // Keep weather/steps visible + pinned at their dropped row through prep
@@ -6978,6 +7133,254 @@ function _freezeTest3WeatherDropState() {
     el.style.setProperty('transform', ty, 'important');
     el.style.setProperty('opacity', '1', 'important');
   });
+}
+// Reset test3 music card copy to the curated Figma strings so stale
+// LLM patches (Holocene etc.) never surface in normal/lyrics/compact.
+function _resetTest3MusicCopy(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
+  if (titleEl) {
+    titleEl.innerHTML = '저녁 한강 러닝에 어울리는<br/>BPM 120-140 신스팝 플레이리스트';
+  }
+  var foldEl = music.querySelector('.dot-music1__icon .dot-music3__foldTitle');
+  if (foldEl) {
+    foldEl.innerHTML = '저녁 한강 러닝<br/>플레이리스트';
+  }
+  music.querySelectorAll('.dot-music1__icon .dot-music3__name-text').forEach(function (s) {
+    s.textContent = 'M83 - Midnight City';
+  });
+  var timeCur = music.querySelector('.dot-music1__icon .dot-music3__time--current');
+  var timeTot = music.querySelector('.dot-music1__icon .dot-music3__time--total');
+  if (timeCur) timeCur.textContent = '01:35';
+  if (timeTot) timeTot.textContent = '02:30';
+  var albumEl = music.querySelector('.dot-music1__icon .dot-music3__albumCredit');
+  if (albumEl) {
+    albumEl.textContent = "Hurry Up, We're Dreaming.";
+  }
+  window.__mlpTest3MusicElapsed = 95;
+  var bar = music.querySelector('.dot-music1__icon .dot-music3__bar');
+  if (bar) {
+    var state = music.getAttribute('data-music-state') || 'normal';
+    if (state === 'compact') {
+      bar.style.setProperty('--bar-w', '140px');
+      bar.style.setProperty('--bar-track', '107px');
+    } else {
+      bar.style.setProperty('--bar-w', '246px');
+      bar.style.setProperty('--bar-track', '188px');
+    }
+  }
+}
+// Post-entrance settled chrome — dark-photo normal player (4423:17126).
+// Applied at vertical expand end (~68 % / expand-ready), not at 14 s.
+function _applyTest3MusicCompactLayout(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var c = TEST3_MUSIC_COMPACT + 'px';
+  music.style.setProperty('width', c, 'important');
+  music.style.setProperty('height', c, 'important');
+  music.style.setProperty('animation', 'none', 'important');
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.style.setProperty('width', c, 'important');
+    shell.style.setProperty('height', c, 'important');
+    shell.style.setProperty('background-color', 'transparent', 'important');
+    shell.style.setProperty('animation', 'none', 'important');
+  }
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    icon.style.setProperty('width', c, 'important');
+    icon.style.setProperty('height', c, 'important');
+    icon.style.setProperty('left', '0', 'important');
+    icon.style.setProperty('right', 'auto', 'important');
+    icon.style.setProperty('opacity', '1', 'important');
+    icon.style.setProperty('visibility', 'visible', 'important');
+    icon.style.setProperty('animation', 'none', 'important');
+  }
+  var player = music.querySelector('.dot-music1__icon .dot-music3');
+  if (player) {
+    player.style.setProperty('width', '100%', 'important');
+    player.style.setProperty('height', c, 'important');
+    player.style.setProperty('min-height', c, 'important');
+    player.style.setProperty('animation', 'none', 'important');
+  }
+  music.querySelectorAll('.dot-music3__compactHeader, .dot-music3__foldTitle, .dot-music3__bottom, .dot-music3__transport, .dot-music3__albumCredit').forEach(function (el) {
+    el.style.removeProperty('opacity');
+    el.style.removeProperty('visibility');
+    el.style.removeProperty('display');
+    el.style.removeProperty('animation');
+  });
+  var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
+  var topEl = music.querySelector('.dot-music1__icon .dot-music3__top');
+  if (titleEl) titleEl.style.setProperty('display', 'none', 'important');
+  if (topEl) topEl.style.setProperty('display', 'none', 'important');
+}
+function _applyTest3MusicNormalLayout(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  music.style.setProperty('width', '340px', 'important');
+  music.style.setProperty('height', '168px', 'important');
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.style.setProperty('width', '340px', 'important');
+    shell.style.setProperty('height', '168px', 'important');
+  }
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    icon.style.setProperty('width', '340px', 'important');
+    icon.style.setProperty('height', '168px', 'important');
+    icon.style.removeProperty('left');
+    icon.style.removeProperty('right');
+  }
+  var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
+  var topEl = music.querySelector('.dot-music1__icon .dot-music3__top');
+  if (titleEl) titleEl.style.removeProperty('display');
+  if (topEl) topEl.style.removeProperty('display');
+  var foldEl = music.querySelector('.dot-music1__icon .dot-music3__foldTitle');
+  if (foldEl) foldEl.style.removeProperty('display');
+}
+function _applyTest3MusicLyricsLayout(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  music.style.setProperty('width', '340px', 'important');
+  music.style.setProperty('height', '280px', 'important');
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.style.setProperty('width', '340px', 'important');
+    shell.style.setProperty('height', '280px', 'important');
+    shell.style.setProperty('background-color', '#f8953d', 'important');
+    shell.style.setProperty('animation', 'none', 'important');
+  }
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    icon.style.setProperty('height', '280px', 'important');
+    icon.style.setProperty('opacity', '1', 'important');
+    icon.style.setProperty('visibility', 'visible', 'important');
+    icon.style.setProperty('animation', 'none', 'important');
+  }
+  var player = music.querySelector('.dot-music1__icon .dot-music3');
+  if (player) {
+    player.style.setProperty('height', '280px', 'important');
+    player.style.setProperty('min-height', '280px', 'important');
+    player.style.setProperty('background', '#f8953d', 'important');
+    player.style.setProperty('animation', 'none', 'important');
+    player.style.setProperty('display', 'flex', 'important');
+    player.style.setProperty('flex-direction', 'column', 'important');
+  }
+  music.querySelectorAll('.dot-music3__compactHeader, .dot-music3__playlistPill, .dot-music3__bottom, .dot-music3__transport').forEach(function (el) {
+    el.style.removeProperty('opacity');
+    el.style.removeProperty('visibility');
+    el.style.removeProperty('display');
+    el.style.removeProperty('animation');
+  });
+  var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
+  var topEl = music.querySelector('.dot-music1__icon .dot-music3__top');
+  if (titleEl) titleEl.style.removeProperty('display');
+  if (topEl) topEl.style.removeProperty('display');
+  var foldEl = music.querySelector('.dot-music1__icon .dot-music3__foldTitle');
+  if (foldEl) foldEl.style.setProperty('display', 'none', 'important');
+  var albumEl = music.querySelector('.dot-music1__icon .dot-music3__albumCredit');
+  if (albumEl) albumEl.style.setProperty('display', 'none', 'important');
+  var bar = music.querySelector('.dot-music1__icon .dot-music3__bar');
+  if (bar) {
+    bar.style.setProperty('--bar-w', '246px');
+    bar.style.setProperty('--bar-track', '188px');
+  }
+}
+function _applyTest3MusicStateLayout(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var state = music.getAttribute('data-music-state') || 'normal';
+  if (state === 'compact') {
+    if (typeof _applyTest3MusicCompactLayout === 'function') _applyTest3MusicCompactLayout(music);
+  } else if (state === 'lyrics') {
+    if (typeof _applyTest3MusicLyricsLayout === 'function') _applyTest3MusicLyricsLayout(music);
+  } else {
+    if (typeof _applyTest3MusicNormalLayout === 'function') _applyTest3MusicNormalLayout(music);
+  }
+}
+function _applyTest3MusicSettledLayout(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  if (!music.getAttribute('data-music-state')) {
+    music.setAttribute('data-music-state', 'normal');
+  }
+  music.setAttribute('data-test3-music-settled', '1');
+  music.setAttribute('data-test3-music-phase', 'playing');
+  music.setAttribute('data-test3-music-orb-handoff', '1');
+  if (typeof _resetTest3MusicCopy === 'function') {
+    _resetTest3MusicCopy(music);
+  }
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    icon.style.setProperty('animation', 'none', 'important');
+    icon.style.opacity = '1';
+    icon.style.visibility = 'visible';
+    icon.style.pointerEvents = 'auto';
+  }
+  music.querySelectorAll('.dot-music1__icon .dot-music3__icon, .dot-music1__icon .dot-music3__iconBg, .dot-music1__icon .dot-music3__playBtn').forEach(function (el) {
+    el.style.setProperty('animation', 'none', 'important');
+    el.style.display = 'none';
+    el.style.opacity = '0';
+    el.style.visibility = 'hidden';
+  });
+}
+function _clearTest3MusicEntranceInlineStyles(music) {
+  if (!music) return;
+  var settled =
+    music.getAttribute('data-test3-music-settled') === '1' ||
+    music.getAttribute('data-test3-music-expand-ready') === '1';
+  ['height', 'animation', 'opacity', 'visibility'].forEach(function (prop) {
+    music.style.removeProperty(prop);
+  });
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    ['width', 'height', 'border-radius', 'clip-path', 'background-color', 'animation'].forEach(function (prop) {
+      shell.style.removeProperty(prop);
+    });
+  }
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    ['opacity', 'visibility', 'pointer-events', 'animation', 'height'].forEach(function (prop) {
+      icon.style.removeProperty(prop);
+    });
+  }
+  var clearSel = settled
+    ? '.dot-music1__icon .dot-music3__title, .dot-music1__icon .dot-music3__bottom, .dot-music1__compact--layout'
+    : '.dot-music1__icon .dot-music3__title, .dot-music1__icon .dot-music3__bottom, .dot-music1__icon .dot-music3__iconBg, .dot-music1__icon .dot-music3__playBtn, .dot-music1__icon .dot-music3__icon, .dot-music1__compact--layout';
+  music.querySelectorAll(clearSel).forEach(function (el) {
+    ['opacity', 'visibility', 'pointer-events', 'animation', 'display', 'transform', 'width', 'height', 'left', 'top', 'margin', 'border-radius'].forEach(function (prop) {
+      el.style.removeProperty(prop);
+    });
+  });
+}
+// Skip entrance entirely — debug / fallback only (not used on mount).
+function _settleTest3MusicPlayerImmediately(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  music.setAttribute('data-music-playing', '1');
+  music.setAttribute('data-test3-music-phase', 'playing');
+  music.setAttribute('data-test3-music-orb-handoff', '1');
+  music.setAttribute('data-test3-music-settled', '1');
+  music.removeAttribute('data-test3-music-loading');
+  music.removeAttribute('data-test3-music-expand-ready');
+  music.classList.remove('is-motion-phase2');
+  music.style.setProperty('animation', 'none', 'important');
+  music.style.height = '168px';
+  music.style.opacity = '1';
+  music.style.visibility = 'visible';
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.style.width = '340px';
+    shell.style.height = '168px';
+    shell.style.borderRadius = '32px';
+    shell.style.clipPath = 'inset(0 0 0 0 round 32px)';
+    shell.style.setProperty('animation', 'none', 'important');
+  }
+  if (typeof _applyTest3MusicSettledLayout === 'function') {
+    _applyTest3MusicSettledLayout(music);
+  }
+  if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
 }
 // Mount the music card AFTER weather/steps have cleared row 2.
 function _mountTest3MusicAfterWeatherPrep(runId) {
@@ -7002,23 +7405,38 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
     c.removeAttribute('data-test3-weather-prep');
     _freezeTest3WeatherDropState();
     window.__mlpTest3MusicElapsed = 0;
+    if (typeof _stopTest3MusicAudio === 'function') _stopTest3MusicAudio();
     var test3MusicEl = document.querySelector('#test3-music');
     if (test3MusicEl) {
       test3MusicEl.setAttribute('data-music-playing', '1');
       test3MusicEl.setAttribute('data-test3-music-loading', '1');
       test3MusicEl.setAttribute('data-test3-music-phase', 'spawn');
       test3MusicEl.removeAttribute('data-test3-music-expand-ready');
-      if (typeof _restartTest3MusicEntranceAnimations === 'function') {
-        _restartTest3MusicEntranceAnimations(test3MusicEl);
-      } else {
-        // Fresh diff-mount needs an animation restart so spawn keyframes run.
-        test3MusicEl.style.animation = 'none';
-        void test3MusicEl.offsetWidth;
-        test3MusicEl.style.removeProperty('animation');
+      test3MusicEl.removeAttribute('data-music-state');
+      test3MusicEl.removeAttribute('data-test3-music-orb-handoff');
+      test3MusicEl.removeAttribute('data-test3-music-settled');
+      test3MusicEl.removeAttribute('data-test3-music-settling');
+      if (typeof _clearTest3MusicEntranceInlineStyles === 'function') {
+        _clearTest3MusicEntranceInlineStyles(test3MusicEl);
       }
+      if (typeof _resetTest3MusicCopy === 'function') {
+        _resetTest3MusicCopy(test3MusicEl);
+      }
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if ((window.__mlpTest3MusicShiftRunId || 0) !== runId) return;
+          if (!document.querySelector('#test3-music')) return;
+          if (typeof _restartTest3MusicEntranceAnimations === 'function') {
+            _restartTest3MusicEntranceAnimations(test3MusicEl);
+          }
+        });
+      });
     }
     if (typeof _startTest3MusicTimeTicker === 'function') {
       _startTest3MusicTimeTicker();
+    }
+    if (typeof _startTest3MusicAudioFadeIn === 'function') {
+      _startTest3MusicAudioFadeIn();
     }
     setTimeout(function () {
       if (typeof _syncTest3CardsExpandDown === 'function') {
@@ -7067,38 +7485,61 @@ function _syncTest3CardsExpandDown() {
     });
   });
 }
-// Keep the play/pause control visible once the player shell has expanded.
-function _revealTest3MusicPlayerCopy(music) {
+// Expand end (~68 %) — crossfade orange orb player → dark photo normal (4423:17126).
+function _finishTest3MusicSettle(music) {
   music = music || document.querySelector('#test3-music');
   if (!music) return;
-  var icon = music.querySelector('.dot-music1__icon');
-  if (icon) {
-    icon.style.opacity = '1';
-    icon.style.visibility = 'visible';
-    icon.style.pointerEvents = 'auto';
-    icon.style.removeProperty('animation');
+  music.removeAttribute('data-test3-music-settling');
+  music.classList.remove('test3-music-settle-active', 'test3-music-content-enter');
+  if (typeof _applyTest3MusicSettledLayout === 'function') {
+    _applyTest3MusicSettledLayout(music);
   }
-  var copies = music.querySelectorAll('.dot-music1__icon .dot-music3__title, .dot-music1__icon .dot-music3__bottom');
-  copies.forEach(function (el) {
-    el.style.opacity = '1';
-    el.style.visibility = 'visible';
-    el.style.transform = 'translateY(0)';
-    el.style.removeProperty('animation');
-  });
+  if (typeof _clearTest3MusicEntranceInlineStyles === 'function') {
+    _clearTest3MusicEntranceInlineStyles(music);
+  }
 }
 function _signalTest3MusicExpandReady(music) {
   music = music || document.querySelector('#test3-music');
   if (!music) return;
+  if (music.getAttribute('data-test3-music-expand-ready') === '1') return;
   music.setAttribute('data-test3-music-expand-ready', '1');
-  if (typeof _revealTest3MusicPlayDisc === 'function') {
-    _revealTest3MusicPlayDisc(music);
+  if (!music.getAttribute('data-music-state')) {
+    music.setAttribute('data-music-state', 'normal');
   }
-  if (typeof _revealTest3MusicPlayBtn === 'function') {
-    _revealTest3MusicPlayBtn(music);
+  setTimeout(function () {
+    if (!music.isConnected) return;
+    if (typeof _beginTest3MusicSettle === 'function') {
+      _beginTest3MusicSettle(music);
+    }
+  }, TEST3_MUSIC_IMAGE1_HOLD_MS);
+}
+function _beginTest3MusicSettle(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  if (music.getAttribute('data-test3-music-settling') === '1') return;
+  music.setAttribute('data-test3-music-settling', '1');
+  if (typeof _resetTest3MusicCopy === 'function') {
+    _resetTest3MusicCopy(music);
   }
-  if (typeof _revealTest3MusicPlayerCopy === 'function') {
-    _revealTest3MusicPlayerCopy(music);
+  var orb = music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg');
+  if (orb) {
+    orb.style.setProperty('animation', 'none', 'important');
   }
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      if (!music.isConnected) return;
+      music.classList.add('test3-music-settle-active');
+      requestAnimationFrame(function () {
+        if (!music.isConnected) return;
+        music.classList.add('test3-music-content-enter');
+      });
+    });
+  });
+  setTimeout(function () {
+    if (typeof _finishTest3MusicSettle === 'function') {
+      _finishTest3MusicSettle(music);
+    }
+  }, TEST3_MUSIC_SETTLE_MS);
 }
 function _revealTest3MusicPlayDisc(music) {
   music = music || document.querySelector('#test3-music');
@@ -7121,22 +7562,21 @@ function _revealTest3MusicPlayBtn(music) {
 }
 function _restartTest3MusicEntranceAnimations(music) {
   if (!music) return;
-  var targets = [
-    music,
-    music.querySelector('.dot-music1'),
-    music.querySelector('.dot-music1__icon'),
-    music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg'),
-    music.querySelector('.dot-music1__icon .dot-music3__iconBg'),
-    music.querySelector('.dot-music1__icon .dot-music3__playBtn'),
-    music.querySelector('.dot-music1__icon .dot-music3__title'),
-    music.querySelector('.dot-music1__icon .dot-music3__bottom')
-  ];
+  var targets = [music].concat(Array.prototype.slice.call(music.querySelectorAll('*')));
   targets.forEach(function (el) {
-    if (!el) return;
     el.style.animation = 'none';
-    void el.offsetWidth;
+  });
+  void music.offsetWidth;
+  targets.forEach(function (el) {
     el.style.removeProperty('animation');
   });
+  music.style.removeProperty('height');
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    ['width', 'height', 'border-radius', 'clip-path', 'background-color'].forEach(function (prop) {
+      shell.style.removeProperty(prop);
+    });
+  }
 }
 // Lock the music shell geometry after the 14 s entrance timeline finishes.
 function _lockTest3MusicShell(music) {
@@ -7150,45 +7590,14 @@ function _lockTest3MusicShell(music) {
   if (cs.clipPath && cs.clipPath !== 'none') {
     shell.style.clipPath = cs.clipPath;
   }
-  shell.style.backgroundColor = cs.backgroundColor;
+  shell.style.backgroundColor = 'transparent';
   shell.style.setProperty('animation', 'none', 'important');
 }
 // Seamless orb → play-disc: one element through entrance, then hand off
 // to the native iconBg slot without a visible layer swap.
 function _handoffTest3MusicOrb(music) {
   if (!music || music.getAttribute('data-test3-music-orb-handoff') === '1') return;
-  var compactOrb = music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg');
-  var playDisc = music.querySelector('.dot-music1__icon .dot-music3__iconBg');
-  if (compactOrb) {
-    compactOrb.style.setProperty('animation', 'none', 'important');
-    var orbCs = window.getComputedStyle(compactOrb);
-    compactOrb.style.width = orbCs.width;
-    compactOrb.style.height = orbCs.height;
-    compactOrb.style.left = orbCs.left;
-    compactOrb.style.top = orbCs.top;
-    compactOrb.style.margin = '0';
-    compactOrb.style.borderRadius = orbCs.borderRadius;
-  }
-  if (playDisc) {
-    playDisc.style.opacity = '1';
-    playDisc.style.visibility = 'visible';
-    playDisc.style.background = 'rgba(255, 255, 255, 0.18)';
-    playDisc.style.setProperty('animation', 'none', 'important');
-  }
-  if (compactOrb) {
-    compactOrb.style.opacity = '0';
-    compactOrb.style.visibility = 'hidden';
-  }
   music.setAttribute('data-test3-music-orb-handoff', '1');
-  if (!music.getAttribute('data-music-state')) {
-    music.setAttribute('data-music-state', 'normal');
-  }
-  if (typeof _revealTest3MusicPlayDisc === 'function') {
-    _revealTest3MusicPlayDisc(music);
-  }
-  if (typeof _revealTest3MusicPlayBtn === 'function') {
-    _revealTest3MusicPlayBtn(music);
-  }
 }
 // Lock final layout after the CSS vertical expand + orb handoff finish.
 function _finalizeTest3MusicEntrance() {
@@ -7196,23 +7605,23 @@ function _finalizeTest3MusicEntrance() {
   var weather = document.querySelector('#test3-weather');
   var steps   = document.querySelector('#test3-steps');
   if (music) {
-    // Swap compact orb → native play disc before dropping loading so the
-    // disc never vanishes behind the opaque .dot-music3 icon layer.
-    if (typeof _handoffTest3MusicOrb === 'function') {
-      _handoffTest3MusicOrb(music);
+    music.removeAttribute('data-test3-music-loading');
+    music.classList.remove('is-motion-phase2');
+    music.setAttribute('data-test3-music-phase', 'playing');
+    if (typeof _clearTest3MusicEntranceInlineStyles === 'function') {
+      _clearTest3MusicEntranceInlineStyles(music);
+    }
+    if (!music.getAttribute('data-test3-music-settled')) {
+      if (typeof _finishTest3MusicSettle === 'function' &&
+          music.getAttribute('data-test3-music-settling') === '1') {
+        _finishTest3MusicSettle(music);
+      } else if (typeof _applyTest3MusicSettledLayout === 'function') {
+        _applyTest3MusicSettledLayout(music);
+      }
     }
     if (typeof _lockTest3MusicShell === 'function') {
       _lockTest3MusicShell(music);
     }
-    if (typeof _revealTest3MusicPlayDisc === 'function') {
-      _revealTest3MusicPlayDisc(music);
-    }
-    if (typeof _revealTest3MusicPlayBtn === 'function') {
-      _revealTest3MusicPlayBtn(music);
-    }
-    music.removeAttribute('data-test3-music-loading');
-    music.classList.remove('is-motion-phase2');
-    music.setAttribute('data-test3-music-phase', 'playing');
   }
   if (weather) weather.classList.remove('is-motion-phase2');
   if (steps)   steps.classList.remove('is-motion-phase2');
@@ -7269,6 +7678,9 @@ function _initTest3HoverPause() {
     // / resumes together with the bar's visible fill.
     var card = btn.closest('#test3-music');
     if (card) card.setAttribute('data-music-playing', next);
+    if (typeof _setTest3MusicAudioPlaying === 'function') {
+      _setTest3MusicAudioPlaying(next === '1');
+    }
     // Quick white-50% flash on the disc background to give the play/
     // pause toggle a visible "click" beat. The .is-blinking class
     // runs a 320ms one-shot keyframe (in theme-page.css); strip it
@@ -7301,6 +7713,10 @@ function _initTest3HoverPause() {
     // after the music shift) so the tap can't fight dotMusicRevealCard's
     // width grow. After that, taps cycle freely.
     if (!window.__mlpTest3MusicShifted) return;
+    if (card.getAttribute('data-test3-music-loading') === '1') return;
+    if (window.__mlpTest3MusicAudioPending && typeof _setTest3MusicAudioPlaying === 'function') {
+      _setTest3MusicAudioPlaying(true);
+    }
     if (typeof _handoffTest3MusicOrb === 'function' &&
         card.getAttribute('data-test3-music-orb-handoff') !== '1') {
       _handoffTest3MusicOrb(card);
@@ -7310,6 +7726,12 @@ function _initTest3HoverPause() {
              : cur === 'lyrics' ? 'compact'
              : 'normal';
     card.setAttribute('data-music-state', next);
+    if (typeof _resetTest3MusicCopy === 'function') {
+      _resetTest3MusicCopy(card);
+    }
+    if (typeof _applyTest3MusicStateLayout === 'function') {
+      _applyTest3MusicStateLayout(card);
+    }
     // Reflow weather + steps to fill / yield to the new music footprint.
     if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
   });
@@ -7326,6 +7748,11 @@ function _initTest3HoverPause() {
     if (!card) return;
     if (!window.__mlpTest3MusicShifted) return;
     card.classList.toggle('is-expanded');
+    var isExp = card.classList.contains('is-expanded');
+    var compact = card.querySelector('.dot-w21__compact, .dot-steps21__compact');
+    var expanded = card.querySelector('.dot-w21__expanded, .dot-steps21__expanded');
+    if (compact) compact.setAttribute('aria-hidden', isExp ? 'true' : 'false');
+    if (expanded) expanded.setAttribute('aria-hidden', isExp ? 'false' : 'true');
     var detail = card.querySelector('.dot-w21__expandDetail, .dot-steps21__expandDetail');
     if (detail) {
       detail.setAttribute('aria-hidden', card.classList.contains('is-expanded') ? 'false' : 'true');
@@ -7456,8 +7883,8 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
               var freshSeed = introRunEl.querySelector('.dot-goal__map-seed');
               if (freshSeed) freshSeed.remove();
               introSeedKeep.className = 'dot-goal__map-seed dot-goal__map-seed--handoff';
-              introSeedKeep.style.opacity = '1';
-              introSeedKeep.style.visibility = 'visible';
+              introSeedKeep.style.removeProperty('opacity');
+              introSeedKeep.style.removeProperty('visibility');
               introSeedKeep.style.animation = 'none';
               introSeedKeep.style.removeProperty('left');
               introSeedKeep.style.removeProperty('right');
@@ -7533,13 +7960,6 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
   // card's full bounds. Removed in finishTransition() below.
   if (canvas) canvas.setAttribute('data-test3-intro-exiting', '1');
 
-  // Kick off the LLM music recommendation NOW (at tap) so the result is
-  // ready by the time the music-shift timer fires ~5.6s after the home
-  // stage settles. window.__mlpTest3MusicRec is set when the fetch
-  // resolves; the layout builder reads it (with a curated fallback).
-  // Clear any stale rec so successive sessions get fresh tracks.
-  window.__mlpTest3MusicRec = null;
-  _fetchTest3MusicRecommendation();
   // Kick off the real-time weather fetch at the same beat so the live
   // values are ready by the time the home stage mounts the weather
   // card. _fetchTest3Weather populates window.__mlpTest3Weather; the
@@ -7971,6 +8391,7 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         if (typeof _stopTest3GoalDistanceTicker === 'function') _stopTest3GoalDistanceTicker();
         if (typeof _stopTest3MapDotMotion === 'function') _stopTest3MapDotMotion();
         if (typeof _stopTest3MusicTimeTicker === 'function') _stopTest3MusicTimeTicker();
+        if (typeof _stopTest3MusicAudio === 'function') _stopTest3MusicAudio();
         window.__mlpTest3HoverPaused = false;
         // Reset goal-related session flags so the NEXT entry from
         // intro can fire the first-mount entrance animations again.
@@ -7989,6 +8410,7 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       if (typeof _stopTest3GoalDistanceTicker === 'function') _stopTest3GoalDistanceTicker();
       if (typeof _stopTest3MapDotMotion === 'function') _stopTest3MapDotMotion();
       if (typeof _stopTest3MusicTimeTicker === 'function') _stopTest3MusicTimeTicker();
+      if (typeof _stopTest3MusicAudio === 'function') _stopTest3MusicAudio();
       window.__mlpTest3HoverPaused = false;
     }
   } else {
