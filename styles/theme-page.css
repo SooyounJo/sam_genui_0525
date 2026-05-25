@@ -22,6 +22,11 @@
     initial-value: 0deg;
     inherits: false;
   }
+  @property --test3-radar-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
 
   :root {
     --pg-bg:     #0a0a0c;
@@ -1192,19 +1197,44 @@
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__distance {
     opacity: 0 !important;
     visibility: hidden !important;
-    transform: translateY(-10px);
+    transform: translateY(12px);
   }
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-leaflet,
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-position-pulse,
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-map-compass {
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-map-compass,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed:not(.dot-goal__map-seed--handoff) {
     opacity: 0 !important;
     visibility: hidden !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-seed--handoff {
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map {
     transform: scale(0) !important;
   }
   #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map::before {
     opacity: 0 !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map-seed {
+    position: absolute;
+    /* Map circle center: 64px inset from .dot-goal padding-box right edge. */
+    left: calc(100% - 64px - 5px);
+    right: auto;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: #F5FBFF;
+    box-shadow:
+      0 0 0 2px #B8E4FF,
+      0 0 10px 2px rgba(120, 200, 255, 0.55),
+      0 0 18px 4px rgba(100, 180, 255, 0.28);
+    opacity: 0;
+    z-index: 12;
+    pointer-events: none;
   }
   #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map {
     background: transparent;
@@ -1212,26 +1242,46 @@
     position: relative;
     overflow: hidden;
   }
-  /* Map bloom animation gated to FIRST mount only. On re-renders
-     (music shift wipe at ~5.6s) the goal element gets re-created
-     fresh, but we don't want the user to see the map re-blooming
-     from a dot — that reads as "the card flickered and refreshed".
-     With this gating, only the first mount animates. */
-  /* Map bloom — scales from a center dot to the full 128 px circle on
-     first mount, synced with title enter (no stagger). Tile imagery
-     fades in on the same beat so the circle never appears empty after
-     the left-side text has already landed. */
+  /* Staged map entrance (first mount only):
+       1) handoff seed dot stays visible (intro → home continuity)
+       2) brief beat → test3-goal-map-ready
+       3) circle blooms from center (map masked in circle)
+       4) radar sweep fades in over 0.5s after bloom
+       5) pulse halo upgrades after entrance settles */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-seed:not(.dot-goal__map-seed--handoff) {
+    animation: test3GoalMapSeedIn 360ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map-seed--handoff {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+    z-index: 1001;
+    left: calc(100% - 64px - 5px) !important;
+    right: auto !important;
+    top: 50% !important;
+    width: 10px !important;
+    height: 10px !important;
+    margin-top: -5px !important;
+    transform: none !important;
+  }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__map {
     transform: scale(0);
-    animation: test3GoalMapBloom 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map {
+    transform: scale(0);
+    animation: test3GoalMapBloom 920ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
     will-change: transform;
   }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-leaflet,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__map-leaflet {
     opacity: 0;
     visibility: visible;
-    animation: test3GoalMapContentFade 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map-leaflet {
+    animation: test3GoalMapContentFade 760ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
     will-change: opacity;
   }
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-position-pulse,
@@ -1239,8 +1289,46 @@
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-position-pulse,
   #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-map-compass {
     opacity: 0;
+    visibility: hidden;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .mlp-map-compass,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-map-ready .mlp-map-compass {
     visibility: visible;
-    animation: test3GoalMapContentFade 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+    animation: test3GoalMapCompassFade 500ms cubic-bezier(0.16, 1, 0.3, 1) 920ms both;
+    will-change: opacity;
+  }
+  @keyframes test3GoalMapSeedIn {
+    0%   { opacity: 0; transform: scale(0.35); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  /* Pulse inside the map circle — always dead center (overrides card-anchored seed coords). */
+  #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map .mlp-position-pulse,
+  #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map .mlp-position-pulse.dot-goal__map-seed--in-map {
+    left: 50% !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  /* Entrance seed upgraded in-place — card-anchored until reparented into .dot-goal__map. */
+  #canvas[data-test-scope="test3"] #test3-goal .mlp-position-pulse.dot-goal__map-seed--from-seed:not(.dot-goal__map-seed--in-map) {
+    left: calc(100% - 64px - 19px);
+    right: auto;
+    top: 50%;
+    width: 38px;
+    height: 38px;
+    margin-top: 0;
+    transform: translateY(-50%);
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+    z-index: 1000;
   }
   @keyframes test3GoalMapBloom {
     0%   { transform: scale(0); }
@@ -1249,6 +1337,14 @@
   @keyframes test3GoalMapContentFade {
     0%   { opacity: 0; visibility: visible; }
     100% { opacity: 1; visibility: visible; }
+  }
+  @keyframes test3GoalMapCompassFade {
+    0%   { opacity: 0; visibility: visible; }
+    100% { opacity: 1; visibility: visible; }
+  }
+  @keyframes test3GoalMapRadarReveal {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
   }
   /* Leaflet container — fills the 128×128 .dot-goal__map circle.
      NOTE: filter is applied to the .leaflet-tile-pane specifically,
@@ -1280,8 +1376,14 @@
      so bright it washes out the tile detail. */
   #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map-leaflet .leaflet-tile-pane {
     filter: brightness(1.05) saturate(2.0) hue-rotate(210deg);
-    animation: test3MapAlivePulse 3s ease-in-out infinite;
     will-change: filter;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map-leaflet .leaflet-tile-pane {
+    animation: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-entrance-settled .dot-goal__map-leaflet .leaflet-tile-pane,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-map-ready:not(.test3-goal-enter-ready) .dot-goal__map-leaflet .leaflet-tile-pane {
+    animation: test3MapAlivePulse 3s ease-in-out 900ms infinite;
   }
   @keyframes test3MapAlivePulse {
     0%, 70%   { filter: brightness(1.05) saturate(2.0) hue-rotate(210deg); }
@@ -1304,8 +1406,10 @@
     inset: 0;
     border-radius: 50%;
     pointer-events: none;
+    opacity: 0;
+    --test3-radar-angle: 0deg;
     background: conic-gradient(
-      from 0deg,
+      from var(--test3-radar-angle, 0deg),
       rgba(120, 200, 255, 0)    0deg,
       rgba(120, 200, 255, 0)  270deg,
       rgba(120, 200, 255, 0.25) 300deg,
@@ -1315,13 +1419,24 @@
       rgba(120, 200, 255, 0)    360deg
     );
     mix-blend-mode: screen;
-    z-index: 401;
-    animation: test3MapRadarSweep 3.2s linear infinite;
-    will-change: transform;
+    z-index: 470;
+    will-change: opacity, --test3-radar-angle;
   }
-  @keyframes test3MapRadarSweep {
-    0%   { transform: rotate(0deg);   }
-    100% { transform: rotate(360deg); }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-map-ready .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal[data-test3-goal-map-ready="1"] .dot-goal__map::before {
+    opacity: 1;
+    animation: test3MapRadarAngleSweep 3.2s linear infinite;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-map-ready .dot-goal__map::before,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready[data-test3-goal-map-ready="1"] .dot-goal__map::before {
+    opacity: 0;
+    animation:
+      test3GoalMapRadarReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) 920ms forwards,
+      test3MapRadarAngleSweep 3.2s linear 1420ms infinite;
+  }
+  @keyframes test3MapRadarAngleSweep {
+    from { --test3-radar-angle: 0deg; }
+    to   { --test3-radar-angle: 360deg; }
   }
   /* Blinking current-position pulse — based on Figma node 6116:14292
      (https://figma.com/.../node-id=6116-14292). Small white core dot
@@ -1426,6 +1541,7 @@
     inset: 0;
     border-radius: 50%;
     pointer-events: none;
+    z-index: 430;
     background: radial-gradient(circle at center,
       transparent 55%,
       rgba(15, 31, 61, 0.35) 85%,
@@ -1437,30 +1553,42 @@
      "rides" the card's height expansion. Triggered ~1000ms post-tap
      (= when "N" of "Running Now" is being written by the title wave). */
 
-  /* Time + distance enter with the same fade+down motion as the title. */
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__title,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__title,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__time,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__distance {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    transition:
-      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
-      visibility 0s linear;
-    will-change: opacity, transform;
+  /* Goal copy — keyframe rise (transitions were skipping on class flip). */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__title,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__title,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__distance,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready:not(.test3-goal-copy-enter) .dot-goal__distance {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(12px);
+    animation: none !important;
   }
-  /* Stagger after title: time → distance cascade. */
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__time {
-    transition-delay: 0.16s;
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title {
+    visibility: visible !important;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 0ms both !important;
   }
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance,
-  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__distance {
-    transition-delay: 0.30s;
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time {
+    visibility: visible !important;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance {
+    visibility: visible !important;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: test3GoalCopyRise 500ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both !important;
+  }
+  @keyframes test3GoalCopyRise {
+    0%   { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
   #canvas[data-test-scope="test3"][data-test3-home-enter="1"] #test3-weather {
     animation-delay: 0.11s !important;
@@ -1483,183 +1611,244 @@
      Weather goes "right first, then down" (X leads); Steps goes
      "down first, then left" (Y leads) — the two cards swing past each
      other on different orbits, avoiding visual collision mid-shift. */
-  @keyframes test3WeatherShift {
-    /* Include opacity:1 in every keyframe so this animation OVERRIDES
-       the static `opacity: 0` rule that fires on .test3-intro-prefade
-       in the pre-home state. Without that override the cards would
-       become invisible the moment data-test3-music-shift flips on
-       (the prefade animation finishes/cancels and its opacity:1 end-
-       state override disappears, exposing the base opacity:0).
-       Y offsets use musicH(168) + TEST3_CARD_GAP(4) = 172px. */
+  /* Phase 1 — weather/steps drop alone BEFORE music mounts (JS prep gate). */
+  @keyframes test3WeatherPrepDrop {
     0% {
       opacity: 1;
-      transform: translate(0, 0);
-      animation-timing-function: cubic-bezier(0.18, 0.85, 0.4, 1);
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     }
-    62% {
+    100% {
       opacity: 1;
-      transform: translate(172px, 59px);
-      animation-timing-function: cubic-bezier(0.5, 0, 0.25, 1);
+      transform: translateY(86px);
     }
-    100% { opacity: 1; transform: translate(172px, 172px); }
+  }
+  /* Phase 2 — music timeline: cards already sit one row lower. */
+  @keyframes test3WeatherShift {
+    0%, 100% {
+      opacity: 1;
+      transform: translateY(86px);
+    }
   }
   @keyframes test3StepsShift {
-    0% {
+    0%, 100% {
       opacity: 1;
-      transform: translate(0, 0);
-      animation-timing-function: cubic-bezier(0.18, 0.85, 0.4, 1);
+      transform: translateY(86px);
+    }
+  }
+  /* === test3 music card — v2 motion (14 s master timeline) =================
+     Entrance: 82×82 heavily-rounded SQUARE (reads as a circle) with the
+     intro-pill rainbow border swirl (img 2), then expands RIGHT only
+     (82 → 340 px) into a horizontal pill — square → rectangle, not a
+     circle morph or vertical stub. Height stays 82 px until player expand. */
+  @keyframes test3MusicMotionShell {
+    0% {
+      width: 82px;
+      height: 82px;
+      border-radius: 41px;
+      clip-path: inset(0 0 0 0 round 41px);
+    }
+    0%, 14% {
+      width: 82px;
+      height: 82px;
+      border-radius: 41px;
+      clip-path: inset(0 0 0 0 round 41px);
+    }
+    14% {
+      width: 82px;
+      height: 82px;
+      border-radius: 41px;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    24% {
+      width: 340px;
+      height: 82px;
+      border-radius: 41px;
+      clip-path: inset(0 0 0 0 round 41px);
+    }
+    57% {
+      width: 340px;
+      height: 82px;
+      border-radius: 41px;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    68%, 100% {
+      width: 340px;
+      height: 168px;
+      border-radius: 32px;
+      clip-path: inset(0 0 0 0 round 32px);
+    }
+  }
+  @keyframes test3MusicShellFill {
+    0%, 2%   { background-color: rgba(255, 127, 36, 0); }
+    8%, 100% { background-color: #FF7F24; }
+  }
+  @keyframes test3MusicOutlineFade {
+    0%, 1%   { opacity: 0; }
+    3%, 14%  { opacity: 1; }
+    19%, 100% { opacity: 0; }
+  }
+  @keyframes test3MusicWrapperHeight {
+    0%, 57% { height: 82px; }
+    57% { animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    68%, 100% { height: 168px; }
+  }
+  @keyframes test3MusicPlayerExpand {
+    0%, 57% {
+      align-items: center;
+      justify-content: flex-start;
+    }
+    58%, 100% {
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+  }
+  @keyframes test3MusicSpawnIn {
+    0% { opacity: 0; visibility: hidden; }
+    2%, 100% { opacity: 1; visibility: visible; }
+  }
+  @keyframes test3MusicCompactHold {
+    0%, 100% { opacity: 1; }
+  }
+  /* Player chrome builds in from vertical expand — same surface, no layer swap. */
+  @keyframes test3MusicIconReveal {
+    0%, 56% { opacity: 0; pointer-events: none; visibility: hidden; }
+    57% { opacity: 0; pointer-events: none; visibility: visible; }
+    62%, 100% { opacity: 1; pointer-events: auto; visibility: visible; }
+  }
+  @keyframes test3MusicPlayerCopyIn {
+    0%, 67% { opacity: 0; transform: translateY(4px); }
+    72%, 100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes test3MusicPlayDiscIn {
+    0%, 67% { opacity: 0; visibility: hidden; }
+    68%, 100% { opacity: 1; visibility: visible; }
+  }
+  @keyframes test3MusicCompactOrbOut {
+    0%, 100% { opacity: 1; visibility: visible; }
+  }
+  @keyframes test3MusicPlayBtnIn {
+    0%, 56% { opacity: 0; }
+    57%, 100% { opacity: 1; }
+  }
+  @keyframes test3MusicSearchLine1 {
+    0%, 23% { opacity: 0; transform: translateX(6px); }
+    24%, 42% { opacity: 1; transform: translateX(0); }
+    43%, 100% { opacity: 0; transform: translateX(-4px); }
+  }
+  @keyframes test3MusicSearchLine2 {
+    0%, 42% { opacity: 0; transform: translateX(6px); }
+    43%, 56% { opacity: 1; transform: translateX(0); }
+    57%, 100% { opacity: 0; transform: translateX(-4px); }
+  }
+  @keyframes test3MusicNotePhase {
+    0%, 3% { opacity: 0; transform: scale(0.85); }
+    5%, 13% { opacity: 1; transform: scale(1); }
+    15%, 100% { opacity: 0; transform: scale(0.85); }
+  }
+  @keyframes test3MusicOrbMotion {
+    0%, 14% {
+      width: var(--test3-orb-size, 56px);
+      height: var(--test3-orb-size, 56px);
+      left: 13px;
+      top: 13px;
+      margin: 0;
+      border-radius: 50%;
+      opacity: 1;
+    }
+    14% {
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    24%, 56% {
+      width: var(--test3-orb-size, 56px);
+      height: var(--test3-orb-size, 56px);
+      left: var(--test3-orb-x, 12px);
+      top: 13px;
+      margin: 0;
+      border-radius: 50%;
+      opacity: 1;
+    }
+    56% {
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    57% {
+      width: var(--test3-orb-size, 56px);
+      height: var(--test3-orb-size, 56px);
+      left: var(--test3-orb-x, 12px);
+      top: 13px;
+      margin: 0;
+      border-radius: 50%;
+      opacity: 1;
     }
     62% {
+      width: 58px;
+      height: 58px;
+      left: 14px;
+      top: 16px;
+      margin: 0;
+      border-radius: 50%;
       opacity: 1;
-      transform: translate(-56px, 172px);
-      animation-timing-function: cubic-bezier(0.5, 0, 0.25, 1);
     }
-    100% { opacity: 1; transform: translate(-172px, 172px); }
-  }
-  @keyframes test3MusicRevealCard {
-    0%, 14% {
-      width: 168px;
-      clip-path: inset(0 0 0 0 round 32px);
-    }
-    34%, 100% {
-      width: 340px;
-      clip-path: inset(0 0 0 0 round 32px);
-    }
-  }
-  @keyframes test3MusicCompactOut {
-    0%, 18% {
+    68%, 100% {
+      width: var(--test3-disc-size, 64px);
+      height: var(--test3-disc-size, 64px);
+      left: var(--test3-disc-x, 16px);
+      top: var(--test3-disc-y, 20px);
+      margin: 0;
+      border-radius: 99px;
       opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-    34%, 100% {
-      opacity: 0;
-      transform: translateX(-8px) scale(0.98);
     }
   }
-  @keyframes test3MusicIconIn {
-    0%, 28% {
-      opacity: 0;
-      transform: translateX(8px) scale(0.985);
+  /* Phase A (0–42%): loading ring only — no gradient orb.
+     Phase B (43%+): radial glow orb until native play-disc takes over.
+     Phase C (68%+): icon-slot play disc fades in; compact orb keeps glow
+     underneath until JS handoff — avoids the 68% “blank disc” gap. */
+  @keyframes test3MusicOrbBodyFill {
+    0%, 42% {
+      background-color: rgba(255, 255, 255, 0.14);
+      background-image: none;
+      filter: none;
     }
-    44%, 100% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
+    42% {
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    43%, 100% {
+      background-color: #FFD4A8;
+      background-image: radial-gradient(
+        circle at 38% 32%,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(255, 220, 170, 0.92) 28%,
+        rgba(255, 170, 100, 0.78) 62%,
+        rgba(255, 130, 50, 0.55) 100%
+      );
+      filter: brightness(1.04);
     }
   }
-
-  /* === test3 music card — "loading shimmer" pre-state =====================
-     Plays for the first ~2.4s after the music card mounts (= the music
-     shift). Two layered effects communicate "the AI is forming the
-     recommendation" before any track text shows:
-       (1) Rotating gradient outline (orange → white → orange) wraps the
-           card. Two full turns (0deg → 720deg) over 2.4s. Made with a
-           conic-gradient + mask-composite trick so only the 3px outer
-           ring is visible — the conic fill inside is masked out.
-       (2) Card background fills up from very faint orange (10%) to full
-           orange (100%). The fill builds in phases that match the
-           outline's rotation:
-              0 → 0.5 turn  (0 → 0.6s):  10% (hold — just a tint)
-              0.5 → 1 turn  (0.6 → 1.2s): 10 → 30%
-              1   → 2 turns (1.2 → 2.4s): 30 → 100%
-           So by the time the outline has done two laps, the card is
-           solid orange and the existing content animations
-           (dotMusicRevealCard, dotMusicCompactOut, …) take over. */
-  /* Outline pseudo-element on .dot-music1 — Phase 1 of the new
-     appearance sequence (per user direction):
-       Phase 1 (0 → 1s):  ONLY the gradient stroke is visible (card
-                          interior transparent, content hidden) so the
-                          weather/today-progress cards underneath stay
-                          readable through the music slot.
-       Phase 2 (1 → 2.5s): card fill ramps 0 → 30 % orange while the
-                          outline keeps rotating.
-       Phase 3 (2.5 → 3.5s): card fill ramps 30 → 100 % and the
-                          content (search reasoning, then the
-                          recommendation icon) fades in.
-     Outline uses the same conic-gradient + angle-rotation trick as
-     the persona avatar badge, restricted to the orange-white
-     spectrum so it reads as the music card's identity from the
-     first frame. Three full rotations over 3.5 s keeps the motion
-     visible throughout. */
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 32px;
-    padding: 3px;
-    background: conic-gradient(
-      from var(--music-shimmer-angle, 0deg),
-      #FF7F24  0%,
-      #FFCDA3 25%,
-      #FFFFFF 50%,
-      #FFCDA3 75%,
-      #FF7F24 100%
-    );
-    /* Two stacked masks — content-box vs border-box — XOR'd so only
-       the 3px ring around the outside is rendered. The masked-out
-       center keeps the gradient from showing through onto the card
-       content underneath, so the weather/today-progress cards stay
-       legible BEHIND the still-transparent music slot during Phase 1. */
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    z-index: 5;
-    pointer-events: none;
-    will-change: --music-shimmer-angle, opacity;
-    animation: test3MusicShimmerOutline 3.5s linear forwards;
+  /* Loading stroke ring — visible only while searching (line 1). */
+  @keyframes test3MusicOrbLoadingRing {
+    0%, 13% { opacity: 0.72; }
+    14%, 42% { opacity: 1; }
+    43%, 100% { opacity: 0; }
   }
-  /* The stroke STARTS at 1px and thickens by 1px per rotation — so
-     each completed lap of the gradient angle visibly bulks the ring
-     up. Padding controls the visible ring thickness (the mask-xor
-     trick masks the inside of the ::before, leaving the padding
-     band visible). With 3 rotations over 3.5s, the rotation marks
-     land at 33%/66%/100%, giving padding 2px/3px/4px respectively.
-
-     Per UX direction "그라디언트는 프로세스를 나타내는 언어로만 사용" —
-     the gradient is the visual language for the LOADING / PROCESS
-     phase only. As soon as the orange music card hits its solid-fill
-     phase (71.4% mark = 2.5 s, start of Phase 3 in
-     test3MusicShimmerFill), the gradient outline begins dissolving
-     and is fully gone by 100% (3.5 s) when the orange is at full
-     intensity and the card is "playing". This way the process
-     language never overlaps the playback state. */
-  @keyframes test3MusicShimmerOutline {
-    0%      { --music-shimmer-angle:    0deg; padding: 1px; opacity: 1; }
-    33.33%  { padding: 2px; }
-    66.67%  { padding: 3px; }
-    /* 71.4% — orange starts solidifying (Phase 3 start). Gradient
-       holds opacity 1 here, then ramps to 0 over the next 1 s. */
-    71.4%   { padding: 4px; opacity: 1; }
-    100%    { --music-shimmer-angle: 1080deg; padding: 4px; opacity: 0; }
+  @keyframes test3MusicOrbSphereGlow {
+    0%, 42% { opacity: 0; --dot-music1-glow-angle: 0deg; }
+    43%, 100% { opacity: 1; }
   }
-  /* Background fill — overrides .dot-music1 / .dot-music.is-orange's
-     solid #FF7F24 with an opacity ramp keyed to the outline's rotation
-     count. NOTE: this animation is COMPOSED with the existing
-     dotMusicRevealCard width-grow on the SAME element (.dot-music1) —
-     see the rule below that lists both. They must be declared together
-     because CSS's `animation` property is a single value (the later
-     declaration would otherwise wipe out the earlier one). */
-  /* Fill is on a different cadence than the outline so the three
-     phases above are visually distinct:
-       Phase 1 (0 → 28.6%, 0 → 1s):   fully transparent — outline only
-       Phase 2 (28.6% → 71.4%, 1 → 2.5s): 0 → 30 % orange — card body
-                                          materializing, weather still
-                                          legible underneath
-       Phase 3 (71.4% → 100%, 2.5 → 3.5s): 30 → 100 % — card snaps to
-                                          full orange and content fades in */
-  @keyframes test3MusicShimmerFill {
-    0%, 28.6% { background-color: rgba(255, 127, 36, 0);    }
-    71.4%     { background-color: rgba(255, 127, 36, 0.30); }
-    100%      { background-color: rgba(255, 127, 36, 1.00); }
+  @keyframes test3MusicOrbRingSpin {
+    from { --dot-music1-ring-angle: 0deg; }
+    to   { --dot-music1-ring-angle: 360deg; }
+  }
+  @keyframes test3MusicNoteSweep {
+    0% { opacity: 0; transform: translateX(-1px) scale(0.7); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
   }
 
   #canvas[data-test-scope="test3"] #test3-music {
-    opacity: 0 !important;
     visibility: hidden;
-    transform: translateY(18px) scale(0.965);
+    transform: none;
     pointer-events: none !important;
     z-index: 3;
+    overflow: visible;
   }
   #canvas[data-test-scope="test3"]:not([data-test3-music-shift="1"]) #test3-music {
     opacity: 0 !important;
@@ -1667,144 +1856,327 @@
     animation: none !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music {
-    opacity: 1 !important;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-    /* !important is REQUIRED to win against the base rule's
-       `pointer-events: none !important` — without it the music card
-       wrapper swallows nothing and ALL clicks (play button + card-body
-       tap cycle + everything) pass straight through to .canvas-inner. */
+    --test3-orb-size: 56px;
+    --test3-orb-x: 12px;
+    --test3-disc-size: 64px;
+    --test3-disc-x: 16px;
+    --test3-disc-y: 20px;
+    --test3-orb-glow-delay: 6.02s;
+    visibility: hidden;
+    transform: none;
     pointer-events: auto !important;
-    animation: test3MusicCardIn 0.74s cubic-bezier(0.16, 1, 0.3, 1) both !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1 {
-    width: 168px;
-    clip-path: inset(0 0 0 0 round 32px);
-    /* Background starts at 10% orange — the pre-shimmer fill animation
-       below ramps it up to solid orange over the first 2.4 s while the
-       conic-gradient outline (::before) makes its two rotations. */
-    background-color: rgba(255, 127, 36, 0.10);
-    /* TWO animations composed: the original width grow (dotMusicRevealCard)
-       and the new background-fill ramp (test3MusicShimmerFill). They MUST
-       be in one declaration — `animation` is a single property; declaring
-       it twice in cascading rules replaces, not composes. */
-    animation:
-      dotMusicRevealCard      12s    cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      test3MusicShimmerFill   3.5s   ease-in-out                    forwards !important;
-    will-change: width, clip-path, background-color;
-  }
-  /* During phases 1-2 of the new appearance sequence (0 → 2.5s) the
-     music card content (compact loading text + the eventual icon view
-     underneath) must stay invisible so the user sees ONLY the gradient
-     outline + the gradual fill. The existing reveal animation is
-     pushed to start at 2.5s so the content cross-fades in alongside
-     the fill reaching 30 %. */
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact {
-    width: 168px;
-    opacity: 0;
-    animation:
-      dotMusicCompactOut 12s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards,
-      test3MusicContentFadeIn 0.8s ease-out 2.5s forwards !important;
-  }
-  @keyframes test3MusicContentFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__expanded {
-    animation: dotMusicExpandedIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon {
-    animation: dotMusicIconIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-    /* Override the default `pointer-events: none` on .dot-music1__icon
-       once the card has shifted in — otherwise the play/pause button
-       inside the recommendation view is unclickable because clicks pass
-       straight through to .canvas-inner below. */
-    pointer-events: auto;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3::before {
-    animation: dotMusicHorizontalBgFlowIn 4.2s linear 12s forwards !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player {
-    animation: none !important;
-  }
-  /* 1×1 compact phase: reuse Music 1×1 asset movement from theme detail/preview */
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player::before {
-    animation:
-      dotMusicSecondBgIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      dotMusicSecondBgFlow 9s linear 5s forwards !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__player::after {
-    /* searchReasonCycle (content swap between BPM / weather / distance
-       lines) DROPPED per UX direction — the lines were cycling too
-       fast to read, and the BPM line alone already communicates the
-       AI's reasoning. The ::after's `content` stays at its default
-       '현재 페이스에 맞는 BPM' (set in the .dot-music1__player::after
-       base rule). dotMusicSecondTextIn handles opacity, gradient
-       sweep animates the text shimmer. */
-    animation:
-      dotMusicSecondTextIn 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      dotMusicSecondTitleGradient 2.2s linear 6.6s infinite !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__singer-name {
-    animation:
-      dotMusicSingerGradient 2.2s linear 3s infinite,
-      dotMusicSingerGradientFillIn 680ms cubic-bezier(0.16, 1, 0.3, 1) 3s forwards,
-      dotMusicFirstTextOut 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
     overflow: visible;
-    z-index: 2;
-    --dot-music1-blob-angle: 0deg;
-    background-color: #FFC090;
-    background-image: conic-gradient(
-      from var(--dot-music1-blob-angle),
-      rgba(255, 255, 255, 0.94) 0deg,
-      rgba(255, 210, 165, 0.96) 65deg,
-      rgba(255, 165, 105, 0.90) 135deg,
-      rgba(255, 238, 215, 0.98) 205deg,
-      rgba(255, 127, 36, 0.32) 275deg,
-      rgba(255, 255, 255, 0.88) 325deg,
-      rgba(255, 255, 255, 0.94) 360deg
-    );
+    transition: none !important;
     animation:
-      test3MusicBlobGradientFlow 3.6s ease-in-out infinite,
-      test3MusicBlobSway 5.2s ease-in-out infinite,
-      test3MusicBlobGlowPulse 4s ease-in-out infinite,
-      test3MusicBlobBgCut 12s linear forwards,
-      test3MusicFirstIconBgToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+      test3MusicSpawnIn 14s cubic-bezier(0.16, 1, 0.3, 1) both,
+      test3MusicWrapperHeight 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::before {
-    /* ReactBits-style base ring — soft orange/white sweep underneath. */
-    padding: 2.5px;
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  /* Loading capsule — stroke ring while searching; gradient orb after track set. */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg {
+    --dot-music1-blob-angle: 0deg;
+    overflow: visible;
+    animation:
+      test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg::before {
     background: conic-gradient(
       from var(--dot-music1-ring-angle, 0deg),
-      rgba(255, 255, 255, 0.10) 0deg,
-      rgba(255, 255, 255, 0.95) 38deg,
-      rgba(255, 220, 185, 0.82) 105deg,
-      rgba(255, 127, 36, 0.30) 190deg,
-      rgba(255, 255, 255, 0.06) 275deg,
-      rgba(255, 255, 255, 0.95) 322deg,
-      rgba(255, 255, 255, 0.10) 360deg
+      rgba(255, 255, 255, 1) 0deg,
+      rgba(255, 255, 255, 1) 35deg,
+      rgba(255, 255, 255, 0) 130deg,
+      rgba(255, 255, 255, 0) 230deg,
+      rgba(255, 255, 255, 1) 325deg,
+      rgba(255, 255, 255, 1) 360deg
     );
     animation:
-      dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      test3MusicIconBgRingFlow 2.4s linear 8.64s infinite !important;
+      test3MusicOrbLoadingRing 14s linear forwards,
+      test3MusicOrbRingSpin 0.85s linear 0s infinite !important;
   }
-  /* Border-glow spotlight — tight white cone racing over the base ring
-     (same layered trick as persona-circle ::after in MlpTestPage). */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg::after {
+    animation:
+      test3MusicOrbSphereGlow 14s linear forwards,
+      test3MusicIconBgGlowFlow 1.1s linear var(--test3-orb-glow-delay, 6.02s) infinite !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music.is-motion-phase2 {
+    /* Height expand stays on the 14 s CSS timeline — do not kill it here. */
+    transition: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__icon {
+    z-index: 4;
+  }
+  /* Player chrome builds in during expand — native play disc fades in at 68%. */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__icon .dot-music3 {
+    background: transparent !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.8px;
+    background: conic-gradient(
+      from var(--intro-outline-angle, 0deg),
+      #64e9e3   0%,
+      #b47cff  25%,
+      #FFFFFF  50%,
+      #ffb84a  75%,
+      #64e9e3 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+    will-change: opacity, --intro-outline-angle;
+    animation:
+      test3MusicOutlineFade 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3IntroOutlineSpin 1.6s linear infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1 {
+    position: relative;
+    transform-origin: top left;
+    overflow: hidden;
+    padding: 0 !important;
+    gap: 0 !important;
+    background-color: rgba(255, 127, 36, 0);
+    transition: none !important;
+    animation:
+      test3MusicMotionShell 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicShellFill   14s ease forwards !important;
+    will-change: width, height, border-radius, clip-path, background-color;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact {
+    width: 100%;
+    height: 100%;
+    inset: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1;
+    animation: test3MusicCompactHold 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout {
+    width: 100%;
+    height: 100%;
+    inset: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0;
+    overflow: visible;
+    position: absolute;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__player {
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    position: static;
+    padding: 0;
+    gap: 0;
+    background: transparent;
+    border-radius: inherit;
+    overflow: visible;
+    animation: test3MusicPlayerExpand 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__player::before,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__player::after {
+    content: none;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__searchText {
+    position: relative;
+    z-index: 2;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 calc(var(--test3-orb-x, 0px) + var(--test3-orb-size, 48px) + 12px);
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__searchLine {
+    position: absolute;
+    left: calc(var(--test3-orb-x, 0px) + var(--test3-orb-size, 48px) + 12px);
+    right: 12px;
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 130%;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__searchLine--1 {
+    animation: test3MusicSearchLine1 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__searchLine--2 {
+    animation: test3MusicSearchLine2 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__singer-name {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__expanded {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon {
+    z-index: 2;
+    animation: test3MusicIconReveal 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__playBtn {
+    pointer-events: auto;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__title,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__bottom {
+    animation: test3MusicPlayerCopyIn 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__iconBg {
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.18);
+    animation: test3MusicPlayDiscIn 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__icon .dot-music3__iconBg {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__compact--layout {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__compact--layout .dot-music1__iconBg {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3 {
+    padding: var(--test3-disc-y, 20px) 20px 16px var(--test3-disc-x, 16px);
+    gap: 28px;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__top {
+    gap: 12px;
+    align-items: center;
+    height: var(--test3-disc-size, 64px);
+    min-height: var(--test3-disc-size, 64px);
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__icon {
+    z-index: 11;
+    flex-shrink: 0;
+    width: var(--test3-disc-size, 64px);
+    height: var(--test3-disc-size, 64px);
+    display: grid;
+    place-items: center;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__iconBg {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 99px;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__playBtn {
+    opacity: 0;
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    z-index: 12;
+    display: grid;
+    place-items: center;
+    animation: test3MusicPlayBtnIn 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3__iconBg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__icon .dot-music3__iconBg {
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__icon .dot-music3::before {
+    animation: dotMusicHorizontalBgFlowIn 4.2s linear 7.98s forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
+    position: absolute;
+    z-index: 11;
+    overflow: visible;
+    pointer-events: none;
+    --dot-music1-blob-angle: 0deg;
+    background-color: #FFC090;
+    left: var(--test3-orb-x, 12px);
+    right: auto;
+    top: 13px;
+    margin: 0;
+    width: var(--test3-orb-size, 56px);
+    height: var(--test3-orb-size, 56px);
+    animation:
+      test3MusicBlobGradientFlow 3.6s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
+      test3MusicBlobSway 5.2s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
+      test3MusicBlobGlowPulse 4s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
+      test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::before {
+    opacity: 0;
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--dot-music1-ring-angle, 0deg),
+      rgba(255, 255, 255, 1) 0deg,
+      rgba(255, 255, 255, 1) 35deg,
+      rgba(255, 255, 255, 0) 130deg,
+      rgba(255, 255, 255, 0) 230deg,
+      rgba(255, 255, 255, 1) 325deg,
+      rgba(255, 255, 255, 1) 360deg
+    );
+    animation:
+      test3MusicOrbLoadingRing 14s linear forwards,
+      test3MusicOrbRingSpin 0.85s linear 0s infinite !important;
+  }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::after {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 2.5px;
+    padding: 2px;
     background: conic-gradient(
       from var(--dot-music1-glow-angle, 0deg),
       rgba(255, 255, 255, 0)     0deg,
-      rgba(255, 255, 255, 0)   328deg,
-      rgba(255, 255, 255, 0.45) 344deg,
-      rgba(255, 255, 255, 1)   354deg,
-      rgba(255, 255, 255, 0.50) 360deg
+      rgba(255, 255, 255, 0)   310deg,
+      rgba(255, 255, 255, 0.55) 340deg,
+      rgba(255, 255, 255, 0.95) 352deg,
+      rgba(255, 255, 255, 0.45) 360deg
     );
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -1814,19 +2186,78 @@
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    opacity: 0;
-    filter: blur(1px);
+    filter: blur(0.5px);
     mix-blend-mode: screen;
     pointer-events: none;
     z-index: 1;
-    will-change: --dot-music1-glow-angle, opacity;
     animation:
-      dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      test3MusicIconBgGlowFlow 1.45s linear 8.64s infinite !important;
+      test3MusicOrbSphereGlow 14s linear forwards,
+      test3MusicIconBgGlowFlow 1.1s linear var(--test3-orb-glow-delay, 6.02s) infinite !important;
   }
-  /* test3: no dot-note SVG on the compact loading card — text + ring only. */
-  #canvas[data-test-scope="test3"] #test3-music .dot-music1__musicIcon,
-  #canvas[data-test-scope="test3"] #test3-music .dot-music1__noteSvg,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1 {
+    transition: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg .dot-music1__musicIcon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__musicIcon {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 4;
+    animation: test3MusicNotePhase 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg {
+    display: block !important;
+    visibility: visible !important;
+    width: 100%;
+    height: 100%;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle {
+    fill: #000000;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    animation: test3MusicNoteSweep 120ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(1)  { animation-delay: 560ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(7)  { animation-delay: 578ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(2)  { animation-delay: 596ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(3)  { animation-delay: 614ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(8)  { animation-delay: 632ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(13) { animation-delay: 650ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(9)  { animation-delay: 668ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(14) { animation-delay: 686ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(4)  { animation-delay: 704ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(19) { animation-delay: 722ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(15) { animation-delay: 740ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(10) { animation-delay: 758ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(5)  { animation-delay: 776ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(21) { animation-delay: 794ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(25) { animation-delay: 812ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(16) { animation-delay: 830ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(11) { animation-delay: 848ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(6)  { animation-delay: 866ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(31) { animation-delay: 884ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(26) { animation-delay: 902ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(23) { animation-delay: 920ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(12) { animation-delay: 938ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(17) { animation-delay: 956ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(32) { animation-delay: 974ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(27) { animation-delay: 992ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(18) { animation-delay: 1010ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(20) { animation-delay: 1028ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(22) { animation-delay: 1046ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(28) { animation-delay: 1064ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(33) { animation-delay: 1082ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(24) { animation-delay: 1100ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(29) { animation-delay: 1118ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(34) { animation-delay: 1136ms; }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__noteSvg circle:nth-child(30) { animation-delay: 1154ms; }
   #canvas[data-test-scope="test3"] #test3-music .dot-music1__secondMusicIcon,
   #canvas[data-test-scope="test3"] #test3-music .dot-music1__secondNoteSvg,
   #canvas[data-test-scope="test3"] #test3-music .dot-music3__noteSvg {
@@ -1875,15 +2306,30 @@
      they slid BEHIND the opaque orange music card mid-flight,
      vanishing for ~2 s before re-emerging at their final positions.
      With z-index 4 they stay visible through the entire arc. */
+  #canvas[data-test-scope="test3"][data-test3-weather-prep="1"] #test3-weather,
+  #canvas[data-test-scope="test3"][data-test3-weather-prep="1"] #test3-weather.test3-intro-prefade,
+  #canvas[data-test-scope="test3"][data-test3-weather-prep="1"] #test3-steps,
+  #canvas[data-test-scope="test3"][data-test3-weather-prep="1"] #test3-steps.test3-intro-prefade {
+    animation: test3WeatherPrepDrop 1.4s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    opacity: 1 !important;
+    will-change: transform;
+    z-index: 4;
+  }
+  #canvas[data-test-scope="test3"][data-test3-weather-dropped="1"] #test3-weather,
+  #canvas[data-test-scope="test3"][data-test3-weather-dropped="1"] #test3-steps {
+    opacity: 1 !important;
+  }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-weather,
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-weather.test3-intro-prefade {
-    animation: test3WeatherShift 2.4s cubic-bezier(0.16, 1, 0.3, 1) 1s both !important;
+    animation: test3WeatherShift 14s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    opacity: 1 !important;
     will-change: transform;
     z-index: 4;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-steps,
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-steps.test3-intro-prefade {
-    animation: test3StepsShift 2.4s cubic-bezier(0.16, 1, 0.3, 1) 1s both !important;
+    animation: test3StepsShift 14s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    opacity: 1 !important;
     will-change: transform;
     z-index: 4;
   }
@@ -1896,7 +2342,7 @@
   #canvas[data-test-scope="test3"] #test3-weather.test3-card-flow,
   #canvas[data-test-scope="test3"] #test3-steps.test3-card-flow {
     transition:
-      transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 720ms cubic-bezier(0.16, 1, 0.3, 1),
       width 380ms cubic-bezier(0.22, 1, 0.36, 1) !important;
     cursor: pointer;
     /* Force opacity 1. Without this, the cards disappear the moment
@@ -1908,6 +2354,12 @@
        in. The flow class wins via its `!important` + later cascade
        position. */
     opacity: 1 !important;
+  }
+  /* Phase-2 expand — same 1.54 s window as music shell 57 % → 68 %. */
+  #canvas[data-test-scope="test3"] #test3-weather.test3-card-flow.is-motion-phase2,
+  #canvas[data-test-scope="test3"] #test3-steps.test3-card-flow.is-motion-phase2 {
+    transition:
+      transform 1540ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
   /* Inner cards (.dot-w21 / .dot-steps21) follow the wrapper's width
      when expanded. The default 168px on these elements is overridden
@@ -2836,6 +3288,27 @@
     border-radius: 50%;
     background: #0F1F3D;
   }
+  /* Morph-phase seed — blue dot at the map circle center while the pill grows. */
+  .dot-running2__goal-map-seed {
+    position: absolute;
+    /* Match .dot-running2__goal-map center: right 24px + 64px, top 20px + 64px. */
+    right: calc(24px + 64px - 5px);
+    top: calc(20px + 64px - 5px);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #F5FBFF;
+    box-shadow:
+      0 0 0 2px #B8E4FF,
+      0 0 10px 2px rgba(120, 200, 255, 0.55),
+      0 0 18px 4px rgba(100, 180, 255, 0.28);
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-map-seed {
+    animation: test3GoalMapSeedIn 360ms cubic-bezier(0.16, 1, 0.3, 1) 820ms both;
+  }
   /* Fade-in for the goal preview overlay — only runs during the
      intro-run exit (morph) phase. Hidden by default (opacity 0) so
      it has no effect on the original intro pill state. During the
@@ -2878,10 +3351,10 @@
     #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__title-preview {
       animation: none !important;
     }
-    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__title,
-    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
-    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance {
-      transition: none !important;
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__title,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__time,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready.test3-goal-copy-enter .dot-goal__distance {
+      animation: none !important;
       opacity: 1;
       visibility: visible;
       transform: none;
@@ -4925,8 +5398,27 @@
     transform: none;
     opacity: 1;
   }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playBtn {
+    display: grid;
+    place-items: center;
+  }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playIcon {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 28px;
+    height: 28px;
+    grid-area: 1 / 1;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--play  { opacity: 0; transform: scale(0.82); pointer-events: none; }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--pause { opacity: 1; transform: scale(1); }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--play  { opacity: 1; transform: scale(1); }
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--pause { opacity: 0; transform: scale(0.82); pointer-events: none; }
   .dot-music3__playIcon {
     position: absolute;
+    left: 50%;
+    top: 50%;
     width: 28px;
     height: 28px;
     transition: opacity 180ms ease, transform 180ms ease;
@@ -4936,10 +5428,10 @@
     fill: #000000;
   }
   /* Default state — `data-music-playing="1"`: pause icon visible, play hidden. */
-  .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--play  { opacity: 0; transform: scale(0.82); }
-  .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--pause { opacity: 1; transform: scale(1); }
-  .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--play  { opacity: 1; transform: scale(1); }
-  .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--pause { opacity: 0; transform: scale(0.82); }
+  .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--play  { opacity: 0; transform: translate(-50%, -50%) scale(0.82); }
+  .dot-music3__playBtn[data-music-playing="1"] .dot-music3__playIcon--pause { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--play  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .dot-music3__playBtn[data-music-playing="0"] .dot-music3__playIcon--pause { opacity: 0; transform: translate(-50%, -50%) scale(0.82); }
   /* Lyrics block — REMOVED from flex flow by default (display: none) so
      it can't push the bar+name row out of the card. Earlier this was
      `max-height: 0` which still occupied flex layout space (flex items
@@ -5056,13 +5548,96 @@
     margin-top: auto;
     flex-shrink: 0;
   }
-  /* Stop the 12s reveal/shimmer animations fighting tap-cycle sizing. */
-  #test3-music[data-music-state] .dot-music1 {
+  /* Stop the reveal/shimmer animations fighting tap-cycle sizing once
+     the v2 entrance sequence has finished. */
+  #test3-music[data-test3-music-phase="playing"] .dot-music1 {
     animation: none !important;
     background-color: #FF7F24 !important;
     clip-path: inset(0 0 0 0 round 32px) !important;
+    width: 340px !important;
+    height: 168px !important;
   }
-  #test3-music[data-music-state="normal"] .dot-music1 {
+  #test3-music[data-test3-music-phase="playing"] {
+    --test3-disc-size: 64px;
+    --test3-disc-x: 16px;
+    --test3-disc-y: 20px;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3 {
+    padding: var(--test3-disc-y, 20px) 20px 16px var(--test3-disc-x, 16px);
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__top {
+    gap: 12px;
+    align-items: center;
+    height: var(--test3-disc-size, 64px);
+    min-height: var(--test3-disc-size, 64px);
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__icon {
+    width: var(--test3-disc-size, 64px);
+    height: var(--test3-disc-size, 64px);
+    display: grid;
+    place-items: center;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__playBtn,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-orb-handoff="1"] .dot-music1__icon .dot-music3__playBtn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__playBtn {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    transform: none !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon .dot-music3__iconBg {
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg {
+    display: none !important;
+    animation: none !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg::before,
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__compact--layout .dot-music1__iconBg::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  #test3-music[data-test3-music-phase="playing"] .dot-music1__icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    height: 168px !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-test3-music-phase="playing"] {
+    height: 168px !important;
+  }
+  #test3-music[data-music-state][data-test3-music-phase="playing"] .dot-music1 {
+    animation: none !important;
+    width: 340px !important;
+    height: 168px !important;
+    border-radius: 32px !important;
+    background-color: #FF7F24 !important;
+    clip-path: inset(0 0 0 0 round 32px) !important;
+  }
+  #test3-music[data-music-state="normal"][data-test3-music-phase="playing"] .dot-music1 {
     height: 168px !important;
   }
   #test3-music[data-music-state="normal"] .dot-music1__icon,

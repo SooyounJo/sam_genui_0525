@@ -25,6 +25,14 @@ var TEST3_GOAL_TOP = 42;
 var TEST3_GOAL_H = 168;
 var TEST3_CARD_GAP = 4;
 var TEST3_ROW2_TOP = TEST3_GOAL_TOP + TEST3_GOAL_H + TEST3_CARD_GAP;
+var TEST3_GOAL_MAP_BLOOM_MS = 920;
+var TEST3_GOAL_COPY_RISE_MS = 680;
+var TEST3_MUSIC_MOTION_MS = 14000;
+var TEST3_MUSIC_PRE_DELAY_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.10);
+var TEST3_MUSIC_EXPAND_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.57);
+var TEST3_MUSIC_EXPAND_DUR_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.11);
+var TEST3_MUSIC_EXPAND_END_MS = TEST3_MUSIC_EXPAND_START_MS + TEST3_MUSIC_EXPAND_DUR_MS;
+var TEST3_MUSIC_ENTRANCE_END_MS = TEST3_MUSIC_MOTION_MS;
 
 /** Themes set `--oneui-chroma: mono` (e.g. Mono · Grayscale) so skies/icons stay neutral — no chroma accents in markup. */
 function _isMonoChromaRoot() {
@@ -442,7 +450,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               _rect: { x: 24, y: 42, w: 340, h: 168 } },
             musicShifted ? { id: 'test3-music', role: 'dot-music-1x1', zone: 'viewing',
               variant: {
-                compactTitle: '러닝 맞춤 bgm을 찾고있어요',
+                compactTitle: '러닝을 위한 음악을 찾고 있어요',
                 // Pull from the LLM-prefetched recommendation cache if
                 // available (set by _fetchTest3MusicRecommendation in
                 // __mlpTest3GoHome). Falls back to the original curated
@@ -3828,6 +3836,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
               '<div class="dot-goal__distance">' + gDist + '</div>' +
             '</div>' +
           '</div>' +
+          (gv.useRealMap ? '<div class="dot-goal__map-seed" aria-hidden="true"></div>' : '') +
           '<div class="dot-goal__map" aria-hidden="true">' +
             mapInnerHtml +
           '</div>' +
@@ -4212,8 +4221,13 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         '</svg>';
       var compactHtml = isTest3Music
         ? ('<div class="dot-music1__player" aria-hidden="true">' +
-            '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
-            '<div class="dot-music1__iconBg"></div>' +
+            '<div class="dot-music1__iconBg">' +
+              '<div class="dot-music1__musicIcon">' + compactIconHtml + '</div>' +
+            '</div>' +
+            '<div class="dot-music1__searchText">' +
+              '<span class="dot-music1__searchLine dot-music1__searchLine--1">러닝 bgm을 찾고 있어요</span>' +
+              '<span class="dot-music1__searchLine dot-music1__searchLine--2">가벼운 러닝에 어울리는 Concierto를 골랐어요</span>' +
+            '</div>' +
           '</div>')
         : ('<div class="dot-music1__player" aria-hidden="true">' +
             '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
@@ -5336,6 +5350,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '<div class="dot-running2__goal-preview" aria-hidden="true">' +
             '<div class="dot-running2__goal-time">00:01:42</div>' +
             '<div class="dot-running2__goal-distance">180m</div>' +
+            '<div class="dot-running2__goal-map-seed" aria-hidden="true"></div>' +
             '<div class="dot-running2__goal-map"></div>' +
           '</div>';
       }
@@ -6238,6 +6253,191 @@ function _setupMusicNameMarquee(root) {
 // the navy-blue tint that matches the rest of the persona-3 aesthetic.
 // Draws a dashed running route + start/current markers.
 // Idempotent via data-map-init flag; safe to call after every mount.
+// Fired when Leaflet has tiles ready — triggers the map bloom on the
+// real goal card (circle grow + radar reveal). Idempotent.
+function _pinTest3GoalMapPulseCenter(pulseEl) {
+  if (!pulseEl) return;
+  pulseEl.style.removeProperty('right');
+  pulseEl.style.removeProperty('bottom');
+  pulseEl.style.removeProperty('margin-top');
+  pulseEl.style.removeProperty('margin');
+  pulseEl.style.width = '38px';
+  pulseEl.style.height = '38px';
+  pulseEl.style.left = '50%';
+  pulseEl.style.top = '50%';
+  pulseEl.style.margin = '0';
+  pulseEl.style.transform = 'translate(-50%, -50%)';
+}
+function _upgradeTest3GoalMapSeed(soft) {
+  var goal = document.querySelector('#test3-goal');
+  if (!goal) return null;
+  var goalCard = goal.querySelector('.dot-goal');
+  var mapParent = goal.querySelector('.dot-goal__map');
+  if (!goalCard || !mapParent) return null;
+
+  var existingPulse = mapParent.querySelector('.mlp-position-pulse.dot-goal__map-seed--from-seed') ||
+    mapParent.querySelector('.mlp-position-pulse');
+  if (existingPulse) {
+    _pinTest3GoalMapPulseCenter(existingPulse);
+    return existingPulse;
+  }
+
+  var seedEl = goalCard.querySelector('.dot-goal__map-seed') ||
+    goalCard.querySelector('.dot-goal__map-seed--handoff') ||
+    goalCard.querySelector('.mlp-position-pulse.dot-goal__map-seed--from-seed');
+  if (!seedEl) return null;
+
+  var isHandoff = seedEl.classList.contains('dot-goal__map-seed--handoff');
+  seedEl.classList.remove('dot-goal__map-seed');
+  seedEl.classList.add('mlp-position-pulse', 'dot-goal__map-seed--from-seed');
+  seedEl.style.opacity = '1';
+  seedEl.style.visibility = 'visible';
+  seedEl.style.animation = 'none';
+
+  if (!seedEl.querySelector('.mlp-position-pulse__core')) {
+    var core = document.createElement('div');
+    core.className = 'mlp-position-pulse__core';
+    var halo = document.createElement('div');
+    halo.className = 'mlp-position-pulse__halo';
+    if (isHandoff || soft) {
+      halo.style.opacity = '0';
+      halo.style.transition = 'opacity 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+    }
+    seedEl.appendChild(core);
+    seedEl.appendChild(halo);
+    seedEl.style.background = 'transparent';
+    seedEl.style.boxShadow = 'none';
+    if (isHandoff || soft) {
+      requestAnimationFrame(function () {
+        halo.style.opacity = '1';
+      });
+    }
+  }
+
+  if (!seedEl.classList.contains('dot-goal__map-seed--in-map')) {
+    seedEl.classList.add('dot-goal__map-seed--in-map');
+    mapParent.appendChild(seedEl);
+  }
+  _pinTest3GoalMapPulseCenter(seedEl);
+  return seedEl;
+}
+function _triggerTest3GoalCopyEnter(goalEl) {
+  if (!goalEl || !goalEl.isConnected) return;
+  if (goalEl.classList.contains('test3-goal-copy-enter')) return;
+  if (!goalEl.classList.contains('test3-goal-enter-ready')) return;
+  var copies = goalEl.querySelectorAll('.dot-goal__title, .dot-goal__time, .dot-goal__distance');
+  copies.forEach(function (el) {
+    el.style.removeProperty('opacity');
+    el.style.removeProperty('visibility');
+    el.style.removeProperty('transform');
+    el.style.removeProperty('animation');
+  });
+  goalEl.classList.add('test3-goal-copy-enter');
+  void goalEl.offsetWidth;
+  copies.forEach(function (el) {
+    void el.offsetWidth;
+  });
+}
+function _scheduleTest3GoalCopyEnter(goalEl) {
+  if (!goalEl) return;
+  var fired = false;
+  function fire() {
+    if (fired || !goalEl.isConnected) return;
+    fired = true;
+    _triggerTest3GoalCopyEnter(goalEl);
+    setTimeout(function () {
+      _finalizeTest3GoalEntrance(goalEl);
+    }, TEST3_GOAL_COPY_RISE_MS + 80);
+  }
+  function afterBloom() {
+    setTimeout(fire, TEST3_GOAL_MAP_BLOOM_MS);
+  }
+  if (goalEl.getAttribute('data-test3-goal-map-ready') === '1' ||
+      goalEl.classList.contains('test3-goal-map-ready')) {
+    afterBloom();
+    return;
+  }
+  var deadline = setTimeout(fire, 2800);
+  var poll = setInterval(function () {
+    if (!goalEl.isConnected) {
+      clearInterval(poll);
+      clearTimeout(deadline);
+      return;
+    }
+    if (goalEl.getAttribute('data-test3-goal-map-ready') === '1' ||
+        goalEl.classList.contains('test3-goal-map-ready')) {
+      clearInterval(poll);
+      clearTimeout(deadline);
+      afterBloom();
+    }
+  }, 40);
+}
+function _finalizeTest3GoalEntrance(goalEl) {
+  if (!goalEl || !goalEl.isConnected) return;
+  var titleEl = goalEl.querySelector('.dot-goal__title');
+  var timeEl = goalEl.querySelector('.dot-goal__time');
+  var distEl = goalEl.querySelector('.dot-goal__distance');
+  var mapEl = goalEl.querySelector('.dot-goal__map');
+  [titleEl, timeEl, distEl].forEach(function (el) {
+    if (!el) return;
+    el.style.opacity = '1';
+    el.style.visibility = 'visible';
+    el.style.transform = 'translateY(0)';
+    el.style.removeProperty('animation');
+  });
+  if (mapEl) {
+    mapEl.style.transform = 'scale(1)';
+    mapEl.style.removeProperty('animation');
+  }
+  goalEl.classList.remove('test3-goal-enter', 'test3-goal-enter-ready', 'test3-goal-copy-enter');
+  goalEl.classList.add('test3-goal-entrance-settled');
+  var canvas = document.getElementById('canvas');
+  if (canvas) canvas.removeAttribute('data-test3-goal-fresh');
+  if (typeof _upgradeTest3GoalMapSeed === 'function') _upgradeTest3GoalMapSeed(true);
+  try {
+    if (typeof window.generateSurfaceScenario === 'function') {
+      window.generateSurfaceScenario('tab-root');
+    }
+  } catch (_) {}
+}
+function _orchestrateTest3GoalEntrance(goalEl) {
+  if (!goalEl || goalEl.dataset.test3GoalEntrance === '1') return;
+  goalEl.dataset.test3GoalEntrance = '1';
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      try {
+        if (!goalEl.isConnected) return;
+        goalEl.classList.add('test3-goal-enter');
+        void goalEl.offsetWidth;
+        requestAnimationFrame(function () {
+          try {
+            if (!goalEl.isConnected) return;
+            goalEl.classList.add('test3-goal-enter-ready');
+            void goalEl.offsetWidth;
+            try {
+              if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
+            } catch (_) {}
+            setTimeout(function () {
+              try {
+                if (!goalEl.isConnected) return;
+                if (typeof _signalTest3GoalMapReady === 'function') _signalTest3GoalMapReady();
+              } catch (_) {}
+            }, 360);
+            if (typeof _scheduleTest3GoalCopyEnter === 'function') {
+              _scheduleTest3GoalCopyEnter(goalEl);
+            }
+          } catch (_) {}
+        });
+      } catch (_) {}
+    });
+  });
+}
+function _signalTest3GoalMapReady() {
+  var goal = document.querySelector('#test3-goal');
+  if (!goal || goal.getAttribute('data-test3-goal-map-ready') === '1') return;
+  goal.setAttribute('data-test3-goal-map-ready', '1');
+  goal.classList.add('test3-goal-map-ready');
+}
 function _initTest3GoalMap() {
   if (typeof window.L !== 'function' && typeof window.L !== 'object') return;
   var L = window.L;
@@ -6289,14 +6489,22 @@ function _initTest3GoalMap() {
     //       perfectly anchored at the visual center because it is OUTSIDE
     //       the transformed element.
     var mapParent = el.parentNode;
-    var pulseOverlay = document.createElement('div');
-    pulseOverlay.className = 'mlp-position-pulse';
-    pulseOverlay.setAttribute('aria-hidden', 'true');
-    pulseOverlay.innerHTML =
-      '<div class="mlp-position-pulse__core"></div>' +
-      '<div class="mlp-position-pulse__halo"></div>';
-    if (mapParent) mapParent.appendChild(pulseOverlay);
-    else el.appendChild(pulseOverlay);
+    var goalCard = mapParent && mapParent.closest('.dot-goal');
+    var seedEl = goalCard && goalCard.querySelector('.dot-goal__map-seed');
+    var existingPulse = mapParent && mapParent.querySelector('.mlp-position-pulse');
+    if (!existingPulse && !seedEl) {
+      var pulseOverlay = document.createElement('div');
+      pulseOverlay.className = 'mlp-position-pulse';
+      pulseOverlay.setAttribute('aria-hidden', 'true');
+      pulseOverlay.innerHTML =
+        '<div class="mlp-position-pulse__core"></div>' +
+        '<div class="mlp-position-pulse__halo"></div>';
+      if (mapParent) mapParent.appendChild(pulseOverlay);
+      else el.appendChild(pulseOverlay);
+      if (typeof _pinTest3GoalMapPulseCenter === 'function') {
+        _pinTest3GoalMapPulseCenter(pulseOverlay);
+      }
+    }
     // Map state: the slow-pan loop below shifts `el` via CSS
     // translate3d (GPU-accelerated, smooth) rather than calling
     // map.setView per-frame (which would cause Leaflet to recompute
@@ -6361,6 +6569,23 @@ function _initTest3GoalMap() {
     // The pulse stays anchored at the visual center and the route
     // around it stays fixed. (The slow-pan loop function is still
     // defined in case we re-enable it later.)
+    map.whenReady(function () {
+      var goalEl = document.querySelector('#test3-goal');
+      if (goalEl && goalEl.dataset.test3GoalEntrance === '1') return;
+      var signaled = false;
+      function trySignal() {
+        if (signaled) return;
+        signaled = true;
+        _signalTest3GoalMapReady();
+      }
+      var goalEl = document.querySelector('#test3-goal');
+      var hasHandoff = goalEl && goalEl.querySelector('.dot-goal__map-seed--handoff');
+      var dotBeat = hasHandoff ? 360 : 480;
+      map.once('load', function () {
+        setTimeout(trySignal, dotBeat);
+      });
+      setTimeout(trySignal, Math.max(1600, dotBeat + 400));
+    });
   } catch (e) {
     // Leaflet init failed (CDN blocked, etc.) — leave the empty div
     // and reset the flag so a retry could fire later. The CSS gives
@@ -6590,13 +6815,21 @@ function _layoutTest3Cards() {
   var steps   = document.querySelector('#test3-steps');
   if (!weather || !steps) return;
   var musicState   = music ? (music.getAttribute('data-music-state') || 'normal') : 'normal';
+  var musicLoading = music && music.getAttribute('data-test3-music-loading') === '1';
+  var musicPhase   = music ? (music.getAttribute('data-test3-music-phase') || 'spawn') : 'spawn';
+  var inMusicEntrance = musicLoading || musicPhase !== 'playing';
+  var inExpand = (weather && weather.classList.contains('is-motion-phase2')) ||
+                 (steps && steps.classList.contains('is-motion-phase2')) ||
+                 (music && music.classList.contains('is-motion-phase2'));
+  // During entrance: 82 px capsule until vertical expand; 168 px once
+  // phase-2 starts so weather/steps glide below the growing player.
+  var musicH = inMusicEntrance
+    ? (inExpand ? 168 : 82)
+    : ((musicState === 'lyrics') ? 280 : 168);
   var weatherExp = weather.classList.contains('is-expanded');
   var stepsExp   = steps.classList.contains('is-expanded');
-  // Music footprint
-  var musicH = (musicState === 'lyrics') ? 280 : 168;
   var musicCompact = (musicState === 'compact');
   var musicBottom  = TEST3_ROW2_TOP + musicH;
-  // Card geometry constants (pixels in the canvas grid).
   var FULL = 340, HALF = 168, ROW_H = 82, GAP = TEST3_CARD_GAP;
   var wX, wY, wW, sX, sY, sW;
   if (musicCompact) {
@@ -6615,8 +6848,8 @@ function _layoutTest3Cards() {
     // right after the music card's bottom edge.
     var baseY = musicBottom + GAP;
     if (!weatherExp && !stepsExp) {
-      wX = 196; wY = baseY;                 wW = HALF;
-      sX = 24;  sY = baseY;                 sW = HALF;
+      wX = 24;  wY = baseY;                 wW = HALF;
+      sX = 196; sY = baseY;                 sW = HALF;
     } else if (weatherExp && !stepsExp) {
       wX = 24;  wY = baseY;                 wW = FULL;
       sX = 24;  sY = baseY + ROW_H + GAP;   sW = HALF;
@@ -6653,10 +6886,245 @@ function _layoutTest3Cards() {
   // can be 168×168 (compact) or 340×280 (lyrics), causing clicks on
   // the inner card area to fall OUTSIDE the wrapper and miss the tap
   // handler that cycles the card state.
-  if (music) {
+  if (music && !inMusicEntrance) {
     var mW = musicCompact ? 168 : 340;
     apply(music, 24, TEST3_ROW2_TOP, mW, musicH);
   }
+}
+// Keep weather/steps visible + pinned at their dropped row through prep
+// handoff. Without this, removing data-test3-weather-prep before
+// data-test3-music-shift activates lets .test3-intro-prefade snap back
+// to opacity:0 — the "disappearing cards" bug.
+function _freezeTest3WeatherDropState() {
+  var weather = document.querySelector('#test3-weather');
+  var steps   = document.querySelector('#test3-steps');
+  [weather, steps].forEach(function (el) {
+    if (!el) return;
+    el.classList.remove('test3-intro-prefade');
+    var computed = getComputedStyle(el);
+    var ty = computed.transform;
+    if (!ty || ty === 'none') {
+      ty = 'translateY(86px)';
+    }
+    el.style.setProperty('transform', ty, 'important');
+    el.style.setProperty('opacity', '1', 'important');
+  });
+}
+// Mount the music card AFTER weather/steps have cleared row 2.
+function _mountTest3MusicAfterWeatherPrep(runId) {
+  try {
+    var stillTest3 =
+      (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+      (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+    if (!stillTest3) return;
+    if ((window.__mlpTest3MusicShiftRunId || 0) !== runId) return;
+    if (!window.__mlpTestConfig || window.__mlpTestConfig.homeStage !== 'home') return;
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test3') return;
+    window.__mlpTest3MusicShiftPrep = false;
+    window.__mlpTest3WeatherDropped = true;
+    window.__mlpTest3MusicShifted = true;
+    _freezeTest3WeatherDropState();
+    c.setAttribute('data-test3-weather-dropped', '1');
+    c.setAttribute('data-test3-music-shift', '1');
+    if (typeof window.generateSurfaceScenario === 'function') {
+      window.generateSurfaceScenario('tab-root');
+    }
+    c.removeAttribute('data-test3-weather-prep');
+    _freezeTest3WeatherDropState();
+    window.__mlpTest3MusicElapsed = 0;
+    var test3MusicEl = document.querySelector('#test3-music');
+    if (test3MusicEl) {
+      test3MusicEl.setAttribute('data-music-playing', '1');
+      test3MusicEl.setAttribute('data-test3-music-loading', '1');
+      test3MusicEl.setAttribute('data-test3-music-phase', 'spawn');
+      if (typeof _restartTest3MusicEntranceAnimations === 'function') {
+        _restartTest3MusicEntranceAnimations(test3MusicEl);
+      } else {
+        // Fresh diff-mount needs an animation restart so spawn keyframes run.
+        test3MusicEl.style.animation = 'none';
+        void test3MusicEl.offsetWidth;
+        test3MusicEl.style.removeProperty('animation');
+      }
+    }
+    if (typeof _startTest3MusicTimeTicker === 'function') {
+      _startTest3MusicTimeTicker();
+    }
+    setTimeout(function () {
+      if (typeof _syncTest3CardsExpandDown === 'function') {
+        _syncTest3CardsExpandDown();
+      }
+    }, TEST3_MUSIC_EXPAND_START_MS);
+    setTimeout(function () {
+      if (typeof _revealTest3MusicPlayBtn === 'function') {
+        _revealTest3MusicPlayBtn();
+      }
+    }, TEST3_MUSIC_EXPAND_START_MS);
+    setTimeout(function () {
+      if (typeof _revealTest3MusicPlayDisc === 'function') {
+        _revealTest3MusicPlayDisc();
+      }
+    }, TEST3_MUSIC_EXPAND_END_MS);
+    setTimeout(function () {
+      if (typeof _finalizeTest3MusicEntrance === 'function') {
+        _finalizeTest3MusicEntrance();
+      }
+    }, TEST3_MUSIC_ENTRANCE_END_MS);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        if (typeof _setupMusicNameMarquee === 'function') {
+          _setupMusicNameMarquee(document);
+        }
+      });
+    });
+  } catch (_) {}
+}
+// Phase-2: weather/steps glide to row below the expanding music card.
+// Music shell + orb motion stay on the 14 s CSS timeline (no JS cut).
+function _syncTest3CardsExpandDown() {
+  var canvas = document.getElementById('canvas');
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test3') return;
+  if (!window.__mlpTest3MusicShifted) return;
+  var weather = document.querySelector('#test3-weather');
+  var steps   = document.querySelector('#test3-steps');
+  if (!weather || !steps) return;
+  [weather, steps].forEach(function (el) {
+    var computed = getComputedStyle(el).transform;
+    el.classList.add('test3-card-flow', 'is-motion-phase2');
+    el.style.setProperty('animation', 'none', 'important');
+    if (computed && computed !== 'none') {
+      el.style.setProperty('transform', computed, 'important');
+    }
+  });
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
+    });
+  });
+}
+// Keep the play/pause control visible once the player shell has expanded.
+function _revealTest3MusicPlayDisc(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var playDisc = music.querySelector('.dot-music1__icon .dot-music3__iconBg');
+  if (!playDisc) return;
+  playDisc.style.opacity = '1';
+  playDisc.style.visibility = 'visible';
+  playDisc.style.background = 'rgba(255, 255, 255, 0.18)';
+  playDisc.style.setProperty('animation', 'none', 'important');
+}
+function _revealTest3MusicPlayBtn(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var playBtn = music.querySelector('.dot-music1__icon .dot-music3__playBtn');
+  if (!playBtn) return;
+  playBtn.style.opacity = '1';
+  playBtn.style.visibility = 'visible';
+  playBtn.style.setProperty('animation', 'none', 'important');
+}
+function _restartTest3MusicEntranceAnimations(music) {
+  if (!music) return;
+  var targets = [
+    music,
+    music.querySelector('.dot-music1'),
+    music.querySelector('.dot-music1__icon'),
+    music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg'),
+    music.querySelector('.dot-music1__icon .dot-music3__iconBg'),
+    music.querySelector('.dot-music1__icon .dot-music3__playBtn')
+  ];
+  targets.forEach(function (el) {
+    if (!el) return;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.removeProperty('animation');
+  });
+}
+// Lock the music shell geometry after the 14 s entrance timeline finishes.
+function _lockTest3MusicShell(music) {
+  if (!music) return;
+  var shell = music.querySelector('.dot-music1');
+  if (!shell) return;
+  var cs = window.getComputedStyle(shell);
+  shell.style.width = cs.width;
+  shell.style.height = cs.height;
+  shell.style.borderRadius = cs.borderRadius;
+  if (cs.clipPath && cs.clipPath !== 'none') {
+    shell.style.clipPath = cs.clipPath;
+  }
+  shell.style.backgroundColor = cs.backgroundColor;
+  shell.style.setProperty('animation', 'none', 'important');
+}
+// Seamless orb → play-disc: one element through entrance, then hand off
+// to the native iconBg slot without a visible layer swap.
+function _handoffTest3MusicOrb(music) {
+  if (!music || music.getAttribute('data-test3-music-orb-handoff') === '1') return;
+  var compactOrb = music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg');
+  var playDisc = music.querySelector('.dot-music1__icon .dot-music3__iconBg');
+  if (compactOrb) {
+    compactOrb.style.setProperty('animation', 'none', 'important');
+    var orbCs = window.getComputedStyle(compactOrb);
+    compactOrb.style.width = orbCs.width;
+    compactOrb.style.height = orbCs.height;
+    compactOrb.style.left = orbCs.left;
+    compactOrb.style.top = orbCs.top;
+    compactOrb.style.margin = '0';
+    compactOrb.style.borderRadius = orbCs.borderRadius;
+  }
+  if (playDisc) {
+    playDisc.style.opacity = '1';
+    playDisc.style.visibility = 'visible';
+    playDisc.style.background = 'rgba(255, 255, 255, 0.18)';
+    playDisc.style.setProperty('animation', 'none', 'important');
+  }
+  if (compactOrb) {
+    compactOrb.style.opacity = '0';
+    compactOrb.style.visibility = 'hidden';
+  }
+  music.setAttribute('data-test3-music-orb-handoff', '1');
+  if (!music.getAttribute('data-music-state')) {
+    music.setAttribute('data-music-state', 'normal');
+  }
+  if (typeof _revealTest3MusicPlayDisc === 'function') {
+    _revealTest3MusicPlayDisc(music);
+  }
+  if (typeof _revealTest3MusicPlayBtn === 'function') {
+    _revealTest3MusicPlayBtn(music);
+  }
+}
+// Lock final layout after the CSS vertical expand + orb handoff finish.
+function _finalizeTest3MusicEntrance() {
+  var music = document.querySelector('#test3-music');
+  var weather = document.querySelector('#test3-weather');
+  var steps   = document.querySelector('#test3-steps');
+  if (music) {
+    // Swap compact orb → native play disc before dropping loading so the
+    // disc never vanishes behind the opaque .dot-music3 icon layer.
+    if (typeof _handoffTest3MusicOrb === 'function') {
+      _handoffTest3MusicOrb(music);
+    }
+    if (typeof _lockTest3MusicShell === 'function') {
+      _lockTest3MusicShell(music);
+    }
+    if (typeof _revealTest3MusicPlayDisc === 'function') {
+      _revealTest3MusicPlayDisc(music);
+    }
+    if (typeof _revealTest3MusicPlayBtn === 'function') {
+      _revealTest3MusicPlayBtn(music);
+    }
+    music.removeAttribute('data-test3-music-loading');
+    music.classList.remove('is-motion-phase2');
+    music.setAttribute('data-test3-music-phase', 'playing');
+  }
+  if (weather) weather.classList.remove('is-motion-phase2');
+  if (steps)   steps.classList.remove('is-motion-phase2');
+  // Defer layout lock until the compact→icon crossfade finishes so we
+  // don't cut the 14 s CSS timeline with animation:none mid-handoff.
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      if (music) music.style.removeProperty('height');
+      if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
+    });
+  });
 }
 // the phone, pause the distance ticker (via the global flag the ticker
 // checks each tick) AND start the slow map dot motion above. Leaving
@@ -6734,6 +7202,10 @@ function _initTest3HoverPause() {
     // after the music shift) so the tap can't fight dotMusicRevealCard's
     // width grow. After that, taps cycle freely.
     if (!window.__mlpTest3MusicShifted) return;
+    if (typeof _handoffTest3MusicOrb === 'function' &&
+        card.getAttribute('data-test3-music-orb-handoff') !== '1') {
+      _handoffTest3MusicOrb(card);
+    }
     var cur  = card.getAttribute('data-music-state') || 'normal';
     var next = cur === 'normal' ? 'lyrics'
              : cur === 'lyrics' ? 'compact'
@@ -6785,6 +7257,8 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
   function finishTransition() {
     window.__mlpTestConfig.homeStage = 'home';
     window.__mlpTest3MusicShifted = false;
+    window.__mlpTest3MusicShiftPrep = false;
+    window.__mlpTest3WeatherDropped = false;
     window.__mlpTest3MusicShiftRunId = (window.__mlpTest3MusicShiftRunId || 0) + 1;
     window.__mlpTest3WeatherRainArmed = false;
     if (window.__mlpTest3WeatherRainTimer) {
@@ -6849,11 +7323,41 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
           // "everything blinks on" flash the user flagged.
           if (canvasFresh) canvasFresh.setAttribute('data-test3-goal-fresh', '1');
           window.__mlpTest3GoalFreshDone = true;
+          var introSeedKeep = null;
+          try {
+            var introSeedEl = introRunEl.querySelector('.dot-running2__goal-map-seed');
+            if (introSeedEl) {
+              var introSeedOpacity = parseFloat(window.getComputedStyle(introSeedEl).opacity || '0');
+              if (introSeedOpacity > 0.01 && introSeedEl.parentNode) {
+                introSeedKeep = introSeedEl;
+                introSeedEl.parentNode.removeChild(introSeedEl);
+              }
+            }
+          } catch (_) {}
           introRunEl.id = 'test3-goal';
-          introRunEl.classList.remove('test3-intro-run-exit', 'test3-goal-enter', 'test3-goal-enter-ready');
+          introRunEl.classList.remove('test3-intro-run-exit', 'test3-goal-enter', 'test3-goal-enter-ready', 'test3-goal-copy-enter');
           introRunEl.dataset.role = goalComp.role;
           introRunEl.setAttribute('data-role', goalComp.role);
           introRunEl.innerHTML = window.renderAtomicForRole(goalComp, goalRect);
+          if (introSeedKeep) {
+            try {
+              var goalCardInner = introRunEl.querySelector('.dot-goal');
+              var freshSeed = introRunEl.querySelector('.dot-goal__map-seed');
+              if (freshSeed) freshSeed.remove();
+              introSeedKeep.className = 'dot-goal__map-seed dot-goal__map-seed--handoff';
+              introSeedKeep.style.opacity = '1';
+              introSeedKeep.style.visibility = 'visible';
+              introSeedKeep.style.animation = 'none';
+              introSeedKeep.style.left = 'calc(100% - 64px - 5px)';
+              introSeedKeep.style.top = '50%';
+              introSeedKeep.style.width = '10px';
+              introSeedKeep.style.height = '10px';
+              introSeedKeep.style.marginTop = '-5px';
+              introSeedKeep.style.removeProperty('right');
+              introSeedKeep.style.removeProperty('transform');
+              if (goalCardInner) goalCardInner.appendChild(introSeedKeep);
+            } catch (_) {}
+          }
           // Pin layout to the goal card's rect (the morph keyframes had
           // animated height to 168, but inline style still says 82;
           // clearing the animation would revert height to 82 if we
@@ -6865,50 +7369,9 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
           introRunEl.style.opacity = '1';
           introRunEl.style.overflow = '';
           goalEnterRebuildScheduled = true;
-          // Three-frame gate: (1) HOLD paints opacity:0, (2) arm
-          // test3-goal-enter only, (3) add enter-ready on the NEXT
-          // frame so the browser has a committed hidden state before
-          // the CSS transition runs. Adding enter-ready in the same
-          // recalc as HOLD release skips the 0→1 sweep (instant pop).
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              try {
-                if (!introRunEl.isConnected) return;
-                introRunEl.classList.add('test3-goal-enter');
-                void introRunEl.offsetWidth;
-                requestAnimationFrame(function () {
-                  try {
-                    if (!introRunEl.isConnected) return;
-                    var titleEl = introRunEl.querySelector('.dot-goal__title');
-                    var timeEl = introRunEl.querySelector('.dot-goal__time');
-                    var distEl = introRunEl.querySelector('.dot-goal__distance');
-                    introRunEl.classList.add('test3-goal-enter-ready');
-                    if (titleEl) void titleEl.offsetWidth;
-                    if (timeEl) void timeEl.offsetWidth;
-                    if (distEl) void distEl.offsetWidth;
-                    // Init Leaflet on the same beat as enter-ready so the
-                    // map circle + tiles mount while still hidden, then fade
-                    // in with the title (was deferred 520ms → visible lag).
-                    try {
-                      if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
-                    } catch (_) {}
-                    requestAnimationFrame(function () {
-                      if (typeof window.generateSurfaceScenario === 'function') {
-                        window.generateSurfaceScenario('tab-root');
-                      }
-                    });
-                  } catch (_) {}
-                });
-              } catch (_) {}
-            });
-          });
-          setTimeout(function () {
-            try {
-              introRunEl.classList.remove('test3-goal-enter', 'test3-goal-enter-ready');
-              var cDone = document.getElementById('canvas');
-              if (cDone) cDone.removeAttribute('data-test3-goal-fresh');
-            } catch (_) {}
-          }, 1700);
+          if (typeof _orchestrateTest3GoalEntrance === 'function') {
+            _orchestrateTest3GoalEntrance(introRunEl);
+          }
         }
       }
     } catch (_) {}
@@ -7366,8 +7829,16 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       else canvas.removeAttribute('data-test3-home-prep');
       if (homeStage === 'home') {
         canvas.setAttribute('data-test3-music-shift', window.__mlpTest3MusicShifted ? '1' : '0');
+        if (window.__mlpTest3WeatherDropped) {
+          canvas.setAttribute('data-test3-weather-dropped', '1');
+        } else {
+          canvas.removeAttribute('data-test3-weather-dropped');
+        }
+        canvas.removeAttribute('data-test3-weather-prep');
       } else {
         window.__mlpTest3MusicShifted = false;
+        window.__mlpTest3MusicShiftPrep = false;
+        window.__mlpTest3WeatherDropped = false;
         window.__mlpTest3MusicShiftRunId = (window.__mlpTest3MusicShiftRunId || 0) + 1;
         window.__mlpTest3WeatherRainArmed = false;
         if (window.__mlpTest3WeatherRainTimer) {
@@ -7377,6 +7848,10 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         if (window.__mlpTest3MusicShiftTimer) {
           clearTimeout(window.__mlpTest3MusicShiftTimer);
           window.__mlpTest3MusicShiftTimer = null;
+        }
+        if (window.__mlpTest3MusicMountTimer) {
+          clearTimeout(window.__mlpTest3MusicMountTimer);
+          window.__mlpTest3MusicMountTimer = null;
         }
         // Stop the goal time + distance tickers when leaving the home
         // stage so they don't run forever on every page load. Also
@@ -7392,6 +7867,8 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         window.__mlpTest3GoalFreshDone = false;
         window.__mlpTest3GoalMapZoomDone = false;
         canvas.removeAttribute('data-test3-music-shift');
+        canvas.removeAttribute('data-test3-weather-prep');
+        canvas.removeAttribute('data-test3-weather-dropped');
         canvas.removeAttribute('data-test3-weather-rain');
       }
     } else {
@@ -7520,8 +7997,12 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         clearTimeout(window.__mlpTest3MusicShiftTimer);
         window.__mlpTest3MusicShiftTimer = null;
       }
+      if (window.__mlpTest3MusicMountTimer) {
+        clearTimeout(window.__mlpTest3MusicMountTimer);
+        window.__mlpTest3MusicMountTimer = null;
+      }
       var stage = window.__mlpTestConfig && window.__mlpTestConfig.homeStage;
-      if (stage === 'home' && !window.__mlpTest3MusicShifted) {
+      if (stage === 'home' && !window.__mlpTest3MusicShifted && !window.__mlpTest3MusicShiftPrep) {
         var musicShiftRunId = window.__mlpTest3MusicShiftRunId || 0;
         window.__mlpTest3MusicShiftTimer = setTimeout(function () {
           try {
@@ -7533,45 +8014,19 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
             if (!window.__mlpTestConfig || window.__mlpTestConfig.homeStage !== 'home') return;
             var c = document.getElementById('canvas');
             if (!c || c.getAttribute('data-test-scope') !== 'test3') return;
-            window.__mlpTest3MusicShifted = true;
-            if (typeof window.generateSurfaceScenario === 'function') {
-              window.generateSurfaceScenario('tab-root');
-            } else {
-              c.setAttribute('data-test3-music-shift', '1');
-            }
+            // Phase 1 — weather + progress drop alone; music mounts after.
+            window.__mlpTest3MusicShiftPrep = true;
+            var weatherEl = c.querySelector('#test3-weather');
+            var stepsEl   = c.querySelector('#test3-steps');
+            if (weatherEl) weatherEl.classList.remove('test3-intro-prefade');
+            if (stepsEl)   stepsEl.classList.remove('test3-intro-prefade');
+            c.setAttribute('data-test3-weather-prep', '1');
             if (typeof window.__mountTest3WeatherRainMotion === 'function') {
               window.__mountTest3WeatherRainMotion(1020);
             }
-            // Reset music elapsed counter at the moment the card mounts
-            // (= the song starts from the beginning). Initial `data-
-            // music-playing="1"` on the wrapper mirrors the play button's
-            // default so the CSS sees a consistent paused/playing state
-            // across the bar, the time, and the icon swap.
-            window.__mlpTest3MusicElapsed = 0;
-            var test3MusicEl = document.querySelector('#test3-music');
-            if (test3MusicEl) test3MusicEl.setAttribute('data-music-playing', '1');
-            if (typeof _startTest3MusicTimeTicker === 'function') {
-              _startTest3MusicTimeTicker();
-            }
-            // After the music shift's CSS keyframes (curved-path
-            // translate of weather/steps) finish, hand layout off to
-            // _layoutTest3Cards so subsequent state changes can
-            // reflow the row. Delay matches the animation's total:
-            // 2.4s duration + 1.68s delay = 4.08s.
-            setTimeout(function () {
-              if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
-            }, 4100);
-            // Measure the music name now that the card has rendered with
-            // the LLM-recommended subtitle, and enable the marquee scroll
-            // if the text overflows the visible window. Two rAFs so layout
-            // (incl. Inter font load) has stabilized before measurement.
-            requestAnimationFrame(function () {
-              requestAnimationFrame(function () {
-                if (typeof _setupMusicNameMarquee === 'function') {
-                  _setupMusicNameMarquee(document);
-                }
-              });
-            });
+            window.__mlpTest3MusicMountTimer = setTimeout(function () {
+              _mountTest3MusicAfterWeatherPrep(musicShiftRunId);
+            }, TEST3_MUSIC_PRE_DELAY_MS);
           } catch (_) {}
         }, 5600);
       }
