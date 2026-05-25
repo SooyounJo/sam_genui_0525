@@ -19,6 +19,13 @@ window.SURFACE_TYPES = {
 
 window.currentSurfaceType = window.SURFACE_TYPES.FIRST_DEPTH_LIST;
 
+// test3 home card stack — Figma-tight vertical gap (4px). Horizontal
+// half-card gap stays 4px on the 340px grid.
+var TEST3_GOAL_TOP = 42;
+var TEST3_GOAL_H = 168;
+var TEST3_CARD_GAP = 4;
+var TEST3_ROW2_TOP = TEST3_GOAL_TOP + TEST3_GOAL_H + TEST3_CARD_GAP;
+
 /** Themes set `--oneui-chroma: mono` (e.g. Mono · Grayscale) so skies/icons stay neutral — no chroma accents in markup. */
 function _isMonoChromaRoot() {
   try {
@@ -367,6 +374,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') {
         var stage = window.__mlpTestConfig.homeStage || 'intro'; // 'intro' | 'home'
         var musicShifted = !!window.__mlpTest3MusicShifted;
+        var test3Row2Y = TEST3_ROW2_TOP;
         if (stage !== 'home') {
           // Persona 3 (health home) intro: prompt banner at top → click to reveal home widgets.
           // Banner is the wide Jogging prompt variant (340×82) so it
@@ -383,12 +391,11 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
             components: [
               { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
               { id: 'test3-intro-run', role: 'dot-running-prompt', zone: 'viewing',
-                /* titleAtEnd renders an in-pill preview of the goal's
-                   title that becomes visible 300ms after tap (see
-                   .prox-char-once rule in theme-page.css). The wave
-                   sweeps through the chars and settles before the
-                   morph swap completes, so the goal card paints into
-                   place with its title already at the final state. */
+                /* Intro sequence: compact pill shows "Running Now"
+                   first (see test3IntroTitleStart in theme-page.css),
+                   then stretches to full width and cross-fades into the
+                   detection prompt. On tap, titleAtEnd drives the morph
+                   into the live Running Now goal card. */
                 variant: {
                   prompt: '빠른 움직임이 감지됐어요. 운동을 시작할까요?',
                   titleAtEnd: 'Running Now',
@@ -435,6 +442,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               _rect: { x: 24, y: 42, w: 340, h: 168 } },
             musicShifted ? { id: 'test3-music', role: 'dot-music-1x1', zone: 'viewing',
               variant: {
+                compactTitle: '러닝 맞춤 bgm을 찾고있어요',
                 // Pull from the LLM-prefetched recommendation cache if
                 // available (set by _fetchTest3MusicRecommendation in
                 // __mlpTest3GoHome). Falls back to the original curated
@@ -447,29 +455,27 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
                 // dotMusicBarProgress animation in theme-page.css.
                 expandedBarTrack: 0
               },
-              _rect: { x: 24, y: 214, w: 340, h: 168 } } : null,
+              _rect: { x: 24, y: test3Row2Y, w: 340, h: 168 } } : null,
             { id: 'test3-weather', role: 'dot-weather-2x1-v1-1', zone: 'viewing',
-              /* Live weather, fetched from /api/p3/weather (Open-Meteo
-                 proxy) at intro-tap and cached on window.__mlpTest3Weather.
-                 The three cycle lines below are dynamic too: rain timing,
-                 humidity-based pace recommendation, and temperature
-                 snapshot — all derived from real conditions. Curated
-                 fallback (used when API fails or hasn't returned yet)
-                 keeps the prototype usable offline. */
+              /* Live weather from /api/p3/weather — three compact lines
+                 (온도 / 습도 / 미세먼지) rotate one-at-a-time via the
+                 default scroll-float slot animation. */
               variant: (function () {
                 var w = window.__mlpTest3Weather;
                 return {
+                  title: 'Weather',
                   location: (w && w.location)   || 'Seoul',
                   weather:  (w && w.weather)    || 'Rainy',
                   sunIcon:  (w && w.sunIcon)    || 'pair-raindrop-dual',
                   cycleLines: (w && w.cycleLines && w.cycleLines.length) ? w.cycleLines : [
-                    'Rain expected in 18 min',
-                    'Humidity high, lighter pace recommended',
-                    'Good window to start now'
-                  ]
+                    '온도 18°',
+                    '습도 58%',
+                    '미세먼지 보통'
+                  ],
+                  expandDetail: '실외 러닝에 적합한 조건이에요.'
                 };
               })(),
-              _rect: { x: 24, y: 214, w: 168, h: 82 } },
+              _rect: { x: 24, y: test3Row2Y, w: 168, h: 82 } },
             { id: 'test3-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
               /* "Today Progress" mode: the steps card now talks about
                  the run goal directly. cycleMode: 'fade' reverts the
@@ -484,9 +490,10 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
                 cycleLines: [
                   "현재 페이스 5'00\"/km",
                   'Warm-up achieved'
-                ]
+                ],
+                expandDetail: '목표 페이스 안정'
               },
-              _rect: { x: 196, y: 214, w: 168, h: 82 } },
+              _rect: { x: 196, y: test3Row2Y, w: 168, h: 82 } },
             { id: 'test3-page-dots', role: 'test3-page-dots', zone: 'viewing',
               _rect: { x: 0, y: 714, w: 388, h: 24 } },
             { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
@@ -4189,6 +4196,9 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var _sw = mv.searchWeather  || '비 오는 날';
       var _sd = mv.searchDistance || '5km';
       var compactTitle = mv.compactTitle || (_sw + ' ' + _sd + ' 러닝에 맞는\nBPM과 선호 톤으로\n트랙을 찾고 있어요');
+      var isTest3Music =
+        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
       var compactIconHtml = '' +
         '<svg class="dot-music1__noteSvg" width="32" height="32" viewBox="-2 -2 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
           '<circle cx="19.85" cy="3.49" r="3.5" fill="#000000"/><circle cx="27.98" cy="3.49" r="3.5" fill="#000000"/><circle cx="35.66" cy="3.49" r="3.5" fill="#000000"/><circle cx="44.25" cy="3.49" r="3.5" fill="#000000"/><circle cx="52.39" cy="3.49" r="3.5" fill="#000000"/><circle cx="60.52" cy="3.49" r="3.5" fill="#000000"/>' +
@@ -4200,12 +4210,16 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '<circle cx="3.49" cy="53.32" r="3.5" fill="#000000"/><circle cx="11.62" cy="53.32" r="3.5" fill="#000000"/><circle cx="19.85" cy="53.32" r="3.5" fill="#000000"/><circle cx="44.25" cy="53.32" r="3.5" fill="#000000"/><circle cx="52.39" cy="53.32" r="3.5" fill="#000000"/><circle cx="60.52" cy="53.32" r="3.5" fill="#000000"/>' +
           '<circle cx="3.49" cy="61.45" r="3.5" fill="#000000"/><circle cx="11.62" cy="61.45" r="3.5" fill="#000000"/><circle cx="44.25" cy="61.45" r="3.5" fill="#000000"/><circle cx="52.39" cy="61.45" r="3.5" fill="#000000"/>' +
         '</svg>';
-      var compactHtml = '' +
-        '<div class="dot-music1__player" aria-hidden="true">' +
-          '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
-          '<div class="dot-music1__iconBg"></div>' +
-          '<div class="dot-music1__musicIcon">' + compactIconHtml + '</div>' +
-        '</div>';
+      var compactHtml = isTest3Music
+        ? ('<div class="dot-music1__player" aria-hidden="true">' +
+            '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
+            '<div class="dot-music1__iconBg"></div>' +
+          '</div>')
+        : ('<div class="dot-music1__player" aria-hidden="true">' +
+            '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
+            '<div class="dot-music1__iconBg"></div>' +
+            '<div class="dot-music1__musicIcon">' + compactIconHtml + '</div>' +
+          '</div>');
       var expandedIconHtml = compactIconHtml.replace('dot-music1__noteSvg', 'dot-music1__secondNoteSvg');
       // Search-reasoning text replaces the old static "검색중이에요" with
       // three context-aware lines that cycle (800ms each) during the
@@ -4224,15 +4238,21 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
        // user direction: just show the BPM line statically. Single span,
        // no cycle, no animation; the other two factors are still implied
        // in the compact title above.
-      var expandedHtml = '' +
-        '<div class="dot-music1__secondPlayer">' +
-          '<div class="dot-music1__secondIconBg">' +
-            '<div class="dot-music1__secondMusicIcon">' + expandedIconHtml + '</div>' +
-          '</div>' +
-          '<div class="dot-music1__secondTitle">' +
-            '<span class="dot-music1__reason dot-music1__reason--1">현재 페이스에 맞는 BPM</span>' +
-          '</div>' +
-        '</div>';
+      var expandedHtml = isTest3Music
+        ? ('<div class="dot-music1__secondPlayer">' +
+            '<div class="dot-music1__secondIconBg"></div>' +
+            '<div class="dot-music1__secondTitle">' +
+              '<span class="dot-music1__reason dot-music1__reason--1">현재 페이스에 맞는 BPM</span>' +
+            '</div>' +
+          '</div>')
+        : ('<div class="dot-music1__secondPlayer">' +
+            '<div class="dot-music1__secondIconBg">' +
+              '<div class="dot-music1__secondMusicIcon">' + expandedIconHtml + '</div>' +
+            '</div>' +
+            '<div class="dot-music1__secondTitle">' +
+              '<span class="dot-music1__reason dot-music1__reason--1">현재 페이스에 맞는 BPM</span>' +
+            '</div>' +
+          '</div>');
       var isTabRoot = window.currentSurfaceType === window.SURFACE_TYPES.TAB_ROOT;
       var orangeClass = isTabRoot ? ' is-orange' : '';
       return '' +
@@ -4313,6 +4333,11 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var mv3 = (comp && comp.variant) || {};
       var title3 = (mv3.title || '오늘 날씨에 딱 맞는\n플레이리스트');
       var subtitle3 = (mv3.subtitle || 'Jim Hall - Concierto');
+      var foldTitle3 = mv3.foldTitle;
+      if (!foldTitle3) {
+        var foldDash = subtitle3.indexOf(' - ');
+        foldTitle3 = foldDash >= 0 ? subtitle3.slice(foldDash + 3).trim() : subtitle3;
+      }
       var barW3 = mv3.barFull != null ? mv3.barFull : 292;
       var barTrack3 = mv3.barTrack != null ? mv3.barTrack : 77;
       var safeTitle = String(title3).replace(/\n/g, '<br/>');
@@ -4321,7 +4346,33 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       // real lyrics via mv3.lyrics; otherwise a generic 3-line stand-in.
       var lyrics3 = mv3.lyrics ||
         '♪\n흐르는 빗방울을 따라\n페이스를 맞춰 가면\n오늘도 한 걸음 더 멀리';
-      var safeLyrics = String(lyrics3).replace(/\n/g, '<br/>');
+      var isTest3Lyrics =
+        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+      var lyricsLines = String(lyrics3).split('\n').filter(function (line) { return line.length > 0; });
+      if (!lyricsLines.length) lyricsLines = ['♪'];
+      function _escLyricLine(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+      var lyricsBlockHtml;
+      if (isTest3Lyrics) {
+        var lineHtml = lyricsLines.map(function (line) {
+          return '<span class="dot-music3__lyrics-line">' + _escLyricLine(line) + '</span>';
+        }).join('');
+        var cloneHtml = lyricsLines.map(function (line) {
+          return '<span class="dot-music3__lyrics-line dot-music3__lyrics-line--clone" aria-hidden="true">' + _escLyricLine(line) + '</span>';
+        }).join('');
+        lyricsBlockHtml =
+          '<div class="dot-music3__lyrics dot-music3__lyrics--flow" aria-hidden="true" data-count="' + lyricsLines.length + '">' +
+            '<div class="dot-music3__lyrics-scroller">' + lineHtml + cloneHtml + '</div>' +
+          '</div>';
+      } else {
+        var safeLyrics = String(lyrics3).replace(/\n/g, '<br/>');
+        lyricsBlockHtml = '<div class="dot-music3__lyrics" aria-hidden="true">' + safeLyrics + '</div>';
+      }
       // Decorative music-note SVG is replaced with a play/pause button.
       // Per user direction the recommended song is already playing on
       // the device by the time this card surfaces, so initial state is
@@ -4400,7 +4451,8 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           // the card to enter `data-music-state="lyrics"`. The two-step
           // tap cycle is: normal → lyrics (tap 1) → square (tap 2) →
           // normal (tap 3). Cycle handler lives in surface-layout.js.
-          '<div class="dot-music3__lyrics" aria-hidden="true">' + safeLyrics + '</div>' +
+          lyricsBlockHtml +
+          '<div class="dot-music3__foldTitle" aria-hidden="true">' + foldTitle3 + '</div>' +
           '<div class="dot-music__bottom dot-music3__bottom">' +
             // Name row pairs the artist/song marquee on the left with
             // the current/total track time on the right end, both
@@ -4724,10 +4776,18 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         var stCount = st.count || '10,235';
         contentHtml = '<div class="dot-steps21__count">' + stCount + '</div>';
       }
+      var stExpandDetail = st.expandDetail || '';
+      var stBodyHtml =
+        '<div class="dot-steps21__title">' + stTitle + '</div>' +
+        contentHtml;
+      if (stExpandDetail) {
+        stBodyHtml =
+          '<div class="dot-steps21__main">' + stBodyHtml + '</div>' +
+          '<div class="dot-steps21__expandDetail" aria-hidden="true">' + stExpandDetail + '</div>';
+      }
       return '' +
-        '<div class="dot-card dot-steps21' + (stCycle ? ' dot-steps21--cycle' : '') + '" data-state="' + (st.state || 'idle') + '">' +
-          '<div class="dot-steps21__title">' + stTitle + '</div>' +
-          contentHtml +
+        '<div class="dot-card dot-steps21' + (stCycle ? ' dot-steps21--cycle' : '') + (stExpandDetail ? ' dot-steps21--expandable' : '') + '" data-state="' + (st.state || 'idle') + '">' +
+          stBodyHtml +
         '</div>';
     }
 
@@ -5038,11 +5098,20 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       // "Humidity high, lighter pace recommended" / "Good window to start
       // now" — turning the static reading into a contextual coach.
       var weatherCycle = (w2.cycleLines && w2.cycleLines.length) ? w2.cycleLines : null;
+      var w2Title = w2.title || null;
       var weatherTextHtml;
       if (weatherCycle) {
+        // Cycle modes:
+        //   default 'scroll' — vertical scroll-float (Weather Advisory default)
+        //   'fade'           — opacity cross-fade, first line only visible
+        //   'stack'          — all lines visible, one slot per row (test3 home)
+        var w2CycleMode = w2.cycleMode || 'scroll';
+        var w2ModClass = '';
+        if (w2CycleMode === 'fade') w2ModClass = ' dot-card-cycle--fade';
+        else if (w2CycleMode === 'stack') w2ModClass = ' dot-card-cycle--stack';
         // Same scroll-float structure as the Today Progress card — vertical
         // scroller with a clone of line 1 at the end for seamless wrap.
-        weatherTextHtml = '<div class="dot-w21__text dot-w21__text--cycle dot-card-cycle" data-count="' + weatherCycle.length + '">' +
+        weatherTextHtml = '<div class="dot-w21__text dot-w21__text--cycle dot-card-cycle' + w2ModClass + '" data-count="' + weatherCycle.length + '">' +
           '<div class="dot-card-cycle__scroller">' +
             weatherCycle.map(function (line, i) {
               return '<span class="dot-w21__cycle-line dot-card-cycle__line dot-card-cycle__line--' + (i + 1) + '">' + line + '</span>';
@@ -5057,10 +5126,19 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<div class="dot-w21__weather">' + wt + '</div>' +
           '</div>';
       }
+      var w2ExpandDetail = w2.expandDetail || '';
+      var w2BodyHtml =
+        sunIconHtml +
+        (w2Title ? '<div class="dot-w21__title">' + w2Title + '</div>' : '') +
+        weatherTextHtml;
+      if (w2ExpandDetail) {
+        w2BodyHtml =
+          '<div class="dot-w21__main">' + w2BodyHtml + '</div>' +
+          '<div class="dot-w21__expandDetail" aria-hidden="true">' + w2ExpandDetail + '</div>';
+      }
       return '' +
-        '<div class="dot-card dot-w21' + darkClass + (weatherCycle ? ' dot-w21--cycle' : '') + '" data-state="' + (w2.state || 'idle') + '">' +
-          sunIconHtml +
-          weatherTextHtml +
+        '<div class="dot-card dot-w21' + darkClass + (weatherCycle ? ' dot-w21--cycle' : '') + (w2Title ? ' dot-w21--has-title' : '') + (w2ExpandDetail ? ' dot-w21--expandable' : '') + '" data-state="' + (w2.state || 'idle') + '">' +
+          w2BodyHtml +
         '</div>';
     }
 
@@ -6517,12 +6595,12 @@ function _layoutTest3Cards() {
   // Music footprint
   var musicH = (musicState === 'lyrics') ? 280 : 168;
   var musicCompact = (musicState === 'compact');
-  var musicBottom  = 214 + musicH;
+  var musicBottom  = TEST3_ROW2_TOP + musicH;
   // Card geometry constants (pixels in the canvas grid).
-  var FULL = 340, HALF = 168, ROW_H = 82, GAP = 4;
+  var FULL = 340, HALF = 168, ROW_H = 82, GAP = TEST3_CARD_GAP;
   var wX, wY, wW, sX, sY, sW;
   if (musicCompact) {
-    // Music is 168×168 in the LEFT column at y=214-382. Right column
+    // Music is 168×168 in the LEFT column at row2 (y=214). Right column
     // is open — ALWAYS stack the two cards there alongside the music
     // square, regardless of any is-expanded state on the cards. Their
     // expand class is preserved (so they re-expand when music grows
@@ -6530,8 +6608,8 @@ function _layoutTest3Cards() {
     // the right column. Without this override the user got the weird
     // "cards drop to the bottom even though there's empty space next
     // to the square music card" behaviour.
-    wX = 196; wY = 214;         wW = HALF;
-    sX = 196; sY = 214 + 86;    sW = HALF;
+    wX = 196; wY = TEST3_ROW2_TOP;              wW = HALF;
+    sX = 196; sY = TEST3_ROW2_TOP + ROW_H + GAP; sW = HALF;
   } else {
     // Music is 340 wide (normal or lyrics). Below-music row starts
     // right after the music card's bottom edge.
@@ -6577,7 +6655,7 @@ function _layoutTest3Cards() {
   // handler that cycles the card state.
   if (music) {
     var mW = musicCompact ? 168 : 340;
-    apply(music, 24, 214, mW, musicH);
+    apply(music, 24, TEST3_ROW2_TOP, mW, musicH);
   }
 }
 // the phone, pause the distance ticker (via the global flag the ticker
@@ -6677,6 +6755,10 @@ function _initTest3HoverPause() {
     if (!card) return;
     if (!window.__mlpTest3MusicShifted) return;
     card.classList.toggle('is-expanded');
+    var detail = card.querySelector('.dot-w21__expandDetail, .dot-steps21__expandDetail');
+    if (detail) {
+      detail.setAttribute('aria-hidden', card.classList.contains('is-expanded') ? 'false' : 'true');
+    }
     if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
   });
 }
@@ -6717,16 +6799,9 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     // renders at full opacity by default — visually identical, no
     // perceived "layer popping on top".
     window.__mlpTest3HomeEnterArmed = false;
-    // Goal entrance (map scale-in, time + distance slide-up) ALREADY
-    // fired during the bounce-up via the prefade-mounted goal. Clear
-    // the goal-fresh flag now so the canvas re-render below doesn't
-    // mount a fresh #test3-goal with the entrance animations queued
-    // up to fire a SECOND time — the user would see the time/dist
-    // re-fade in 144ms after the bounce ended.
-    try {
-      var canvasEl = document.getElementById('canvas');
-      if (canvasEl) canvasEl.removeAttribute('data-test3-goal-fresh');
-    } catch (_) {}
+    // Goal entrance animations fire AFTER the innerHTML swap below —
+    // the real .dot-goal__* children are inserted at morph end, then
+    // test3-goal-enter + data-test3-goal-fresh gate the CSS motion.
     // SINGLE-COMPONENT TRANSFORMATION: rename the intro pill into the
     // goal card in place. The same DOM element persists from intro
     // stage through home stage — its id changes, its inner HTML is
@@ -6746,6 +6821,7 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     //   5. The diff renderer (in generateSurfaceScenario below) now
     //      finds the renamed element as #test3-goal in canvas.children
     //      and preserves it — no separate goal card was ever mounted.
+    var goalEnterRebuildScheduled = false;
     try {
       var introRunEl = document.getElementById('test3-intro-run');
       if (introRunEl &&
@@ -6766,18 +6842,18 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
         }
         if (goalComp) {
           var goalRect = window.resolveComponentRect(goalComp, transformLayout, transformPlan);
-          // Replace inner HTML with the real goal card markup. The
-          // .dot-goal element with all its proper children (title,
-          // time, distance, map circle with Leaflet container) takes
-          // the place of the morphing pill content. Visually similar
-          // because the pill's goal-preview overlay was already showing
-          // matching content at matching positions.
-          introRunEl.innerHTML = window.renderAtomicForRole(goalComp, goalRect);
-          // Rename: same element, new identity.
+          var canvasFresh = document.getElementById('canvas');
+          // Arm the fresh gate + rename BEFORE innerHTML swap so the
+          // first paint of the real .dot-goal children is already
+          // covered by the CSS hold rules — prevents the one-frame
+          // "everything blinks on" flash the user flagged.
+          if (canvasFresh) canvasFresh.setAttribute('data-test3-goal-fresh', '1');
+          window.__mlpTest3GoalFreshDone = true;
           introRunEl.id = 'test3-goal';
-          introRunEl.classList.remove('test3-intro-run-exit');
+          introRunEl.classList.remove('test3-intro-run-exit', 'test3-goal-enter', 'test3-goal-enter-ready');
           introRunEl.dataset.role = goalComp.role;
           introRunEl.setAttribute('data-role', goalComp.role);
+          introRunEl.innerHTML = window.renderAtomicForRole(goalComp, goalRect);
           // Pin layout to the goal card's rect (the morph keyframes had
           // animated height to 168, but inline style still says 82;
           // clearing the animation would revert height to 82 if we
@@ -6787,13 +6863,61 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
           introRunEl.style.width = goalRect.w + 'px';
           introRunEl.style.height = goalRect.h + 'px';
           introRunEl.style.opacity = '1';
-          // Restore overflow to default (the morph set it to visible).
           introRunEl.style.overflow = '';
+          goalEnterRebuildScheduled = true;
+          // Three-frame gate: (1) HOLD paints opacity:0, (2) arm
+          // test3-goal-enter only, (3) add enter-ready on the NEXT
+          // frame so the browser has a committed hidden state before
+          // the CSS transition runs. Adding enter-ready in the same
+          // recalc as HOLD release skips the 0→1 sweep (instant pop).
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              try {
+                if (!introRunEl.isConnected) return;
+                introRunEl.classList.add('test3-goal-enter');
+                void introRunEl.offsetWidth;
+                requestAnimationFrame(function () {
+                  try {
+                    if (!introRunEl.isConnected) return;
+                    var titleEl = introRunEl.querySelector('.dot-goal__title');
+                    var timeEl = introRunEl.querySelector('.dot-goal__time');
+                    var distEl = introRunEl.querySelector('.dot-goal__distance');
+                    introRunEl.classList.add('test3-goal-enter-ready');
+                    if (titleEl) void titleEl.offsetWidth;
+                    if (timeEl) void timeEl.offsetWidth;
+                    if (distEl) void distEl.offsetWidth;
+                    // Init Leaflet on the same beat as enter-ready so the
+                    // map circle + tiles mount while still hidden, then fade
+                    // in with the title (was deferred 520ms → visible lag).
+                    try {
+                      if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
+                    } catch (_) {}
+                    requestAnimationFrame(function () {
+                      if (typeof window.generateSurfaceScenario === 'function') {
+                        window.generateSurfaceScenario('tab-root');
+                      }
+                    });
+                  } catch (_) {}
+                });
+              } catch (_) {}
+            });
+          });
+          setTimeout(function () {
+            try {
+              introRunEl.classList.remove('test3-goal-enter', 'test3-goal-enter-ready');
+              var cDone = document.getElementById('canvas');
+              if (cDone) cDone.removeAttribute('data-test3-goal-fresh');
+            } catch (_) {}
+          }, 1700);
         }
       }
     } catch (_) {}
-    if (typeof window.generateSurfaceScenario === 'function') {
-      window.generateSurfaceScenario('tab-root');
+    if (!goalEnterRebuildScheduled) {
+      requestAnimationFrame(function () {
+        if (typeof window.generateSurfaceScenario === 'function') {
+          window.generateSurfaceScenario('tab-root');
+        }
+      });
     }
     // Start the live clock on the goal's time display so it ticks
     // up every second — gives the "Running Now" card the live,
@@ -6806,13 +6930,6 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     // starts a slow map-dot crawl along the route, so the scene reads
     // as alive even when the runner's number is frozen for inspection.
     _initTest3HoverPause();
-    // Initialize the Leaflet map inside the goal's circular slot —
-    // dark tiles + navy-blue tint filter via CSS to match the rest
-    // of the card aesthetic. Wait one frame so Leaflet sees the
-    // element after the canvas wipe has finished mounting it.
-    requestAnimationFrame(function () {
-      _initTest3GoalMap();
-    });
     window.__mlpTest3Transitioning = false;
     // Clear the gradient-sweep gate now that the morph is complete.
     // CSS rule that depends on this stops matching, so the gradient
@@ -6936,24 +7053,8 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
           canvas.appendChild(preWrap);
         }
       });
-      // Flag the canvas now so the goal's internal entrance animations
-      // (map scale-in, time/distance slide-up) fire during the bounce
-      // instead of waiting until the home-stage re-render at +720ms.
-      // Combined with the prefade fade-in, the Running Now card grows
-      // into place exactly as the pill bounces up.
-      canvas.setAttribute('data-test3-goal-fresh', '1');
-      // Mark the "fresh" flag as ALREADY consumed so the home-render
-      // lifecycle (which fires inside generateSurfaceScenario at +720ms)
-      // sees it as a re-render and CLEARS the flag — instead of setting
-      // it again and triggering a second round of entrance animations.
-      window.__mlpTest3GoalFreshDone = true;
-      // Initialize the Leaflet map immediately so the tiles + compass
-      // are ready to be visible as the goal fades in.
-      requestAnimationFrame(function () {
-        try {
-          if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
-        } catch (_) {}
-      });
+      // Goal entrance animations are armed in finishTransition() when
+      // the intro pill's innerHTML is swapped for the real goal card.
     }
     if (cfg) cfg.homeStage = prevStage;
   } catch (_) {}
@@ -6965,19 +7066,19 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     finishTransition();
   }
 
-  // Morph cycle = 1500ms (shortened per user direction —
-  // "the transition is little too slow. roundness and height change
-  // should be done in 1.3 sec"). The shape morph itself completes
-  // at 86.67% × 1500 = 1300 ms; the remaining 200 ms gives content
-  // (time/distance/map) just enough headroom to finish materializing
-  // before the canvas re-render swaps in the real goal card.
+  // Morph shape completes at 86.67% × 1500 ms ≈ 1300 ms. Swap in the
+  // real goal card then so "Running Now" can fade+slide in on the
+  // fresh mount (test3GoalTitleEnter) instead of popping on the
+  // morphing preview pill.
   runEl.addEventListener('animationend', function onExitEnd(e) {
     if (e.target !== runEl) return;
     if (e.animationName !== 'test3IntroToGoal' && e.animationName !== 'test3IntroRunExit') return;
     runEl.removeEventListener('animationend', onExitEnd);
-    completeOnce();
+    /* intentionally do NOT completeOnce here — wrapper morph ends at
+       1500 ms but we want the swap timed to shape completion (~1300 ms)
+       via the timeout below so the title entrance runs on the real card. */
   });
-  setTimeout(completeOnce, 1550);
+  setTimeout(completeOnce, 1320);
 
   return true;
 };
@@ -7330,26 +7431,24 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     if (!window.__mlpTest3GoalFreshDone) {
       canvas.setAttribute('data-test3-goal-fresh', '1');
       window.__mlpTest3GoalFreshDone = true;
-      // 1500 ms — the goal's internal entrance animations fire at
-      // 0.65 s (50 % of the 1.3 s shape morph) and complete by
-      // ~1.1 s. Clearing the gating attribute at 1.5 s gives them
-      // safe headroom to start before the flag goes away.
       setTimeout(function () {
         try {
           var c = document.getElementById('canvas');
           if (c) c.removeAttribute('data-test3-goal-fresh');
         } catch (_) {}
       }, 1500);
-    } else {
-      // Re-render — DON'T re-apply the fresh flag.
-      canvas.removeAttribute('data-test3-goal-fresh');
     }
+    // else: finishTransition already armed goal-fresh + test3-goal-enter —
+    // do NOT clear them here or entrance animations never paint.
     // Leaflet map needs to be (re)initialized whenever the goal card
     // is re-rendered. The `data-map-init` check inside _initTest3GoalMap
     // makes it idempotent per element instance; the slow zoom-out only
     // runs once (gated by window.__mlpTest3GoalMapZoomDone).
     requestAnimationFrame(function () {
-      if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
+      if (typeof _initTest3GoalMap !== 'function') return;
+      // finishTransition defers map init while goal-fresh entrance runs.
+      if (canvas.getAttribute('data-test3-goal-fresh') === '1') return;
+      _initTest3GoalMap();
     });
   } else if (testScope === 'test3') {
     // Left home stage — clear all home flags.

@@ -988,18 +988,24 @@
     will-change: border-radius;
   }
   /* Original prompt text "빠른 움직임이 감지됐어요. 운동을 시작할까요?"
-     fades out as the goal preview fades in. With the pill itself
-     staying at opacity 1 throughout, the prompt text needs its own
-     fade-out animation — otherwise it would stay visible behind the
-     goal preview overlay through the whole morph. Crosses the
-     mid-point at 50 % (same point the goal preview starts fading in),
-     so the transition between the two contents is a clean cross-fade. */
+     must disappear BEFORE the Running Now title wave starts (43 % =
+     650 ms into the 1500 ms morph). Previously the fade ran 30 %→70 %,
+     leaving the prompt ~67 % opaque when the title appeared — the
+     centered Korean lines overlapped "Running Now" at the top-left. */
   #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__prompt {
-    animation: test3IntroPromptFadeOut 1500ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    animation: test3IntroPromptFadeOut 350ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards !important;
+    z-index: 1;
+  }
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__prompt .prox-char {
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__title-preview,
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-preview {
+    z-index: 2;
   }
   @keyframes test3IntroPromptFadeOut {
-    0%, 30% { opacity: 1; }
-    70%, 100% { opacity: 0; }
+    0%   { opacity: 1; visibility: visible; }
+    100% { opacity: 0; visibility: hidden; }
   }
   /* OBSOLETE rules removed — these two used to set `animation: none
      !important` on .dot-running2 and .dot-running2__prompt during the
@@ -1173,35 +1179,76 @@
     from { width: var(--bar-track, 31.48px); }
     to   { width: var(--bar-w, 120px); }
   }
-  /* Goal content entrance — INTENTIONALLY no animation on the
-     parent .dot-goal__main column. Earlier we faded the whole main
-     column over 280ms; that caused the title to visually disappear
-     and re-fade at the moment of swap (the prompt's title-preview
-     was at opacity 1, then the swap mounted .dot-goal__main at
-     opacity 0 → animated back to 1). User saw this as "Running Now
-     blinks then re-appears". Removing the column-level fade means
-     the title is INSTANTLY at opacity 1 at swap, matching the
-     preview's settled state pixel-for-pixel. Only the per-child
-     motions below run: time + distance slide-up from 8px, map
-     scales from 50% — all decorative, none affecting the title. */
+  /* Goal content entrance — title/time/distance use CSS transitions
+     (not @keyframes) so the browser can interpolate AFTER the HOLD
+     gate paints opacity:0 for ≥2 frames. Keyframe animations armed in
+     the same style-recalc as HOLD release often skip the 0→1 sweep. */
+  /* HOLD: while goal-fresh is armed but enter-ready hasn't fired yet,
+     keep the settled 168×168 shell visually EMPTY. Without this the
+     browser paints one frame of full-opacity title/time/map between
+     innerHTML swap and transition start — the "blink" the user sees. */
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__title,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__time,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__distance {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-10px);
+  }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-position-pulse,
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .mlp-map-compass {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map {
+    transform: scale(0) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal:not(.test3-goal-enter-ready) .dot-goal__map::before {
+    opacity: 0 !important;
+  }
   #canvas[data-test-scope="test3"] #test3-goal .dot-goal__map {
     background: transparent;
     transform-origin: center center;
     position: relative;
     overflow: hidden;
   }
-  /* Map scale-in animation gated to FIRST mount only. On re-renders
+  /* Map bloom animation gated to FIRST mount only. On re-renders
      (music shift wipe at ~5.6s) the goal element gets re-created
-     fresh, but we don't want the user to see the map re-popping
-     from 50% → 100% — that reads as "the card flickered and
-     refreshed". With this gating, only the first mount animates. */
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal .dot-goal__map {
-    /* Delay 0.65 s = 50 % of the 1.3 s shape morph. Map scale-in
-       fires when the pill is past the half-way point of becoming
-       a rounded rectangle, so the map "blooms in" alongside the
-       title and other goal content. */
-    animation: test3GoalMapScale 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
-    will-change: opacity, transform;
+     fresh, but we don't want the user to see the map re-blooming
+     from a dot — that reads as "the card flickered and refreshed".
+     With this gating, only the first mount animates. */
+  /* Map bloom — scales from a center dot to the full 128 px circle on
+     first mount, synced with title enter (no stagger). Tile imagery
+     fades in on the same beat so the circle never appears empty after
+     the left-side text has already landed. */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__map {
+    transform: scale(0);
+    animation: test3GoalMapBloom 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+    will-change: transform;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-leaflet,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__map-leaflet {
+    opacity: 0;
+    visibility: visible;
+    animation: test3GoalMapContentFade 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+    will-change: opacity;
+  }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-position-pulse,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-map-compass,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-position-pulse,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .mlp-map-compass {
+    opacity: 0;
+    visibility: visible;
+    animation: test3GoalMapContentFade 520ms cubic-bezier(0.16, 1, 0.3, 1) 0s both;
+  }
+  @keyframes test3GoalMapBloom {
+    0%   { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+  @keyframes test3GoalMapContentFade {
+    0%   { opacity: 0; visibility: visible; }
+    100% { opacity: 1; visibility: visible; }
   }
   /* Leaflet container — fills the 128×128 .dot-goal__map circle.
      NOTE: filter is applied to the .leaflet-tile-pane specifically,
@@ -1244,7 +1291,7 @@
     100%      { filter: brightness(1.05) saturate(2.0) hue-rotate(210deg); }
   }
   /* Radar sweep overlay — a bright blue arc rotates around the map
-     every 2.4 s, mimicking a sonar/radar ping. Per user direction:
+     every 3.2 s, mimicking a sonar/radar ping. Per user direction:
      "running now의 map element 깜빡 거리며 alive한 느낌 보여주기" —
      the sweep + heartbeat brightness pulse together give the map an
      unmistakable "alive" signal beyond the existing position pulse.
@@ -1269,7 +1316,7 @@
     );
     mix-blend-mode: screen;
     z-index: 401;
-    animation: test3MapRadarSweep 2.4s linear infinite;
+    animation: test3MapRadarSweep 3.2s linear infinite;
     will-change: transform;
   }
   @keyframes test3MapRadarSweep {
@@ -1296,9 +1343,8 @@
     pointer-events: none;
   }
   /* White core — the actual position pin. Box-shadow stacks a tight
-     blue ring + a soft outer glow so the pin reads against light or
-     dark map tiles. Color tuned to match the Figma reference's bright
-     blue (#2D6BFF). */
+     light-sky-blue ring + a soft outer glow so the pin reads against
+     dark map tiles without overpowering the map. */
   .mlp-position-pulse__core {
     position: absolute;
     left: 50%;
@@ -1307,11 +1353,11 @@
     height: 12px;
     margin: -6px 0 0 -6px;
     border-radius: 50%;
-    background: #FFFFFF;
+    background: #F5FBFF;
     box-shadow:
-      0 0 0 2.5px #2D6BFF,
-      0 0 10px 2px rgba(45, 107, 255, 0.65),
-      0 0 18px 4px rgba(45, 107, 255, 0.35);
+      0 0 0 2.5px #B8E4FF,
+      0 0 10px 2px rgba(186, 230, 255, 0.62),
+      0 0 18px 4px rgba(186, 230, 255, 0.32);
     z-index: 2;
   }
   /* Outer pulse halo — radial gradient that scales out + fades over
@@ -1326,9 +1372,9 @@
     margin: -13px 0 0 -13px;
     border-radius: 50%;
     background: radial-gradient(circle at center,
-      rgba(45, 107, 255, 0.55) 0%,
-      rgba(45, 107, 255, 0.28) 45%,
-      rgba(45, 107, 255, 0)   100%);
+      rgba(186, 230, 255, 0.48) 0%,
+      rgba(186, 230, 255, 0.24) 45%,
+      rgba(186, 230, 255, 0)   100%);
     animation: mlpPositionPulse 1.8s ease-out infinite;
     z-index: 1;
   }
@@ -1385,45 +1431,36 @@
       rgba(15, 31, 61, 0.35) 85%,
       rgba(15, 31, 61, 0.55) 100%);
   }
-  @keyframes test3GoalMapScale {
-    0%   { opacity: 0; transform: scale(0.5); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-
   /* Gradient sweep moved to the PROMPT pill during the morph — see
      `.dot-running2--prompt::after` rule below. It now flows top→down
      while the card itself is growing vertically, so the sweep visually
      "rides" the card's height expansion. Triggered ~1000ms post-tap
      (= when "N" of "Running Now" is being written by the title wave). */
 
-  /* Numeric stats (time + distance) get an ADDITIONAL slide-up motion
-     on top of the parent's fade — they rise 8px from below over a
-     longer 420ms decel curve, with a small per-element stagger so the
-     time appears just before the distance. The two combine multiplicatively
-     with the parent fade for a subtle "stats settle into place" feel
-     after the title has already materialized. */
-  /* Stat slide-up also gated to first mount. */
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal .dot-goal__time,
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal .dot-goal__distance {
-    animation: test3GoalStatRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Time + distance enter with the same fade+down motion as the title. */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__title,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__title,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__distance {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition:
+      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear;
     will-change: opacity, transform;
   }
-  /* Time + distance entrance — fire at 50 % of the 1.3 s shape morph
-     (= 0.65 s) so they slide in alongside the title materializing.
-     Per-stat stagger preserved: time first, distance ~100 ms later. */
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal .dot-goal__time {
-    animation-delay: 0.65s;
+  /* Stagger after title: time → distance cascade. */
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__time {
+    transition-delay: 0.16s;
   }
-  #canvas[data-test-scope="test3"][data-test3-goal-fresh="1"] #test3-goal .dot-goal__distance {
-    animation-delay: 0.75s;
-  }
-  @keyframes test3GoalStatRise {
-    0%   { opacity: 0; transform: translateY(8px); }
-    100% { opacity: 1; transform: translateY(0);  }
-  }
-  @keyframes test3GoalContentFadeIn {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance,
+  #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter.test3-goal-enter-ready .dot-goal__distance {
+    transition-delay: 0.30s;
   }
   #canvas[data-test-scope="test3"][data-test3-home-enter="1"] #test3-weather {
     animation-delay: 0.11s !important;
@@ -1452,7 +1489,8 @@
        in the pre-home state. Without that override the cards would
        become invisible the moment data-test3-music-shift flips on
        (the prefade animation finishes/cancels and its opacity:1 end-
-       state override disappears, exposing the base opacity:0). */
+       state override disappears, exposing the base opacity:0).
+       Y offsets use musicH(168) + TEST3_CARD_GAP(4) = 172px. */
     0% {
       opacity: 1;
       transform: translate(0, 0);
@@ -1460,7 +1498,7 @@
     }
     62% {
       opacity: 1;
-      transform: translate(172px, 56px);
+      transform: translate(172px, 59px);
       animation-timing-function: cubic-bezier(0.5, 0, 0.25, 1);
     }
     100% { opacity: 1; transform: translate(172px, 172px); }
@@ -1714,56 +1752,88 @@
       dotMusicFirstTextOut 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
-    animation: dotMusicFirstIconBgToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    overflow: visible;
+    z-index: 2;
+    --dot-music1-blob-angle: 0deg;
+    background-color: #FFC090;
+    background-image: conic-gradient(
+      from var(--dot-music1-blob-angle),
+      rgba(255, 255, 255, 0.94) 0deg,
+      rgba(255, 210, 165, 0.96) 65deg,
+      rgba(255, 165, 105, 0.90) 135deg,
+      rgba(255, 238, 215, 0.98) 205deg,
+      rgba(255, 127, 36, 0.32) 275deg,
+      rgba(255, 255, 255, 0.88) 325deg,
+      rgba(255, 255, 255, 0.94) 360deg
+    );
+    animation:
+      test3MusicBlobGradientFlow 3.6s ease-in-out infinite,
+      test3MusicBlobSway 5.2s ease-in-out infinite,
+      test3MusicBlobGlowPulse 4s ease-in-out infinite,
+      test3MusicBlobBgCut 12s linear forwards,
+      test3MusicFirstIconBgToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::before {
+    /* ReactBits-style base ring — soft orange/white sweep underneath. */
+    padding: 2.5px;
+    background: conic-gradient(
+      from var(--dot-music1-ring-angle, 0deg),
+      rgba(255, 255, 255, 0.10) 0deg,
+      rgba(255, 255, 255, 0.95) 38deg,
+      rgba(255, 220, 185, 0.82) 105deg,
+      rgba(255, 127, 36, 0.30) 190deg,
+      rgba(255, 255, 255, 0.06) 275deg,
+      rgba(255, 255, 255, 0.95) 322deg,
+      rgba(255, 255, 255, 0.10) 360deg
+    );
     animation:
       dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      dotMusicFirstIconBgStrokeRotate 12s linear forwards !important;
+      test3MusicIconBgRingFlow 2.4s linear 8.64s infinite !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__musicIcon {
-    animation: dotMusicFirstIconToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-  }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle {
+  /* Border-glow spotlight — tight white cone racing over the base ring
+     (same layered trick as persona-circle ::after in MlpTestPage). */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2.5px;
+    background: conic-gradient(
+      from var(--dot-music1-glow-angle, 0deg),
+      rgba(255, 255, 255, 0)     0deg,
+      rgba(255, 255, 255, 0)   328deg,
+      rgba(255, 255, 255, 0.45) 344deg,
+      rgba(255, 255, 255, 1)   354deg,
+      rgba(255, 255, 255, 0.50) 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    filter: blur(1px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 1;
+    will-change: --dot-music1-glow-angle, opacity;
     animation:
-      dotMusicIconDotSweep 1.8s steps(1, end) 3s 1 forwards,
-      dotMusicIconDotSweep 1.8s steps(1, end) 6.4s infinite,
-      dotMusicSecondDotFillWave 1.8s steps(1, end) 8s infinite !important;
+      dotMusicFirstIconBgStrokeToSecond 12s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicIconBgGlowFlow 1.45s linear 8.64s infinite !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(1) { animation-delay: 3.000s, 6.400s, 8.000s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(7) { animation-delay: 3.018s, 6.418s, 8.018s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(2) { animation-delay: 3.036s, 6.436s, 8.036s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(3) { animation-delay: 3.054s, 6.454s, 8.054s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(8) { animation-delay: 3.072s, 6.472s, 8.072s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(13) { animation-delay: 3.090s, 6.490s, 8.090s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(9) { animation-delay: 3.108s, 6.508s, 8.108s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(14) { animation-delay: 3.126s, 6.526s, 8.126s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(4) { animation-delay: 3.144s, 6.544s, 8.144s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(19) { animation-delay: 3.162s, 6.562s, 8.162s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(15) { animation-delay: 3.180s, 6.580s, 8.180s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(10) { animation-delay: 3.198s, 6.598s, 8.198s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(5) { animation-delay: 3.216s, 6.616s, 8.216s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(21) { animation-delay: 3.234s, 6.634s, 8.234s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(25) { animation-delay: 3.252s, 6.652s, 8.252s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(16) { animation-delay: 3.270s, 6.670s, 8.270s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(11) { animation-delay: 3.288s, 6.688s, 8.288s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(6) { animation-delay: 3.306s, 6.706s, 8.306s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(31) { animation-delay: 3.324s, 6.724s, 8.324s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(26) { animation-delay: 3.342s, 6.742s, 8.342s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(23) { animation-delay: 3.360s, 6.760s, 8.360s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(12) { animation-delay: 3.378s, 6.778s, 8.378s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(17) { animation-delay: 3.396s, 6.796s, 8.396s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(32) { animation-delay: 3.414s, 6.814s, 8.414s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(27) { animation-delay: 3.432s, 6.832s, 8.432s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(18) { animation-delay: 3.450s, 6.850s, 8.450s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(20) { animation-delay: 3.468s, 6.868s, 8.468s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(22) { animation-delay: 3.486s, 6.886s, 8.486s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(28) { animation-delay: 3.504s, 6.904s, 8.504s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(33) { animation-delay: 3.522s, 6.922s, 8.522s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(24) { animation-delay: 3.540s, 6.940s, 8.540s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(29) { animation-delay: 3.558s, 6.958s, 8.558s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(34) { animation-delay: 3.576s, 6.976s, 8.576s; }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__noteSvg circle:nth-child(30) { animation-delay: 3.594s, 6.994s, 8.594s; }
+  /* test3: no dot-note SVG on the compact loading card — text + ring only. */
+  #canvas[data-test-scope="test3"] #test3-music .dot-music1__musicIcon,
+  #canvas[data-test-scope="test3"] #test3-music .dot-music1__noteSvg,
+  #canvas[data-test-scope="test3"] #test3-music .dot-music1__secondMusicIcon,
+  #canvas[data-test-scope="test3"] #test3-music .dot-music1__secondNoteSvg,
+  #canvas[data-test-scope="test3"] #test3-music .dot-music3__noteSvg {
+    display: none !important;
+    visibility: hidden !important;
+    animation: none !important;
+  }
   /* Sync the weather/steps reposition to the orange music card's growth.
      The card uses `dotMusicRevealCard 12s` with the actual width change
      happening between 14% (1.68s) and 34% (4.08s) — a 2.4s window. Match
@@ -1849,6 +1919,63 @@
   #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21,
   #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21 {
     width: 100% !important;
+  }
+  /* Tap-expanded: short detail copy on the right of the main label block. */
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--expandable,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--expandable {
+    position: relative;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21__expandDetail {
+    display: none;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21--expandable,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21--expandable {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__main,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__main {
+    flex: 0 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 148px;
+    margin-left: auto;
+    text-align: right;
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0.02px;
+    opacity: 0;
+    transform: translateX(6px);
+    transition:
+      opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail {
+    color: rgba(25, 25, 25, 0.55);
+  }
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+    color: rgba(255, 255, 255, 0.58);
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+    opacity: 1;
+    transform: translateX(0);
   }
   /* While in lyrics state, the music card height grows to 280px; this
      adds the matching transition so the height grow is animated. */
@@ -2554,18 +2681,17 @@
     will-change: font-variation-settings, transform, color, text-shadow, opacity;
   }
   #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .prox-char-once {
-    /* TRIGGER: only when the prompt enters the morph (test3-intro-run-exit
-       class added on tap). Each char's delay = (index × 60 ms) + 650 ms
-       baseline. The 650 ms baseline is exactly 50 % of the 1.3 s shape-
-       morph window per user direction: "Running Now text should appear
-       when the roundness motion is more than half over."
-         First char (i=0): visible at t=650 ms (= halfway through shape)
-         Last char (i=9): starts at t=1190 ms, settles by t=~1310 ms —
-         right as the shape morph completes and just before the total
-         1500 ms cycle ends. */
-    animation: proxWaveOnce 1500ms cubic-bezier(0.4, 0, 0.2, 1) both;
-    animation-iteration-count: 1;
-    animation-delay: calc(var(--i, 0) * 60ms + 650ms);
+    /* Hold title chars hidden until the wrapper finishes its height +
+       radius morph (86.67 % = 1300 ms of the 1500 ms cycle). Per UX
+       direction the card should grow FIRST, then "Running Now" appears
+       — not while the pill is still resizing. Wave stagger removed
+       during morph; the whole title fades in together once the shape
+       is settled. */
+    animation: none !important;
+    opacity: 1;
+    font-variation-settings: 'wght' 700;
+    font-weight: 700;
+    color: #FFFFFF;
   }
   @keyframes proxWaveOnce {
     /* 0–3% (= 0–45ms): char fades in from invisible to opacity 1.
@@ -2629,6 +2755,19 @@
        "flicker" at the morph→goal handoff. */
     text-align: left;
     pointer-events: none;
+    /* Hidden until morph exit — prox-char-once children also start at
+       opacity 0, but without this the reduced-motion fallback made
+       "Running Now" visible on top of the intro prompt from mount. */
+    opacity: 0;
+    visibility: hidden;
+  }
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__title-preview {
+    /* Title is NOT shown on the morphing preview — it enters on the
+       real goal card after the shape morph completes (see goal text
+       transition rules above). Keeps the pill empty while resizing. */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    animation: none !important;
   }
   /* Goal-content preview overlays inside the intro pill. These slots
      mirror the goal card's time/distance/map positions so the
@@ -2703,28 +2842,64 @@
      4500 ms morph, the overlay fades 0 → 1 across 50-100% (so the
      bottom half of the morph window). By the morph end, the pill
      visually IS the Running Now card. */
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-time,
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-distance,
+  #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-map {
+    /* Stats + map stay hidden during the morph — they enter on the real
+       goal card with the same staged motion as the title. */
+    opacity: 0 !important;
+  }
   #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__goal-preview {
     animation: test3GoalPreviewFadeIn 1500ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   @keyframes test3GoalPreviewFadeIn {
-    /* Hidden until 50% of the shape morph (= 43% of 1.5 s total =
-       ~0.65 s) per user direction "running now text should appear
-       when the roundness motion is more than half over". The text
-       appears as the pill is past the half-way point of becoming
-       a rounded rectangle. */
-    0%, 43% { opacity: 0; }
-    100%    { opacity: 1; }
+    /* Time / distance / map preview also wait until the shape morph
+       completes — same 86.67 % gate as the title above. */
+    0%, 86.67% { opacity: 0; }
+    100%       { opacity: 1; }
   }
-  /* Respect users who prefer no motion — show settled title straight away. */
+  /* Respect users who prefer no motion — show settled title only after
+     the intro prompt begins morphing, and hide the prompt immediately
+     so it never stacks on top of "Running Now". */
   @media (prefers-reduced-motion: reduce) {
     .prox-char-once {
+      opacity: 0;
+      font-variation-settings: 'wght' 400;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.78);
+    }
+    #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .prox-char-once {
+      animation: none !important;
       opacity: 1;
       font-variation-settings: 'wght' 700;
       font-weight: 700;
       color: #FFFFFF;
     }
-    #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .prox-char-once {
-      animation: none;
+    #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__title-preview {
+      animation: none !important;
+    }
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__title,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__time,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__distance {
+      transition: none !important;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map {
+      animation: none !important;
+      transform: none;
+    }
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .dot-goal__map-leaflet,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-position-pulse,
+    #canvas[data-test-scope="test3"] #test3-goal.test3-goal-enter-ready .mlp-map-compass {
+      animation: none !important;
+      opacity: 1;
+    }
+    #canvas[data-test-scope="test3"] #test3-intro-run.test3-intro-run-exit .dot-running2__prompt {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
     }
   }
   /* Respect users who prefer no motion — fall back to a static
@@ -2913,6 +3088,16 @@
     border-radius: 83.3167px;
   }
   @property --dot-music1-ring-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  @property --dot-music1-glow-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  @property --dot-music1-blob-angle {
     syntax: '<angle>';
     inherits: false;
     initial-value: 0deg;
@@ -3273,6 +3458,26 @@
     opacity: 1 !important;
   }
   .dot-card-cycle--fade .dot-card-cycle__line--clone { display: none; }
+
+  /* Stack variant — all lines visible at once, one slot per row. Used
+     by test3 weather so temperature / humidity / fine dust read as a
+     compact static list instead of a scrolling advisory ticker. */
+  .dot-card-cycle--stack .dot-card-cycle__scroller {
+    animation: none !important;
+    transform: none !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    height: 100%;
+  }
+  .dot-card-cycle--stack .dot-card-cycle__line {
+    position: static;
+    height: auto;
+    min-height: 0;
+    opacity: 1 !important;
+  }
+  .dot-card-cycle--stack .dot-card-cycle__line--clone { display: none; }
 
   /* Card-specific overrides — typography matches each card's
      existing text style so the rotating lines don't feel grafted on. */
@@ -3905,6 +4110,70 @@
       opacity: 1;
     }
   }
+  /* test3: bottom-left loading blob — gradient sway + soft glow until ring morph.
+     Blob fill is cut at 78% via test3MusicBlobBgCut (not the morph keyframe)
+     so background never interpolates to transparent from t=0. */
+  @keyframes test3MusicBlobBgCut {
+    0%, 77.99% {
+      background-color: #FFC090;
+    }
+    78%, 100% {
+      background-color: transparent;
+      background-image: none;
+      box-shadow: none;
+      filter: none;
+    }
+  }
+  @keyframes test3MusicFirstIconBgToSecond {
+    0%, 77.9% {
+      width: 53.86px;
+      height: 53.86px;
+      left: 24px;
+      top: 94.14px;
+      opacity: 1;
+    }
+    78%, 100% {
+      width: 96.77px;
+      height: 96.77px;
+      left: 35.08px;
+      top: 19.54px;
+      border-radius: 149.684px;
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes test3MusicBlobGradientFlow {
+    0%, 100% { --dot-music1-blob-angle: 0deg; }
+    50%      { --dot-music1-blob-angle: 155deg; }
+  }
+  @keyframes test3MusicBlobSway {
+    0%, 100% {
+      border-radius: 58% 42% 48% 52% / 52% 48% 52% 48%;
+      transform: scale(1);
+    }
+    33% {
+      border-radius: 46% 54% 52% 48% / 48% 52% 46% 54%;
+      transform: scale(1.045);
+    }
+    66% {
+      border-radius: 52% 48% 44% 56% / 54% 46% 50% 50%;
+      transform: scale(0.985);
+    }
+  }
+  @keyframes test3MusicBlobGlowPulse {
+    0%, 100% {
+      box-shadow:
+        0 0 10px rgba(255, 228, 205, 0.38),
+        0 0 22px rgba(255, 195, 150, 0.22);
+      filter: brightness(1);
+    }
+    50% {
+      box-shadow:
+        0 0 16px rgba(255, 245, 230, 0.58),
+        0 0 30px rgba(255, 210, 170, 0.38);
+      filter: brightness(1.07);
+    }
+  }
   @keyframes dotMusicFirstIconBgStrokeToSecond {
     0%, 66.67% { opacity: 0; }
     72% { opacity: 0.45; }
@@ -3913,6 +4182,14 @@
   @keyframes dotMusicFirstIconBgStrokeRotate {
     0%, 66.67% { --dot-music1-ring-angle: 0deg; }
     96%, 100% { --dot-music1-ring-angle: 1440deg; }
+  }
+  @keyframes test3MusicIconBgRingFlow {
+    from { --dot-music1-ring-angle: 0deg; }
+    to   { --dot-music1-ring-angle: 360deg; }
+  }
+  @keyframes test3MusicIconBgGlowFlow {
+    from { --dot-music1-glow-angle: 0deg; }
+    to   { --dot-music1-glow-angle: 360deg; }
   }
   @keyframes dotMusicFirstIconToSecond {
     0%, 66.67% {
@@ -4670,6 +4947,9 @@
      pushed the bottom row past the 168px card height where overflow
      clipped it — that's why the artist/song/bar disappeared). Only
      appears when the card is in `data-music-state="lyrics"`. */
+  .dot-music3__foldTitle {
+    display: none;
+  }
   .dot-music3__lyrics {
     display: none;
     width: 292px;
@@ -4692,7 +4972,66 @@
      tap-cycle once the user takes control. */
   #test3-music[data-music-state="lyrics"] .dot-music3__lyrics {
     display: block;
-    margin: 4px 0 8px;
+    margin: 2px 0 0;
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+  /* test3 lyrics — bottom-to-top scroll in the expanded card slot. */
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics--flow {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 292px;
+    height: 78px;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 14%,
+      #000 86%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 14%,
+      #000 86%,
+      transparent 100%
+    );
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics-scroller {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    --lyrics-line-h: 20px;
+    animation: test3LyricsFlowUp 14s linear infinite;
+    will-change: transform;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music3__lyrics-line {
+    flex-shrink: 0;
+    height: var(--lyrics-line-h);
+    line-height: var(--lyrics-line-h);
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-playing="0"] .dot-music3__lyrics-scroller {
+    animation-play-state: paused;
+  }
+  @keyframes test3LyricsFlowUp {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
   }
   #test3-music[data-music-state="normal"] .dot-music1,
   #test3-music[data-music-state="lyrics"] .dot-music1 {
@@ -4703,8 +5042,39 @@
   #test3-music[data-music-state="lyrics"] .dot-music1 {
     height: 280px !important;
   }
+  #test3-music[data-music-state="lyrics"] .dot-music1__icon {
+    height: 280px !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="lyrics"] .dot-music1__icon .dot-music3 {
+    height: 280px !important;
+    min-height: 280px;
+    gap: 10px;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+  #test3-music[data-music-state="lyrics"] .dot-music3__bottom {
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  /* Stop the 12s reveal/shimmer animations fighting tap-cycle sizing. */
+  #test3-music[data-music-state] .dot-music1 {
+    animation: none !important;
+    background-color: #FF7F24 !important;
+    clip-path: inset(0 0 0 0 round 32px) !important;
+  }
   #test3-music[data-music-state="normal"] .dot-music1 {
     height: 168px !important;
+  }
+  #test3-music[data-music-state="normal"] .dot-music1__icon,
+  #test3-music[data-music-state="compact"] .dot-music1__icon {
+    height: 168px !important;
+  }
+  #test3-music[data-music-state="normal"] .dot-music1__icon .dot-music3,
+  #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    height: 168px !important;
+    min-height: 168px;
+    gap: 32px;
+    justify-content: space-between;
   }
   /* Compact: card shrinks back to a 168×168 square and only the icon
      (with the play/pause button) remains visible. The other content —
@@ -4713,10 +5083,48 @@
     width: 168px !important;
     height: 168px !important;
   }
-  #test3-music[data-music-state="compact"] .dot-music3__title,
   #test3-music[data-music-state="compact"] .dot-music3__lyrics,
   #test3-music[data-music-state="compact"] .dot-music3__bottom {
     display: none;
+  }
+  /* Compact — play disc on top, track title (not the promo sentence) at bottom. */
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music1__icon .dot-music3 {
+    padding: 14px 12px 12px;
+    justify-content: space-between;
+    gap: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__top {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__title {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__icon {
+    flex-shrink: 0;
+  }
+  #canvas[data-test-scope="test3"] #test3-music[data-music-state="compact"] .dot-music3__foldTitle {
+    display: block !important;
+    flex: 0 0 auto;
+    width: 100%;
+    margin: 0;
+    padding-top: 8px;
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02px;
+    color: #000000;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   /* Tap target — anywhere on the card BODY (not the play button) cycles
      the state. Cursor cue tells the user the card is interactive. */
@@ -6334,20 +6742,90 @@
   #canvas[data-test-scope="test3"] #test3-weather .dot-w21__sun {
     display: none;
   }
-  /* Text area expanded to fill the full card content area (168px wide
-     card minus 16+16 padding = ~136px usable). The text is left-
-     aligned to the new column origin (was right-aligned next to the
-     icon). Each cycling line wraps comfortably across the wider span. */
-  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__text--cycle {
-    left: 16px;
-    top: 16px;
-    width: calc(100% - 32px);
-    height: calc(100% - 32px);
-    --cycle-slot-h: calc(100% - 32px);
+  /* Title + cycle stack — mirrors Today Progress layout on the dark
+     steps card, adapted for the white weather capsule. Both cards share
+     the same vertical rhythm so the row reads as one component pair. */
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21--has-title,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21.dot-steps21--cycle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    gap: 4px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__title {
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    line-height: 96%;
+    text-transform: uppercase;
+    color: rgba(25, 25, 25, 0.45);
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--cycle .dot-steps21__title {
+    margin-bottom: 0;
+  }
+  /* Expanded tap — keep left + right copy vertically centered in the pill.
+     Row layout must win over the default column stack rule above. */
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21.dot-w21--expandable,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21.dot-steps21--expandable {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__main,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__main {
+    align-self: center;
+    justify-content: center;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather.is-expanded .dot-w21__expandDetail,
+  #canvas[data-test-scope="test3"] #test3-steps.is-expanded .dot-steps21__expandDetail {
+    align-self: center;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  /* Shared subtitle viewport — one 18 px line slot on BOTH cards so
+     title + value block centers identically inside the 82 px pill. */
+  #canvas[data-test-scope="test3"] #test3-weather .dot-w21__text--cycle,
+  #canvas[data-test-scope="test3"] #test3-steps .dot-steps21--cycle .dot-steps21__cycle {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    flex: none;
+    min-height: 0;
+    height: 18px;
+    margin-top: 0;
+    --cycle-slot-h: 18px;
+  }
+  #canvas[data-test-scope="test3"] #test3-weather .dot-card-cycle[data-count="3"] .dot-card-cycle__scroller {
+    /* 12 s total (= 4 s/line). Stops use 18 px to match steps slot. */
+    animation-name: test3WeatherCycleScroll3;
+    animation-duration: 12000ms;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  @keyframes test3WeatherCycleScroll3 {
+    0%, 30.42%     { transform: translate3d(0, 0, 0); }
+    33.33%, 63.75% { transform: translate3d(0, -18px, 0); }
+    66.67%, 97.08% { transform: translate3d(0, -36px, 0); }
+    100%           { transform: translate3d(0, -54px, 0); }
   }
   #canvas[data-test-scope="test3"] #test3-weather .dot-w21--cycle .dot-card-cycle__line {
     justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
     text-align: left;
+    font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: 0.05px;
+    color: #191919;
+    white-space: nowrap;
   }
   #canvas[data-test-scope="test3"] #test3-weather .dot-w21__sun--pair-rain {
     width: 59px;

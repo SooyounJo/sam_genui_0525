@@ -11,25 +11,25 @@ const HOME_BG = "/assets/bg-new.png?v=2";
 
 const TESTS = [
   {
-    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png", disabled: true,
+    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png?v=3", disabled: true,
     name: "Junseo",
     age: "32, Office Worker",
     bio: "효율적인 일상을 추구하는 직장인.\n짧은 시간 안에 최대의 효과를 얻는 운동을 선호.",
     interests: ["Quick HIIT", "Meal prep", "Sleep tracking"],
   },
   {
-    id: "test2", href: "/test2", label: "Persona 2", img: "/assets/persona-2.png",
-    name: "Yujin",
-    age: "28, Designer",
-    bio: "감성과 일상의 균형을 중시.\n음악과 산책으로 영감을 얻는 라이프스타일.",
-    interests: ["Long walks", "Music curation", "Visual journals"],
+    id: "test2", href: "/test2", label: "Persona 2", img: "/assets/persona-2.png?v=3",
+    name: "박서현",
+    age: "28, Product Designer",
+    bio: "6일간 휴가 후 복귀. 분석적이고 계획적인 성격, 데이터 기반 의사결정과 체계적인 업무 진행 선호",
+    interests: ["Design reviews", "Dev collaboration", "Figma expert"],
   },
   {
-    id: "test3", href: "/test3", label: "Persona 3", img: "/assets/persona-3.png",
-    name: "Minho",
-    age: "29, Marathon Runner",
-    bio: "꾸준한 러닝과 페이스 관리로 건강을 챙기는 운동인.\n데이터 기반 트레이닝을 선호.",
-    interests: ["Long-distance running", "Pace analytics", "Recovery routines"],
+    id: "test3", href: "/test3", label: "Persona 3", img: "/assets/persona-3.png?v=3",
+    name: "유진",
+    age: "31, Backend Developer",
+    bio: "주 4-5회 한강 조깅, 인디 음악과 함께 혼자만의 시간을 즐김. 기록보다 꾸준함을 중시하는 데이터 기반 러너",
+    interests: ["Evening runner", "Indie music lover", "Data-driven fitness"],
   },
 ];
 
@@ -1129,6 +1129,140 @@ export default function MlpTestPage({
             padding: 4px 9px;
             border-radius: 99px;
           }
+          /* test2 (박서현) — solid card, cream tags, bio below tags */
+          .persona-profile-card--test2 {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 409px;
+            padding: 22px 30px;
+            gap: 0;
+            border-radius: 24.882px;
+            background: #282A2C;
+            -webkit-backdrop-filter: none;
+                    backdrop-filter: none;
+            border: none;
+            box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.55);
+          }
+          .persona-profile-card--test2 .persona-profile-card__head {
+            margin-bottom: 26px;
+          }
+          .persona-profile-card--test2 .persona-profile-card__heading {
+            gap: 0;
+          }
+          .persona-profile-card--test2 .persona-profile-card__name {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 700;
+            font-size: 24.0526px;
+            line-height: 1.8;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+          }
+          .persona-profile-card--test2 .persona-profile-card__age {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 600;
+            font-size: 14.9292px;
+            line-height: 1.8;
+            letter-spacing: -0.02em;
+            color: #FFEDBB;
+            opacity: 0.6;
+          }
+          .persona-profile-card--test2 .persona-profile-card__interests {
+            gap: 8.29px;
+            margin: 0 0 9px;
+          }
+          .persona-profile-card--test2 .persona-profile-card__tag {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 500;
+            font-size: 11.6116px;
+            letter-spacing: -0.02em;
+            line-height: 1.8;
+            color: #282A2C;
+            background: #FFEDBB;
+            border: none;
+            padding: 2.4882px 10.7822px 3.3176px;
+            border-radius: 828.572px;
+          }
+          .persona-profile-card--test2 .persona-profile-card__bio {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 400;
+            font-size: 14.9292px;
+            line-height: 1.5;
+            letter-spacing: -0.02em;
+            color: #EBE8DF;
+            margin: 0;
+            white-space: normal;
+          }
+          .persona-profile-card--test2.is-visible .persona-profile-card__bio {
+            animation: personaCardTextRise 320ms cubic-bezier(0.2, 0, 0.05, 1) 540ms both;
+          }
+          /* test3 (유진) — solid card, mint tags, bio below tags */
+          .persona-profile-card--test3 {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 409px;
+            padding: 22px 35px 22px 30px;
+            gap: 0;
+            border-radius: 24.882px;
+            background: #282A2C;
+            -webkit-backdrop-filter: none;
+                    backdrop-filter: none;
+            border: none;
+            box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.55);
+          }
+          .persona-profile-card--test3 .persona-profile-card__head {
+            margin-bottom: 26px;
+          }
+          .persona-profile-card--test3 .persona-profile-card__heading {
+            gap: 0;
+          }
+          .persona-profile-card--test3 .persona-profile-card__name {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 700;
+            font-size: 24.0526px;
+            line-height: 1.8;
+            letter-spacing: -0.02em;
+            color: #FFFFFF;
+          }
+          .persona-profile-card--test3 .persona-profile-card__age {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 600;
+            font-size: 14.9292px;
+            line-height: 1.8;
+            letter-spacing: -0.02em;
+            color: #BDE5EC;
+            opacity: 0.6;
+          }
+          .persona-profile-card--test3 .persona-profile-card__interests {
+            gap: 8.29px;
+            margin: 0 0 9px;
+          }
+          .persona-profile-card--test3 .persona-profile-card__tag {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 500;
+            font-size: 11.6116px;
+            letter-spacing: -0.02em;
+            line-height: 1.8;
+            color: #282A2C;
+            background: #BDE5EC;
+            border: none;
+            padding: 2.4882px 10.7822px 3.3176px;
+            border-radius: 828.572px;
+          }
+          .persona-profile-card--test3 .persona-profile-card__bio {
+            font-family: 'Pretendard', var(--font), sans-serif;
+            font-weight: 400;
+            font-size: 14.9292px;
+            line-height: 1.5;
+            letter-spacing: -0.02em;
+            color: #EBE8DF;
+            margin: 0;
+            white-space: normal;
+          }
+          .persona-profile-card--test3.is-visible .persona-profile-card__bio {
+            animation: personaCardTextRise 320ms cubic-bezier(0.2, 0, 0.05, 1) 540ms both;
+          }
           /* Staggered text reveal with COUNTER-MOTION per user
              direction "카드들은 위에서 아래로 내려오니 역방향으로
              아래에서 위로 올라가게": the card itself slides DOWN (18px
@@ -1369,7 +1503,7 @@ export default function MlpTestPage({
                 currently hovered. */}
             <div
               ref={profileCardRef}
-              className={`persona-profile-card${cardVisible ? " is-visible" : ""}`}
+              className={`persona-profile-card${cardVisible ? " is-visible" : ""}${hoveredTest?.id === "test2" ? " persona-profile-card--test2" : ""}${hoveredTest?.id === "test3" ? " persona-profile-card--test3" : ""}`}
               style={{ "--hover-idx": Math.max(0, hoveredIdx) }}
               aria-hidden={cardVisible ? "false" : "true"}
             >
@@ -1381,13 +1515,28 @@ export default function MlpTestPage({
                       <div className="persona-profile-card__age">{hoveredTest.age}</div>
                     </div>
                   </div>
-                  <p className="persona-profile-card__bio">{hoveredTest.bio}</p>
-                  {hoveredTest.interests && hoveredTest.interests.length > 0 && (
-                    <ul className="persona-profile-card__interests">
-                      {hoveredTest.interests.map((it) => (
-                        <li key={it} className="persona-profile-card__tag">{it}</li>
-                      ))}
-                    </ul>
+                  {hoveredTest.id === "test2" || hoveredTest.id === "test3" ? (
+                    <>
+                      {hoveredTest.interests && hoveredTest.interests.length > 0 && (
+                        <ul className="persona-profile-card__interests">
+                          {hoveredTest.interests.map((it) => (
+                            <li key={it} className="persona-profile-card__tag">{it}</li>
+                          ))}
+                        </ul>
+                      )}
+                      <p className="persona-profile-card__bio">{hoveredTest.bio}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="persona-profile-card__bio">{hoveredTest.bio}</p>
+                      {hoveredTest.interests && hoveredTest.interests.length > 0 && (
+                        <ul className="persona-profile-card__interests">
+                          {hoveredTest.interests.map((it) => (
+                            <li key={it} className="persona-profile-card__tag">{it}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -1489,8 +1638,8 @@ export default function MlpTestPage({
                 </div>
                 <div className="grad-editor__avatars">
                   {[
-                    { id: "test2", label: "Mid avatar (Yujin)" },
-                    { id: "test3", label: "3rd avatar (Minho)" },
+                    { id: "test2", label: "Mid avatar (서현)" },
+                    { id: "test3", label: "3rd avatar (유진)" },
                   ].map((a) => (
                     <button
                       key={a.id}
