@@ -27,6 +27,11 @@ var TEST3_CARD_GAP = 4;
 var TEST3_ROW2_TOP = TEST3_GOAL_TOP + TEST3_GOAL_H + TEST3_CARD_GAP;
 // Grid 1×1 half-column — outer shell must match weather/steps column (168px).
 var TEST3_MUSIC_COMPACT = 168;
+var TEST3_MUSIC_TITLE = '러닝에 어울리는 신스팝 플레이리스트 재생';
+var TEST3_MUSIC_FOLD_TITLE = '러닝에 어울리는\n신스팝 플레이리스트 재생';
+var TEST3_MUSIC_COMPACT_FOLD = '러닝에 어울리는\n신스팝 플레이리스트';
+var TEST3_MUSIC_LYRICS_TITLE = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
+var TEST3_MUSIC_SEARCH_LINE2 = '러닝에 어울리는 신스팝 플레이리스트 재생';
 var TEST3_GOAL_UNIFIED_RISE_MS = 520;
 var TEST3_MUSIC_MOTION_MS = 14000;
 var TEST3_MUSIC_PRE_DELAY_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.10);
@@ -34,7 +39,7 @@ var TEST3_MUSIC_EXPAND_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.57);
 var TEST3_MUSIC_EXPAND_DUR_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.11);
 var TEST3_MUSIC_EXPAND_END_MS = TEST3_MUSIC_EXPAND_START_MS + TEST3_MUSIC_EXPAND_DUR_MS;
 var TEST3_MUSIC_IMAGE1_HOLD_MS = 320;
-var TEST3_MUSIC_SETTLE_MS = 960;
+var TEST3_MUSIC_SETTLE_MS = 1000;
 var TEST3_MUSIC_ENTRANCE_END_MS = TEST3_MUSIC_MOTION_MS;
 
 /** Themes set `--oneui-chroma: mono` (e.g. Mono · Grayscale) so skies/icons stay neutral — no chroma accents in markup. */
@@ -454,7 +459,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
             musicShifted ? { id: 'test3-music', role: 'dot-music-1x1', zone: 'viewing',
               variant: {
                 compactTitle: '러닝을 위한 음악을 찾고 있어요',
-                iconTitle:    '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트',
+                iconTitle:    TEST3_MUSIC_TITLE,
                 iconSubtitle: 'M83 - Midnight City',
                 expandedBarFull: 246,
                 expandedBarTrack: 188
@@ -4168,7 +4173,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var iconTitle = mv.iconTitle || '가벼운 러닝에는 부드럽고 상쾌한\nConcierto가 좋을거같아요!';
       var iconSubtitle = mv.iconSubtitle || 'Jim Hall - Concierto';
       if (isTest3Music) {
-        iconTitle = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
+        iconTitle = TEST3_MUSIC_TITLE;
         iconSubtitle = 'M83 - Midnight City';
       }
       var iconHtml = window.renderAtomicForRole({
@@ -4209,7 +4214,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '</div>' +
             '<div class="dot-music1__searchText">' +
               '<span class="dot-music1__searchLine dot-music1__searchLine--1">러닝 bgm을 찾고 있어요</span>' +
-              '<span class="dot-music1__searchLine dot-music1__searchLine--2">가벼운 러닝에 어울리는 Concierto를 골랐어요</span>' +
+              '<span class="dot-music1__searchLine dot-music1__searchLine--2">' + TEST3_MUSIC_SEARCH_LINE2 + '</span>' +
             '</div>' +
           '</div>')
         : ('<div class="dot-music1__player" aria-hidden="true">' +
@@ -4332,17 +4337,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
         (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
         (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
       var title3 = mv3.title || (isTest3Lyrics
-        ? '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트'
+        ? TEST3_MUSIC_TITLE
         : '오늘 날씨에 딱 맞는\n플레이리스트');
       var subtitle3 = mv3.subtitle || (isTest3Lyrics ? 'M83 - Midnight City' : 'Jim Hall - Concierto');
       if (isTest3Lyrics) {
-        title3 = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
+        title3 = TEST3_MUSIC_TITLE;
         subtitle3 = 'M83 - Midnight City';
       }
       var foldTitle3 = mv3.foldTitle;
       if (!foldTitle3) {
         foldTitle3 = isTest3Lyrics
-          ? '저녁 한강 러닝\n플레이리스트'
+          ? TEST3_MUSIC_FOLD_TITLE
           : (function () {
               var foldDash = subtitle3.indexOf(' - ');
               return foldDash >= 0 ? subtitle3.slice(foldDash + 3).trim() : subtitle3;
@@ -4399,10 +4404,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</svg>' +
         '</button>';
       var compactHeaderHtml = isTest3Lyrics
-        ? ('<div class="dot-music3__compactHeader" aria-hidden="true">' +
-            '<span class="dot-music3__spotify" aria-hidden="true"></span>' +
-            '<span class="dot-music3__mediaPill">미디어 출력</span>' +
-          '</div>')
+        ? ('<span class="dot-music3__spotify" aria-hidden="true"></span>' +
+            '<div class="dot-music3__compactHeader" aria-hidden="true">' +
+              '<span class="dot-music3__mediaPill">미디어 출력</span>' +
+            '</div>')
         : '';
       return '' +
         '<div class="dot-card dot-music dot-music3 dot-music3--icon" data-state="' + (mv3.state || 'idle') + '">' +
@@ -4470,7 +4475,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '<span class="dot-music3__playlistThumb" aria-hidden="true"></span>' +
             '<div class="dot-music3__playlistCopy">' +
               '<span class="dot-music3__playlistTitle">3,2,1 러닝 시작</span>' +
-              '<span class="dot-music3__playlistMeta">10곡 • 38분 34초</span>' +
+              '<span class="dot-music3__playlistMeta">10곡 · 38분 34초</span>' +
             '</div>' +
             '<span class="dot-music3__playlistChevron" aria-hidden="true"></span>' +
           '</div>' +
@@ -7139,13 +7144,16 @@ function _freezeTest3WeatherDropState() {
 function _resetTest3MusicCopy(music) {
   music = music || document.querySelector('#test3-music');
   if (!music) return;
+  var state = music.getAttribute('data-music-state') || 'normal';
   var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
   if (titleEl) {
-    titleEl.innerHTML = '저녁 한강 러닝에 어울리는<br/>BPM 120-140 신스팝 플레이리스트';
+    var titleCopy = state === 'lyrics' ? TEST3_MUSIC_LYRICS_TITLE : TEST3_MUSIC_TITLE;
+    titleEl.innerHTML = titleCopy.replace(/\n/g, '<br/>');
   }
   var foldEl = music.querySelector('.dot-music1__icon .dot-music3__foldTitle');
   if (foldEl) {
-    foldEl.innerHTML = '저녁 한강 러닝<br/>플레이리스트';
+    var foldCopy = state === 'compact' ? TEST3_MUSIC_COMPACT_FOLD : TEST3_MUSIC_FOLD_TITLE;
+    foldEl.innerHTML = foldCopy.replace(/\n/g, '<br/>');
   }
   music.querySelectorAll('.dot-music1__icon .dot-music3__name-text').forEach(function (s) {
     s.textContent = 'M83 - Midnight City';
@@ -7161,10 +7169,12 @@ function _resetTest3MusicCopy(music) {
   window.__mlpTest3MusicElapsed = 95;
   var bar = music.querySelector('.dot-music1__icon .dot-music3__bar');
   if (bar) {
-    var state = music.getAttribute('data-music-state') || 'normal';
     if (state === 'compact') {
       bar.style.setProperty('--bar-w', '140px');
       bar.style.setProperty('--bar-track', '107px');
+    } else if (state === 'lyrics') {
+      bar.style.setProperty('--bar-w', '300px');
+      bar.style.setProperty('--bar-track', '228px');
     } else {
       bar.style.setProperty('--bar-w', '246px');
       bar.style.setProperty('--bar-track', '188px');
@@ -7208,6 +7218,7 @@ function _applyTest3MusicCompactLayout(music) {
     el.style.removeProperty('opacity');
     el.style.removeProperty('visibility');
     el.style.removeProperty('display');
+    el.style.removeProperty('height');
     el.style.removeProperty('animation');
   });
   var titleEl = music.querySelector('.dot-music1__icon .dot-music3__title');
@@ -7238,6 +7249,13 @@ function _applyTest3MusicNormalLayout(music) {
   if (topEl) topEl.style.removeProperty('display');
   var foldEl = music.querySelector('.dot-music1__icon .dot-music3__foldTitle');
   if (foldEl) foldEl.style.removeProperty('display');
+  music.querySelectorAll('.dot-music3__bottom, .dot-music3__transport').forEach(function (el) {
+    el.style.removeProperty('opacity');
+    el.style.removeProperty('visibility');
+    el.style.removeProperty('display');
+    el.style.removeProperty('height');
+    el.style.removeProperty('animation');
+  });
 }
 function _applyTest3MusicLyricsLayout(music) {
   music = music || document.querySelector('#test3-music');
@@ -7248,7 +7266,7 @@ function _applyTest3MusicLyricsLayout(music) {
   if (shell) {
     shell.style.setProperty('width', '340px', 'important');
     shell.style.setProperty('height', '280px', 'important');
-    shell.style.setProperty('background-color', '#f8953d', 'important');
+    shell.style.setProperty('background-color', 'transparent', 'important');
     shell.style.setProperty('animation', 'none', 'important');
   }
   var icon = music.querySelector('.dot-music1__icon');
@@ -7262,12 +7280,12 @@ function _applyTest3MusicLyricsLayout(music) {
   if (player) {
     player.style.setProperty('height', '280px', 'important');
     player.style.setProperty('min-height', '280px', 'important');
-    player.style.setProperty('background', '#f8953d', 'important');
+    player.style.setProperty('background', 'transparent', 'important');
     player.style.setProperty('animation', 'none', 'important');
     player.style.setProperty('display', 'flex', 'important');
     player.style.setProperty('flex-direction', 'column', 'important');
   }
-  music.querySelectorAll('.dot-music3__compactHeader, .dot-music3__playlistPill, .dot-music3__bottom, .dot-music3__transport').forEach(function (el) {
+  music.querySelectorAll('.dot-music3__compactHeader, .dot-music3__playlistPill, .dot-music3__playlistThumb, .dot-music3__playlistChevron, .dot-music3__bottom, .dot-music3__transport').forEach(function (el) {
     el.style.removeProperty('opacity');
     el.style.removeProperty('visibility');
     el.style.removeProperty('display');
@@ -7283,8 +7301,11 @@ function _applyTest3MusicLyricsLayout(music) {
   if (albumEl) albumEl.style.setProperty('display', 'none', 'important');
   var bar = music.querySelector('.dot-music1__icon .dot-music3__bar');
   if (bar) {
-    bar.style.setProperty('--bar-w', '246px');
-    bar.style.setProperty('--bar-track', '188px');
+    bar.style.setProperty('--bar-w', '300px');
+    bar.style.setProperty('--bar-track', '228px');
+  }
+  if (typeof _resetTest3MusicCopy === 'function') {
+    _resetTest3MusicCopy(music);
   }
 }
 function _applyTest3MusicStateLayout(music) {
@@ -7343,6 +7364,12 @@ function _clearTest3MusicEntranceInlineStyles(music) {
   if (icon) {
     ['opacity', 'visibility', 'pointer-events', 'animation', 'height'].forEach(function (prop) {
       icon.style.removeProperty(prop);
+    });
+  }
+  var player = music.querySelector('.dot-music1__icon .dot-music3');
+  if (player) {
+    ['opacity', 'transform', 'filter', 'animation', 'will-change'].forEach(function (prop) {
+      player.style.removeProperty(prop);
     });
   }
   var clearSel = settled
@@ -7521,18 +7548,10 @@ function _beginTest3MusicSettle(music) {
   if (typeof _resetTest3MusicCopy === 'function') {
     _resetTest3MusicCopy(music);
   }
-  var orb = music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg');
-  if (orb) {
-    orb.style.setProperty('animation', 'none', 'important');
-  }
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
       if (!music.isConnected) return;
-      music.classList.add('test3-music-settle-active');
-      requestAnimationFrame(function () {
-        if (!music.isConnected) return;
-        music.classList.add('test3-music-content-enter');
-      });
+      music.classList.add('test3-music-settle-active', 'test3-music-content-enter');
     });
   });
   setTimeout(function () {
