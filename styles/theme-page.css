@@ -3299,29 +3299,39 @@
       opacity: 1;
     }
   }
-  /* Phase A (0–42%): loading ring only — no gradient orb.
-     Phase B (43%+): radial glow orb held top-left through expand end.
-     Phase C: JS settle crossfade shrinks orb → Spotify, photo + chrome fade in. */
+  /* Orb body — bright-top linear gradient wobble (independent of 14s shell motion). */
+  @keyframes test3MusicOrbTopShimmer {
+    0%, 100% { background-position: 50% 100%; }
+    50%      { background-position: 50% 0%; }
+  }
+  @keyframes test3MusicOrbTopSheen {
+    0%, 100% {
+      background-position: 50% 88%;
+      opacity: 0.68;
+      transform: scale(1);
+    }
+    50% {
+      background-position: 50% 8%;
+      opacity: 1;
+      transform: scale(1.04);
+    }
+  }
   @keyframes test3MusicOrbBodyFill {
-    0%, 42% {
-      background-color: rgba(255, 255, 255, 0.14);
-      background-image: none;
-      filter: none;
-    }
-    42% {
-      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    43%, 100% {
-      background-color: #FFD4A8;
-      background-image: radial-gradient(
-        circle at 38% 32%,
-        rgba(255, 255, 255, 0.98) 0%,
-        rgba(255, 220, 170, 0.92) 28%,
-        rgba(255, 170, 100, 0.78) 62%,
-        rgba(255, 130, 50, 0.55) 100%
-      );
-      filter: brightness(1.04);
-    }
+    0%, 13% { opacity: 0.88; }
+    14%, 56% { opacity: 1; }
+    57%, 100% { opacity: 1; }
+  }
+  @keyframes test3MusicOrbLinearFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes test3MusicOrbLinearSheen {
+    0%, 100% { background-position: 115% 50%; opacity: 0.45; }
+    50%      { background-position: -15% 50%; opacity: 0.82; }
+  }
+  @keyframes test3MusicFillColorFlow {
+    0%, 100% { background-position: 50% 100%; }
+    50%      { background-position: 50% 0%; }
   }
   /* Loading stroke ring — visible only while searching (line 1). */
   @keyframes test3MusicOrbLoadingRing {
@@ -3330,8 +3340,9 @@
     43%, 100% { opacity: 0; }
   }
   @keyframes test3MusicOrbSphereGlow {
-    0%, 42% { opacity: 0; --dot-music1-glow-angle: 0deg; }
-    43%, 100% { opacity: 1; }
+    0%, 13% { opacity: 0; }
+    14%, 56% { opacity: 1; }
+    57%, 100% { opacity: 0; }
   }
   @keyframes test3MusicOrbRingSpin {
     from { --dot-music1-ring-angle: 0deg; }
@@ -3360,7 +3371,7 @@
     --test3-disc-size: 64px;
     --test3-disc-x: 16px;
     --test3-disc-y: 20px;
-    --test3-orb-glow-delay: 6.02s;
+    --test3-orb-glow-delay: 0s;
     visibility: hidden;
     transform: none;
     pointer-events: auto !important;
@@ -3378,15 +3389,20 @@
     opacity: 1 !important;
     visibility: visible !important;
   }
-  /* Loading capsule — stroke ring while searching; gradient orb after track set. */
+  /* Loading — orb top shimmer + stroke ring (capsule fill runs in parallel from 14%). */
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg {
-    --dot-music1-blob-angle: 0deg;
-    overflow: visible;
+    overflow: hidden;
+    border-radius: 50%;
+    filter: none;
+    box-shadow: none;
     animation:
       test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbTopShimmer 3.8s ease-in-out 0s infinite !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg::before {
+    z-index: 2;
+    opacity: 1;
     background: conic-gradient(
       from var(--dot-music1-ring-angle, 0deg),
       rgba(255, 255, 255, 1) 0deg,
@@ -3400,10 +3416,15 @@
       test3MusicOrbLoadingRing 14s linear forwards,
       test3MusicOrbRingSpin 0.85s linear 0s infinite !important;
   }
-  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1__compact--layout .dot-music1__iconBg::after {
+  /* Vertical expand start (57%) — orb stays static; capsule shimmer continues until 68%. */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-pre-expand="1"] .dot-music1__compact--layout .dot-music1__iconBg {
     animation:
-      test3MusicOrbSphereGlow 14s linear forwards,
-      test3MusicIconBgGlowFlow 1.1s linear var(--test3-orb-glow-delay, 6.02s) infinite !important;
+      test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbTopShimmer 3.8s ease-in-out 0s infinite !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-pre-expand="1"] .dot-music1__compact--layout .dot-music1__iconBg::before {
+    animation: test3MusicOrbLoadingRing 14s linear forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music.is-motion-phase2 {
     /* Height expand stays on the 14 s CSS timeline — do not kill it here. */
@@ -3447,6 +3468,261 @@
     animation:
       test3MusicOutlineFade 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
       test3IntroOutlineSpin 1.6s linear infinite;
+  }
+  /* test3 music capsule — test2 agent fill (14% capsule expand → 68% expand done, via JS). */
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    overflow: hidden;
+    transition: opacity 0.55s cubic-bezier(0.22, 0.82, 0.24, 1);
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active {
+    opacity: 1;
+    z-index: 1;
+    overflow: visible;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1.test3-music-shell--fill-active {
+    background-color: transparent !important;
+    overflow: visible;
+    animation: test3MusicMotionShell 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1.test3-music-shell--fill-active .dot-music1__compact,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1.test3-music-shell--fill-active .dot-music1__player {
+    background: transparent !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--fading {
+    opacity: 0 !important;
+    transition: opacity 0.52s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__gl {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__edge,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__edge-inner {
+    position: absolute;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    will-change: opacity, transform, filter;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__edge {
+    inset: -22px;
+    z-index: 2;
+    background:
+      radial-gradient(ellipse 52% 44% at 0% 0%, rgba(255, 195, 90, 0.62) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 100% 0%, rgba(255, 205, 100, 0.58) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 100% 100%, rgba(255, 180, 70, 0.55) 0%, transparent 72%),
+      radial-gradient(ellipse 52% 44% at 0% 100%, rgba(255, 188, 78, 0.52) 0%, transparent 72%),
+      conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255, 190, 80, 0.42),
+        rgba(255, 240, 180, 0.22),
+        rgba(255, 165, 50, 0.38),
+        rgba(255, 225, 140, 0.28),
+        rgba(255, 190, 80, 0.42)
+      );
+    filter: blur(18px);
+    -webkit-mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 56%,
+      rgba(0, 0, 0, 0.45) 72%,
+      rgba(0, 0, 0, 0.82) 86%,
+      transparent 100%
+    );
+    mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 56%,
+      rgba(0, 0, 0, 0.45) 72%,
+      rgba(0, 0, 0, 0.82) 86%,
+      transparent 100%
+    );
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__edge-inner {
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse 120% 88% at 50% 0%, rgba(255, 210, 110, 0.28) 0%, transparent 58%),
+      radial-gradient(ellipse 120% 88% at 50% 100%, rgba(255, 195, 85, 0.24) 0%, transparent 58%),
+      radial-gradient(ellipse 88% 120% at 0% 50%, rgba(255, 200, 95, 0.22) 0%, transparent 58%),
+      radial-gradient(ellipse 88% 120% at 100% 50%, rgba(255, 200, 95, 0.22) 0%, transparent 58%);
+    filter: blur(10px);
+    -webkit-mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.55) 84%,
+      transparent 100%
+    );
+    mask: radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 62%,
+      rgba(0, 0, 0, 0.55) 84%,
+      transparent 100%
+    );
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__mist {
+    position: absolute;
+    right: -28px;
+    bottom: -32px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(18%, 16%) scale(0.18);
+    transform-origin: 72% 72%;
+    will-change: transform, opacity, filter;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__bloom {
+    background: radial-gradient(
+      circle at 58% 58%,
+      rgba(255, 214, 120, 0.98) 0%,
+      rgba(255, 186, 72, 0.72) 22%,
+      rgba(255, 158, 48, 0.38) 46%,
+      rgba(255, 142, 36, 0.10) 58%,
+      rgba(255, 135, 32, 0.04) 72%,
+      rgba(255, 130, 28, 0) 88%
+    );
+    filter: blur(22px);
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__mist {
+    right: -48px;
+    bottom: -52px;
+    width: 260px;
+    height: 260px;
+    transform-origin: 68% 68%;
+    transform: translate(24%, 20%) scale(0.12);
+    background: radial-gradient(
+      circle at 52% 54%,
+      rgba(255, 236, 170, 0.72) 0%,
+      rgba(255, 210, 110, 0.42) 28%,
+      rgba(255, 178, 70, 0.18) 54%,
+      rgba(255, 160, 55, 0.05) 68%,
+      rgba(255, 150, 45, 0.01) 80%,
+      rgba(255, 150, 45, 0) 92%
+    );
+    filter: blur(30px);
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill .p2-agent-fill__wave {
+    position: absolute;
+    inset: -12%;
+    border-radius: inherit;
+    background: linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 252, 230, 0.16) 34%,
+      rgba(255, 255, 255, 0.22) 48%,
+      rgba(255, 228, 150, 0.14) 68%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 260% 260%;
+    mix-blend-mode: soft-light;
+    opacity: 0;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    background: linear-gradient(
+      to top,
+      #FF8F28 0%,
+      #FFA940 26%,
+      #FFC25A 52%,
+      #FFD978 78%,
+      #FFBA45 100%
+    );
+    background-size: 210% 210%;
+    background-position: 50% 100%;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: soft-light;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active::after {
+    opacity: 1;
+    animation: test3MusicFillColorFlow 5.6s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--fading::after {
+    opacity: 0 !important;
+    animation: none !important;
+    transition: opacity 0.52s cubic-bezier(0.22, 0.82, 0.24, 1) !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active .p2-agent-fill__edge {
+    opacity: 0.82;
+    animation: p2Test2EdgeAuraDrift 4.6s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active .p2-agent-fill__edge-inner {
+    opacity: 0.62;
+    animation: p2Test2EdgeAuraPulse 3.8s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active .p2-agent-fill__bloom {
+    transform: translate(0%, 0%) scale(1);
+    opacity: 0.88;
+    filter: blur(32px);
+    animation: p2Test2BloomRipple 3.8s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active .p2-agent-fill__mist {
+    transform: translate(-4%, -2%) scale(1.15);
+    opacity: 0.72;
+    filter: blur(40px);
+    animation: p2Test2MistRipple 4.4s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active.p2-agent-fill--gl-active .p2-agent-fill__bloom {
+    transform: translate(-28%, -22%) scale(2.65);
+    opacity: 0 !important;
+    filter: blur(48px);
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active.p2-agent-fill--gl-active .p2-agent-fill__mist {
+    transform: translate(-32%, -26%) scale(3.1);
+    opacity: 0 !important;
+    filter: blur(52px);
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.test3-music-fill--active .p2-agent-fill__wave {
+    opacity: 1;
+    animation: p2Test2FillWave 4.2s ease-in-out infinite;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active {
+    opacity: 1;
+    overflow: visible;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active::after {
+    display: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready .p2-agent-fill__mist,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready .p2-agent-fill__wave,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready::after,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready::before {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__wave {
+    display: block !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__edge,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__edge-inner {
+    opacity: 0.82 !important;
+    display: block !important;
+    animation: p2Test2EdgeAuraDrift 4.6s ease-in-out infinite !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__bloom,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__mist,
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .test3-music-fill.p2-agent-fill--gl-ready.p2-agent-fill--gl-active .p2-agent-fill__wave {
+    display: block !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1 {
     position: relative;
@@ -3743,10 +4019,21 @@
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg {
     position: absolute;
     z-index: 11;
-    overflow: visible;
+    overflow: hidden;
     pointer-events: none;
-    --dot-music1-blob-angle: 0deg;
-    background-color: #FFC090;
+    border-radius: 50%;
+    background-color: #FF7F24;
+    background-image: linear-gradient(
+      to bottom,
+      #FFE8A8 0%,
+      #FFC860 24%,
+      #FF9A38 58%,
+      #FF7F24 100%
+    );
+    background-size: 100% 220%;
+    background-position: 50% 100%;
+    filter: none;
+    box-shadow: none;
     left: var(--test3-orb-x, 12px);
     right: auto;
     top: 13px;
@@ -3754,13 +4041,12 @@
     width: var(--test3-orb-size, 56px);
     height: var(--test3-orb-size, 56px);
     animation:
-      test3MusicBlobGradientFlow 3.6s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
-      test3MusicBlobSway 5.2s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
-      test3MusicBlobGlowPulse 4s ease-in-out var(--test3-orb-glow-delay, 6.02s) infinite,
       test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbTopShimmer 3.8s ease-in-out 0s infinite !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music .dot-music1__compact--layout .dot-music1__iconBg::before {
+    z-index: 2;
     opacity: 0;
     padding: 1.5px;
     background: conic-gradient(
@@ -3781,30 +4067,29 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 2px;
-    background: conic-gradient(
-      from var(--dot-music1-glow-angle, 0deg),
-      rgba(255, 255, 255, 0)     0deg,
-      rgba(255, 255, 255, 0)   310deg,
-      rgba(255, 255, 255, 0.55) 340deg,
-      rgba(255, 255, 255, 0.95) 352deg,
-      rgba(255, 255, 255, 0.45) 360deg
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    filter: blur(0.5px);
-    mix-blend-mode: screen;
-    pointer-events: none;
     z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(255, 127, 36, 0) 0%,
+      rgba(255, 186, 90, 0.28) 34%,
+      rgba(255, 228, 170, 0.62) 58%,
+      rgba(255, 255, 240, 0.78) 100%
+    );
+    background-size: 100% 240%;
+    background-position: 50% 100%;
+    mix-blend-mode: soft-light;
+    opacity: 1;
+    animation: test3MusicOrbTopSheen 4.2s ease-in-out 0s infinite !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-pre-expand="1"] .dot-music1__compact--layout .dot-music1__iconBg {
     animation:
-      test3MusicOrbSphereGlow 14s linear forwards,
-      test3MusicIconBgGlowFlow 1.1s linear var(--test3-orb-glow-delay, 6.02s) infinite !important;
+      test3MusicOrbBodyFill 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbMotion 14s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+      test3MusicOrbTopShimmer 3.8s ease-in-out 0s infinite !important;
+  }
+  #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-pre-expand="1"] .dot-music1__compact--layout .dot-music1__iconBg::before {
+    animation: test3MusicOrbLoadingRing 14s linear forwards !important;
   }
   #canvas[data-test-scope="test3"][data-test3-music-shift="1"] #test3-music[data-test3-music-loading="1"] .dot-music1 {
     transition: none !important;

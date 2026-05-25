@@ -734,17 +734,10 @@
   Test3MusicFillGL.prototype.constructor = Test3MusicFillGL;
 
   Test3MusicFillGL.prototype._getOrigin = function () {
-    if (!this.shellEl) return [0.14, 0.86];
+    if (!this.shellEl) return [0.92, 0.88];
     var shell = this.shellEl.getBoundingClientRect();
-    if (!shell.width || !shell.height) return [0.14, 0.86];
-    var orb = this.shellEl.querySelector('.dot-music1__compact--layout .dot-music1__iconBg') ||
-      this.shellEl.querySelector('.dot-music1__iconBg');
-    if (!orb) return [0.14, 0.86];
-    var btn = orb.getBoundingClientRect();
-    return [
-      clamp((btn.left + btn.width * 0.5 - shell.left) / shell.width, 0, 1),
-      clamp(1 - (btn.top + btn.height * 0.5 - shell.top) / shell.height, 0, 1)
-    ];
+    if (!shell.width || !shell.height) return [0.92, 0.88];
+    return [0.92, 0.88];
   };
 
   Test3MusicFillGL.prototype._maybeAdvancePhase = function (t) {

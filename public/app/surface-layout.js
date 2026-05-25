@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // app/surface-layout.js
 // One UI surface grammar based layout system
 // Surface-first, zone-first, slot-based renderer
@@ -38,6 +38,7 @@ var TEST3_MUSIC_PRE_DELAY_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.10);
 var TEST3_MUSIC_EXPAND_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.57);
 var TEST3_MUSIC_EXPAND_DUR_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.11);
 var TEST3_MUSIC_EXPAND_END_MS = TEST3_MUSIC_EXPAND_START_MS + TEST3_MUSIC_EXPAND_DUR_MS;
+var TEST3_MUSIC_FILL_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.14);
 var TEST3_MUSIC_IMAGE1_HOLD_MS = 320;
 var TEST3_MUSIC_SETTLE_MS = 1000;
 var TEST3_MUSIC_ENTRANCE_END_MS = TEST3_MUSIC_MOTION_MS;
@@ -4353,8 +4354,19 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           '</div>');
       var isTabRoot = window.currentSurfaceType === window.SURFACE_TYPES.TAB_ROOT;
       var orangeClass = isTabRoot ? ' is-orange' : '';
+      var test3FillHtml = isTest3Music
+        ? ('<div class="test3-music-fill p2-agent-fill" aria-hidden="true">' +
+            '<canvas class="test3-music-fill__gl p2-agent-fill__gl"></canvas>' +
+            '<div class="p2-agent-fill__edge" aria-hidden="true"></div>' +
+            '<div class="p2-agent-fill__edge-inner" aria-hidden="true"></div>' +
+            '<div class="p2-agent-fill__bloom"></div>' +
+            '<div class="p2-agent-fill__mist"></div>' +
+            '<div class="p2-agent-fill__wave"></div>' +
+          '</div>')
+        : '';
       return '' +
         '<div class="dot-card dot-music dot-music1' + orangeClass + '" data-state="' + (mv.state || 'idle') + '">' +
+          test3FillHtml +
           '<div class="dot-music1__compact dot-music1__compact--layout">' +
             compactHtml +
           '</div>' +
@@ -7535,6 +7547,7 @@ function _settleTest3MusicPlayerImmediately(music) {
   music.setAttribute('data-test3-music-orb-handoff', '1');
   music.setAttribute('data-test3-music-settled', '1');
   music.removeAttribute('data-test3-music-loading');
+  music.removeAttribute('data-test3-music-pre-expand');
   music.removeAttribute('data-test3-music-expand-ready');
   music.classList.remove('is-motion-phase2');
   music.style.setProperty('animation', 'none', 'important');
@@ -7583,6 +7596,7 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
       test3MusicEl.setAttribute('data-music-playing', '1');
       test3MusicEl.setAttribute('data-test3-music-loading', '1');
       test3MusicEl.setAttribute('data-test3-music-phase', 'spawn');
+      test3MusicEl.removeAttribute('data-test3-music-pre-expand');
       test3MusicEl.removeAttribute('data-test3-music-expand-ready');
       test3MusicEl.removeAttribute('data-music-state');
       test3MusicEl.removeAttribute('data-test3-music-orb-handoff');
@@ -7601,6 +7615,9 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
           if (typeof _restartTest3MusicEntranceAnimations === 'function') {
             _restartTest3MusicEntranceAnimations(test3MusicEl);
           }
+          if (window.Test3MusicFillGL && typeof window.Test3MusicFillGL.ensureBound === 'function') {
+            window.Test3MusicFillGL.ensureBound();
+          }
         });
       });
     }
@@ -7611,10 +7628,22 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
       _startTest3MusicAudioFadeIn();
     }
     setTimeout(function () {
+      if ((window.__mlpTest3MusicShiftRunId || 0) !== runId) return;
+      if (typeof _beginTest3MusicFill === 'function') {
+        _beginTest3MusicFill();
+      }
+    }, TEST3_MUSIC_FILL_START_MS);
+    setTimeout(function () {
       if (typeof _syncTest3CardsExpandDown === 'function') {
         _syncTest3CardsExpandDown();
       }
     }, TEST3_MUSIC_EXPAND_START_MS);
+    setTimeout(function () {
+      if ((window.__mlpTest3MusicShiftRunId || 0) !== runId) return;
+      if (typeof _endTest3MusicFill === 'function') {
+        _endTest3MusicFill();
+      }
+    }, TEST3_MUSIC_EXPAND_END_MS);
     setTimeout(function () {
       if (typeof _signalTest3MusicExpandReady === 'function') {
         _signalTest3MusicExpandReady();
@@ -7634,6 +7663,39 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
     });
   } catch (_) {}
 }
+function _beginTest3MusicFill(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.classList.add('test3-music-shell--fill-active');
+  }
+  var fill = music.querySelector('.test3-music-fill');
+  if (fill) {
+    fill.classList.remove('test3-music-fill--fading');
+    fill.classList.add('test3-music-fill--active');
+  }
+  if (window.Test3MusicFillGL) {
+    window.Test3MusicFillGL.ensureBound();
+    window.Test3MusicFillGL.setPhase('generating');
+  }
+}
+function _endTest3MusicFill(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.classList.remove('test3-music-shell--fill-active');
+  }
+  var fill = music.querySelector('.test3-music-fill');
+  if (fill) {
+    fill.classList.remove('test3-music-fill--active');
+    fill.classList.add('test3-music-fill--fading');
+  }
+  if (window.Test3MusicFillGL) {
+    window.Test3MusicFillGL.setPhase('fadeOut');
+  }
+}
 // Phase-2: weather/steps glide to row below the expanding music card.
 // Music shell + orb motion stay on the 14 s CSS timeline (no JS cut).
 function _syncTest3CardsExpandDown() {
@@ -7643,6 +7705,10 @@ function _syncTest3CardsExpandDown() {
   var weather = document.querySelector('#test3-weather');
   var steps   = document.querySelector('#test3-steps');
   if (!weather || !steps) return;
+  var music = document.querySelector('#test3-music');
+  if (music) {
+    music.setAttribute('data-test3-music-pre-expand', '1');
+  }
   [weather, steps].forEach(function (el) {
     var computed = getComputedStyle(el).transform;
     el.classList.add('test3-card-flow', 'is-motion-phase2');
@@ -7726,6 +7792,17 @@ function _revealTest3MusicPlayBtn(music) {
 }
 function _restartTest3MusicEntranceAnimations(music) {
   if (!music) return;
+  var fill = music.querySelector('.test3-music-fill');
+  if (fill) {
+    fill.classList.remove('test3-music-fill--active', 'test3-music-fill--fading', 'p2-agent-fill--gl-active', 'p2-agent-fill--gl-fading');
+  }
+  var shell = music.querySelector('.dot-music1');
+  if (shell) {
+    shell.classList.remove('test3-music-shell--fill-active');
+  }
+  if (window.Test3MusicFillGL) {
+    window.Test3MusicFillGL.destroy();
+  }
   var targets = [music].concat(Array.prototype.slice.call(music.querySelectorAll('*')));
   targets.forEach(function (el) {
     el.style.animation = 'none';
