@@ -49,7 +49,7 @@ function TestScripts() {
       <Script src="/app/design-doc.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/interaction-state.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/dot-pair-rain.js?v=1" strategy="beforeInteractive" />
-      <Script src="/app/surface-layout.js?v=mlp-test3-music-settle-2" strategy="beforeInteractive" />
+      <Script src="/app/surface-layout.js?v=mlp-test2-agent-gl-1" strategy="beforeInteractive" />
       <Script src="/app/settings.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/canvas.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/rules-renderer.js?v=2" strategy="beforeInteractive" />
@@ -58,6 +58,7 @@ function TestScripts() {
       <Script src="/app/cached-screens.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/ui-panels.js?v=2" strategy="beforeInteractive" />
       <Script src="/app/main.js?v=2" strategy="beforeInteractive" />
+      <Script src="/app/p2-agent-fill-gl.js?v=22" strategy="beforeInteractive" />
       <Script src="/prototype-logic.js?v=mlp-test-split-1" strategy="lazyOnload" />
     </>
   );
