@@ -3836,10 +3836,12 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
               '<div class="dot-goal__distance">' + gDist + '</div>' +
             '</div>' +
           '</div>' +
-          (gv.useRealMap ? '<div class="dot-goal__map-seed" aria-hidden="true"></div>' : '') +
-          '<div class="dot-goal__map" aria-hidden="true">' +
-            mapInnerHtml +
-          '</div>' +
+          (gv.useRealMap
+            ? '<div class="dot-goal__map-slot" aria-hidden="true">' +
+                '<div class="dot-goal__map-seed" aria-hidden="true"></div>' +
+                '<div class="dot-goal__map">' + mapInnerHtml + '</div>' +
+              '</div>'
+            : '<div class="dot-goal__map" aria-hidden="true">' + mapInnerHtml + '</div>') +
         '</div>';
     }
 
@@ -6388,7 +6390,11 @@ function _finalizeTest3GoalEntrance(goalEl) {
   if (mapEl) {
     mapEl.style.transform = 'scale(1)';
     mapEl.style.removeProperty('animation');
+    mapEl.style.removeProperty('clip-path');
+    mapEl.style.removeProperty('will-change');
   }
+  goalEl.removeAttribute('data-test3-goal-map-hold');
+  goalEl.removeAttribute('data-test3-goal-map-bloomed');
   goalEl.classList.remove('test3-goal-enter', 'test3-goal-enter-ready', 'test3-goal-copy-enter');
   goalEl.classList.add('test3-goal-entrance-settled');
   var canvas = document.getElementById('canvas');
@@ -6413,6 +6419,7 @@ function _orchestrateTest3GoalEntrance(goalEl) {
           try {
             if (!goalEl.isConnected) return;
             goalEl.classList.add('test3-goal-enter-ready');
+            goalEl.setAttribute('data-test3-goal-map-hold', '1');
             void goalEl.offsetWidth;
             try {
               if (typeof _initTest3GoalMap === 'function') _initTest3GoalMap();
@@ -6432,11 +6439,71 @@ function _orchestrateTest3GoalEntrance(goalEl) {
     });
   });
 }
+function _triggerTest3GoalMapBloom(goalEl) {
+  if (!goalEl || !goalEl.isConnected) return false;
+  if (!goalEl.classList.contains('test3-goal-enter-ready')) return false;
+  if (goalEl.getAttribute('data-test3-goal-map-ready') === '1') return false;
+  var mapEl = goalEl.querySelector('.dot-goal__map');
+  if (!mapEl) return false;
+  if (goalEl.__test3GoalMapBloomAnim && typeof goalEl.__test3GoalMapBloomAnim.cancel === 'function') {
+    try { goalEl.__test3GoalMapBloomAnim.cancel(); } catch (_) {}
+    goalEl.__test3GoalMapBloomAnim = null;
+  }
+  goalEl.removeAttribute('data-test3-goal-map-hold');
+  goalEl.setAttribute('data-test3-goal-map-ready', '1');
+  goalEl.classList.add('test3-goal-map-ready');
+  mapEl.style.removeProperty('clip-path');
+  mapEl.style.transformOrigin = 'center center';
+  mapEl.style.willChange = 'transform';
+  mapEl.style.transform = 'scale(0)';
+  void mapEl.offsetWidth;
+  try {
+    var bloomAnim = mapEl.animate(
+      [
+        { transform: 'scale(0)' },
+        { transform: 'scale(1)' }
+      ],
+      {
+        duration: TEST3_GOAL_MAP_BLOOM_MS,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        fill: 'forwards'
+      }
+    );
+    goalEl.__test3GoalMapBloomAnim = bloomAnim;
+    bloomAnim.onfinish = function () {
+      if (!mapEl.isConnected) return;
+      mapEl.style.transform = 'scale(1)';
+      mapEl.style.removeProperty('will-change');
+      goalEl.setAttribute('data-test3-goal-map-bloomed', '1');
+      goalEl.__test3GoalMapBloomAnim = null;
+    };
+  } catch (_) {
+    mapEl.style.transform = 'scale(1)';
+    mapEl.style.removeProperty('will-change');
+    goalEl.setAttribute('data-test3-goal-map-bloomed', '1');
+  }
+  void goalEl.offsetWidth;
+  void mapEl.offsetWidth;
+  return true;
+}
 function _signalTest3GoalMapReady() {
   var goal = document.querySelector('#test3-goal');
   if (!goal || goal.getAttribute('data-test3-goal-map-ready') === '1') return;
-  goal.setAttribute('data-test3-goal-map-ready', '1');
-  goal.classList.add('test3-goal-map-ready');
+  if (!goal.classList.contains('test3-goal-enter-ready')) {
+    var tries = 0;
+    (function retry() {
+      tries += 1;
+      var retryGoal = document.querySelector('#test3-goal');
+      if (!retryGoal || retryGoal.getAttribute('data-test3-goal-map-ready') === '1') return;
+      if (retryGoal.classList.contains('test3-goal-enter-ready')) {
+        _triggerTest3GoalMapBloom(retryGoal);
+        return;
+      }
+      if (tries < 12) setTimeout(retry, 48);
+    })();
+    return;
+  }
+  _triggerTest3GoalMapBloom(goal);
 }
 function _initTest3GoalMap() {
   if (typeof window.L !== 'function' && typeof window.L !== 'object') return;
@@ -6571,14 +6638,16 @@ function _initTest3GoalMap() {
     // defined in case we re-enable it later.)
     map.whenReady(function () {
       var goalEl = document.querySelector('#test3-goal');
-      if (goalEl && goalEl.dataset.test3GoalEntrance === '1') return;
       var signaled = false;
       function trySignal() {
         if (signaled) return;
+        var liveGoal = document.querySelector('#test3-goal');
+        if (!liveGoal) return;
+        if (liveGoal.dataset.test3GoalEntrance === '1' &&
+            !liveGoal.classList.contains('test3-goal-enter-ready')) return;
         signaled = true;
         _signalTest3GoalMapReady();
       }
-      var goalEl = document.querySelector('#test3-goal');
       var hasHandoff = goalEl && goalEl.querySelector('.dot-goal__map-seed--handoff');
       var dotBeat = hasHandoff ? 360 : 480;
       map.once('load', function () {
@@ -6938,6 +7007,7 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
       test3MusicEl.setAttribute('data-music-playing', '1');
       test3MusicEl.setAttribute('data-test3-music-loading', '1');
       test3MusicEl.setAttribute('data-test3-music-phase', 'spawn');
+      test3MusicEl.removeAttribute('data-test3-music-expand-ready');
       if (typeof _restartTest3MusicEntranceAnimations === 'function') {
         _restartTest3MusicEntranceAnimations(test3MusicEl);
       } else {
@@ -6956,13 +7026,8 @@ function _mountTest3MusicAfterWeatherPrep(runId) {
       }
     }, TEST3_MUSIC_EXPAND_START_MS);
     setTimeout(function () {
-      if (typeof _revealTest3MusicPlayBtn === 'function') {
-        _revealTest3MusicPlayBtn();
-      }
-    }, TEST3_MUSIC_EXPAND_START_MS);
-    setTimeout(function () {
-      if (typeof _revealTest3MusicPlayDisc === 'function') {
-        _revealTest3MusicPlayDisc();
+      if (typeof _signalTest3MusicExpandReady === 'function') {
+        _signalTest3MusicExpandReady();
       }
     }, TEST3_MUSIC_EXPAND_END_MS);
     setTimeout(function () {
@@ -7003,6 +7068,38 @@ function _syncTest3CardsExpandDown() {
   });
 }
 // Keep the play/pause control visible once the player shell has expanded.
+function _revealTest3MusicPlayerCopy(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  var icon = music.querySelector('.dot-music1__icon');
+  if (icon) {
+    icon.style.opacity = '1';
+    icon.style.visibility = 'visible';
+    icon.style.pointerEvents = 'auto';
+    icon.style.removeProperty('animation');
+  }
+  var copies = music.querySelectorAll('.dot-music1__icon .dot-music3__title, .dot-music1__icon .dot-music3__bottom');
+  copies.forEach(function (el) {
+    el.style.opacity = '1';
+    el.style.visibility = 'visible';
+    el.style.transform = 'translateY(0)';
+    el.style.removeProperty('animation');
+  });
+}
+function _signalTest3MusicExpandReady(music) {
+  music = music || document.querySelector('#test3-music');
+  if (!music) return;
+  music.setAttribute('data-test3-music-expand-ready', '1');
+  if (typeof _revealTest3MusicPlayDisc === 'function') {
+    _revealTest3MusicPlayDisc(music);
+  }
+  if (typeof _revealTest3MusicPlayBtn === 'function') {
+    _revealTest3MusicPlayBtn(music);
+  }
+  if (typeof _revealTest3MusicPlayerCopy === 'function') {
+    _revealTest3MusicPlayerCopy(music);
+  }
+}
 function _revealTest3MusicPlayDisc(music) {
   music = music || document.querySelector('#test3-music');
   if (!music) return;
@@ -7030,7 +7127,9 @@ function _restartTest3MusicEntranceAnimations(music) {
     music.querySelector('.dot-music1__icon'),
     music.querySelector('.dot-music1__compact--layout .dot-music1__iconBg'),
     music.querySelector('.dot-music1__icon .dot-music3__iconBg'),
-    music.querySelector('.dot-music1__icon .dot-music3__playBtn')
+    music.querySelector('.dot-music1__icon .dot-music3__playBtn'),
+    music.querySelector('.dot-music1__icon .dot-music3__title'),
+    music.querySelector('.dot-music1__icon .dot-music3__bottom')
   ];
   targets.forEach(function (el) {
     if (!el) return;
@@ -7335,27 +7434,38 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
             }
           } catch (_) {}
           introRunEl.id = 'test3-goal';
-          introRunEl.classList.remove('test3-intro-run-exit', 'test3-goal-enter', 'test3-goal-enter-ready', 'test3-goal-copy-enter');
+          introRunEl.classList.remove(
+            'test3-intro-run-exit',
+            'test3-goal-enter',
+            'test3-goal-enter-ready',
+            'test3-goal-copy-enter',
+            'test3-goal-map-ready',
+            'test3-goal-entrance-settled'
+          );
+          introRunEl.removeAttribute('data-test3-goal-map-ready');
+          introRunEl.removeAttribute('data-test3-goal-map-hold');
+          introRunEl.removeAttribute('data-test3-goal-map-bloomed');
+          delete introRunEl.dataset.test3GoalEntrance;
           introRunEl.dataset.role = goalComp.role;
           introRunEl.setAttribute('data-role', goalComp.role);
           introRunEl.innerHTML = window.renderAtomicForRole(goalComp, goalRect);
           if (introSeedKeep) {
             try {
               var goalCardInner = introRunEl.querySelector('.dot-goal');
+              var goalMapSlot = introRunEl.querySelector('.dot-goal__map-slot');
               var freshSeed = introRunEl.querySelector('.dot-goal__map-seed');
               if (freshSeed) freshSeed.remove();
               introSeedKeep.className = 'dot-goal__map-seed dot-goal__map-seed--handoff';
               introSeedKeep.style.opacity = '1';
               introSeedKeep.style.visibility = 'visible';
               introSeedKeep.style.animation = 'none';
-              introSeedKeep.style.left = 'calc(100% - 64px - 5px)';
-              introSeedKeep.style.top = '50%';
-              introSeedKeep.style.width = '10px';
-              introSeedKeep.style.height = '10px';
-              introSeedKeep.style.marginTop = '-5px';
+              introSeedKeep.style.removeProperty('left');
               introSeedKeep.style.removeProperty('right');
+              introSeedKeep.style.removeProperty('top');
+              introSeedKeep.style.removeProperty('marginTop');
               introSeedKeep.style.removeProperty('transform');
-              if (goalCardInner) goalCardInner.appendChild(introSeedKeep);
+              if (goalMapSlot) goalMapSlot.appendChild(introSeedKeep);
+              else if (goalCardInner) goalCardInner.appendChild(introSeedKeep);
             } catch (_) {}
           }
           // Pin layout to the goal card's rect (the morph keyframes had
