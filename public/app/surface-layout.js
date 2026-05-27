@@ -24,6 +24,8 @@ window.currentSurfaceType = window.SURFACE_TYPES.FIRST_DEPTH_LIST;
 var TEST3_GOAL_TOP = 42;
 var TEST3_GOAL_H = 168;
 var TEST3_CARD_GAP = 4;
+var TEST3_PILL_SLOT_H = 72;
+var TEST3_WEATHER_DROP = 168 - TEST3_PILL_SLOT_H;
 var TEST3_ROW2_TOP = TEST3_GOAL_TOP + TEST3_GOAL_H + TEST3_CARD_GAP;
 // Grid 1×1 half-column — outer shell must match weather/steps column (168px).
 var TEST3_MUSIC_COMPACT = 168;
@@ -33,6 +35,9 @@ var TEST3_MUSIC_COMPACT_FOLD = '러닝에 어울리는\n신스팝 플레이리�
 var TEST3_MUSIC_LYRICS_TITLE = '저녁 한강 러닝에 어울리는\nBPM 120-140 신스팝 플레이리스트';
 var TEST3_MUSIC_SEARCH_LINE2 = '러닝에 어울리는 신스팝 플레이리스트 재생';
 var TEST3_GOAL_UNIFIED_RISE_MS = 520;
+var TEST3_PILL_REVEAL_HOLD_MS = 1000;
+var TEST3_PILL_REVEAL_EXPAND_MS = 520;
+var TEST3_PILL_REVEAL_TOTAL_MS = TEST3_PILL_REVEAL_HOLD_MS + TEST3_PILL_REVEAL_EXPAND_MS;
 var TEST3_MUSIC_MOTION_MS = 14000;
 var TEST3_MUSIC_PRE_DELAY_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.10);
 var TEST3_MUSIC_EXPAND_START_MS = Math.round(TEST3_MUSIC_MOTION_MS * 0.57);
@@ -469,22 +474,25 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
             { id: 'test3-weather', role: 'dot-weather-2x1-v1-1', zone: 'viewing',
               variant: {
                 partyPill: {
-                  title: '러닝 파티 모드',
-                  subtitle: '실시간 경로 수정 중',
-                  expandTitle: '러닝 아일랜드 모드',
-                  expandBody: '고요한 러닝을 위해 현재 사람이 적은\n한강 공원으로 경로를 수정했어요'
+                  title: '목표 페이스',
+                  subtitle: '7\'00"/KM',
+                  stats: [
+                    { type: 'run', label: '달리기' },
+                    { type: 'level', value: '6', label: '러닝레벨' },
+                    { type: 'energy', value: '86', label: '에너지' }
+                  ]
                 }
               },
-              _rect: { x: 24, y: test3Row2Y, w: 168, h: 82 } },
+              _rect: { x: 24, y: test3Row2Y, w: 168, h: TEST3_PILL_SLOT_H } },
             { id: 'test3-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
               variant: {
                 pacePill: {
-                  title: '러닝 페이스',
-                  subtitle: '현재 7\'00"',
-                  expandTitle: '러닝 페이스'
+                  title: '한강 공원',
+                  subtitle: '러닝 경로 최적화',
+                  expandBody: '실시간 혼잡도를 분석해 러닝 경로를 최적화했어요'
                 }
               },
-              _rect: { x: 196, y: test3Row2Y, w: 168, h: 82 } },
+              _rect: { x: 196, y: test3Row2Y, w: 168, h: TEST3_PILL_SLOT_H } },
             { id: 'test3-page-dots', role: 'test3-page-dots', zone: 'viewing',
               _rect: { x: 0, y: 714, w: 388, h: 24 } },
             { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
@@ -4890,45 +4898,32 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var st = (comp && comp.variant) || {};
       if (st.pacePill) {
         var pp = st.pacePill;
-        var ppTitle = pp.title || '러닝 페이스';
-        var ppSub = pp.subtitle || '현재 7\'00"';
-        var ppExpandTitle = pp.expandTitle || ppTitle;
+        var ppTitle = pp.title || '한강 공원';
+        var ppSub = pp.subtitle || '러닝 경로 최적화';
+        var ppExpandBody = pp.expandBody || '실시간 혼잡도를 분석해 러닝 경로를 최적화했어요';
         var ppIconHtml =
           '<div class="dot-steps21__pillIcon" aria-hidden="true">' +
-            '<span class="dot-steps21__pillIconBg"></span>' +
-            '<img class="dot-steps21__pillIconMark" src="/assets/test3-running-icon.svg" alt="" aria-hidden="true">' +
+            '<img class="dot-steps21__pillIconImg" src="/assets/test3-pace-route-icon.png" alt="" aria-hidden="true">' +
+          '</div>';
+        var ppCopyHtml =
+          '<div class="dot-steps21__pillCopy">' +
+            '<div class="dot-steps21__pillTitle">' + ppTitle + '</div>' +
+            '<div class="dot-steps21__pillSub">' + ppSub + '</div>' +
           '</div>';
         var ppCompactHtml =
           '<div class="dot-steps21__compact" aria-hidden="false">' +
             '<div class="dot-steps21__pillRow">' +
-              '<div class="dot-steps21__pillCopy">' +
-                '<div class="dot-steps21__pillTitle">' + ppTitle + '</div>' +
-                '<div class="dot-steps21__pillSub">' + ppSub + '</div>' +
-              '</div>' +
               ppIconHtml +
+              ppCopyHtml +
             '</div>' +
           '</div>';
-        var ppWaveHtml =
-          '<svg class="dot-steps21__paceWave" width="92" height="28" viewBox="0 0 92 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-            '<defs>' +
-              '<linearGradient id="test3PaceWaveGrad" x1="0" y1="14" x2="92" y2="14" gradientUnits="userSpaceOnUse">' +
-                '<stop stop-color="#FF6B4A"/><stop offset="0.35" stop-color="#FF4FA3"/>' +
-                '<stop offset="0.65" stop-color="#8B5CF6"/><stop offset="1" stop-color="#2563EB"/>' +
-              '</linearGradient>' +
-            '</defs>' +
-            '<ellipse cx="12" cy="14" rx="5" ry="11" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="24" cy="14" rx="4" ry="8" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="36" cy="14" rx="6" ry="13" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="50" cy="14" rx="5" ry="10" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="62" cy="14" rx="4" ry="7" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="74" cy="14" rx="6" ry="12" fill="url(#test3PaceWaveGrad)"/>' +
-            '<ellipse cx="86" cy="14" rx="4" ry="9" fill="url(#test3PaceWaveGrad)"/>' +
-          '</svg>';
         var ppExpandedHtml =
           '<div class="dot-steps21__expanded" aria-hidden="true">' +
-            '<div class="dot-steps21__pillTitle dot-steps21__pillTitle--solo">' + ppExpandTitle + '</div>' +
-            ppWaveHtml +
             ppIconHtml +
+            '<div class="dot-steps21__expandedBody">' +
+              '<div class="dot-steps21__pillTitle">' + ppTitle + '</div>' +
+              '<div class="dot-steps21__pillBody">' + ppExpandBody + '</div>' +
+            '</div>' +
           '</div>';
         return '' +
           '<div class="dot-card dot-steps21 dot-steps21--pace-pill dot-steps21--expandable" data-state="' + (st.state || 'idle') + '">' +
@@ -5210,32 +5205,51 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       var w2 = (comp && comp.variant) || {};
       if (w2.partyPill) {
         var pl = w2.partyPill;
-        var plTitle = pl.title || '러닝 파티 모드';
-        var plSub = pl.subtitle || '실시간 경로 수정 중';
-        var plExpandTitle = pl.expandTitle || plTitle;
-        var plExpandBody = pl.expandBody || plSub;
+        var plTitle = pl.title || '목표 페이스';
+        var plSub = pl.subtitle || '7\'00"/KM';
+        var plStats = (pl.stats && pl.stats.length) ? pl.stats : [
+          { type: 'run', label: '달리기' },
+          { type: 'level', value: '6', label: '러닝레벨' },
+          { type: 'energy', value: '86', label: '에너지' }
+        ];
         var plIconHtml =
           '<div class="dot-w21__pillIcon" aria-hidden="true">' +
-            '<span class="dot-w21__pillIconBg"></span>' +
-            '<img class="dot-w21__pillIconMark" src="/assets/test3-running-icon.svg" alt="" aria-hidden="true">' +
+            '<img class="dot-w21__pillIconImg" src="/assets/test3-party-pace-icon.png" alt="" aria-hidden="true">' +
           '</div>';
+        var plCopyHtml =
+          '<div class="dot-w21__pillCopy">' +
+            '<div class="dot-w21__pillTitle">' + plTitle + '</div>' +
+            '<div class="dot-w21__pillSub">' + plSub + '</div>' +
+          '</div>';
+        var plStatHtml = '';
+        for (var psi = 0; psi < plStats.length; psi++) {
+          var ps = plStats[psi];
+          var psType = ps.type || 'run';
+          var psLabel = ps.label || '';
+          plStatHtml +=
+            '<div class="dot-w21__statBadge dot-w21__statBadge--' + psType + '">';
+          if (psType === 'run') {
+            plStatHtml +=
+              '<img class="dot-w21__statBadgeIcon" src="/assets/test3-party-stat-run.svg" alt="" aria-hidden="true">';
+          } else {
+            plStatHtml += '<div class="dot-w21__statBadgeValue">' + (ps.value || '') + '</div>';
+          }
+          plStatHtml += '<div class="dot-w21__statBadgeLabel">' + psLabel + '</div></div>';
+        }
         var plCompactHtml =
           '<div class="dot-w21__compact" aria-hidden="false">' +
             '<div class="dot-w21__pillRow">' +
-              '<div class="dot-w21__pillCopy">' +
-                '<div class="dot-w21__pillTitle">' + plTitle + '</div>' +
-                '<div class="dot-w21__pillSub">' + plSub + '</div>' +
-              '</div>' +
               plIconHtml +
+              plCopyHtml +
             '</div>' +
           '</div>';
         var plExpandedHtml =
           '<div class="dot-w21__expanded" aria-hidden="true">' +
-            '<div class="dot-w21__pillCopy">' +
-              '<div class="dot-w21__pillTitle">' + plExpandTitle + '</div>' +
-              '<div class="dot-w21__pillBody">' + String(plExpandBody).replace(/\n/g, '<br/>') + '</div>' +
-            '</div>' +
             plIconHtml +
+            '<div class="dot-w21__expandedBody">' +
+              plCopyHtml +
+              '<div class="dot-w21__statRow">' + plStatHtml + '</div>' +
+            '</div>' +
           '</div>';
         return '' +
           '<div class="dot-card dot-w21 dot-w21--party-pill dot-w21--expandable" data-state="' + (w2.state || 'idle') + '">' +
@@ -7191,7 +7205,7 @@ function _layoutTest3Cards() {
   var stepsExp   = steps.classList.contains('is-expanded');
   var musicCompact = (musicState === 'compact');
   var musicBottom  = TEST3_ROW2_TOP + musicH;
-  var FULL = 340, HALF = 168, ROW_H = 82, GAP = TEST3_CARD_GAP;
+  var FULL = 340, HALF = 168, ROW_H = TEST3_PILL_SLOT_H, GAP = TEST3_CARD_GAP;
   var wX, wY, wW, sX, sY, sW;
   if (musicCompact) {
     // Music is 168×168 in the LEFT column at row2 (y=214). Right column
@@ -7240,8 +7254,8 @@ function _layoutTest3Cards() {
     if (h != null) el.style.setProperty('height', h + 'px', 'important');
     el.style.setProperty('animation', 'none', 'important');
   }
-  apply(weather, wX, wY, wW);
-  apply(steps,   sX, sY, sW);
+  apply(weather, wX, wY, wW, TEST3_PILL_SLOT_H);
+  apply(steps,   sX, sY, sW, TEST3_PILL_SLOT_H);
   // Resize the music wrapper to match the inner card's current state —
   // otherwise the canvas-item box stays 340×168 while the inner card
   // can be 168×168 (compact) or 340×280 (lyrics), causing clicks on
@@ -7290,7 +7304,7 @@ function _freezeTest3WeatherDropState() {
     var computed = getComputedStyle(el);
     var ty = computed.transform;
     if (!ty || ty === 'none') {
-      ty = 'translateY(86px)';
+      ty = 'translateY(' + TEST3_WEATHER_DROP + 'px)';
     }
     el.style.setProperty('transform', ty, 'important');
     el.style.setProperty('opacity', '1', 'important');
@@ -7566,6 +7580,74 @@ function _settleTest3MusicPlayerImmediately(music) {
     _applyTest3MusicSettledLayout(music);
   }
   if (typeof _layoutTest3Cards === 'function') _layoutTest3Cards();
+}
+// Circle → 1 s hold → expand-right reveal for party/pace pills.
+function _armTest3PillsReveal(canvas) {
+  if (!canvas) return;
+  if (window.__mlpTest3PillsRevealed) {
+    canvas.setAttribute('data-test3-pills-revealed', '1');
+    canvas.removeAttribute('data-test3-pills-reveal');
+    return;
+  }
+  canvas.setAttribute('data-test3-pills-reveal', '1');
+  canvas.removeAttribute('data-test3-pills-revealed');
+  if (window.__mlpTest3PillsRevealTimer) return;
+  window.__mlpTest3PillsRevealTimer = setTimeout(function () {
+    window.__mlpTest3PillsRevealTimer = null;
+    try {
+      var stillTest3 =
+        (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+        (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+      if (!stillTest3) return;
+      if (!window.__mlpTestConfig || window.__mlpTestConfig.homeStage !== 'home') return;
+      var c = document.getElementById('canvas');
+      if (!c || c.getAttribute('data-test-scope') !== 'test3') return;
+      window.__mlpTest3PillsRevealed = true;
+      c.setAttribute('data-test3-pills-revealed', '1');
+      c.removeAttribute('data-test3-pills-reveal');
+      if (window.__mlpTest3WeatherPrepPending ||
+          (!window.__mlpTest3MusicShiftPrep && !window.__mlpTest3MusicShifted)) {
+        window.__mlpTest3WeatherPrepPending = false;
+        setTimeout(function () {
+          _beginTest3WeatherPrep(window.__mlpTest3MusicShiftRunId || 0);
+        }, 320);
+      }
+    } catch (_) {}
+  }, TEST3_PILL_REVEAL_TOTAL_MS);
+}
+function _beginTest3WeatherPrep(runId) {
+  try {
+    var stillTest3 =
+      (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
+      (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
+    if (!stillTest3) return;
+    if ((window.__mlpTest3MusicShiftRunId || 0) !== runId) return;
+    if (!window.__mlpTestConfig || window.__mlpTestConfig.homeStage !== 'home') return;
+    if (window.__mlpTest3MusicShifted || window.__mlpTest3MusicShiftPrep) return;
+    if (!window.__mlpTest3PillsRevealed) {
+      window.__mlpTest3WeatherPrepPending = true;
+      return;
+    }
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test3') return;
+    window.__mlpTest3MusicShiftPrep = true;
+    window.__mlpTest3WeatherPrepPending = false;
+    var weatherEl = c.querySelector('#test3-weather');
+    var stepsEl   = c.querySelector('#test3-steps');
+    if (weatherEl) weatherEl.classList.remove('test3-intro-prefade');
+    if (stepsEl)   stepsEl.classList.remove('test3-intro-prefade');
+    c.setAttribute('data-test3-weather-prep', '1');
+    if (typeof window.__mountTest3WeatherRainMotion === 'function') {
+      window.__mountTest3WeatherRainMotion(1020);
+    }
+    if (window.__mlpTest3MusicMountTimer) {
+      clearTimeout(window.__mlpTest3MusicMountTimer);
+      window.__mlpTest3MusicMountTimer = null;
+    }
+    window.__mlpTest3MusicMountTimer = setTimeout(function () {
+      _mountTest3MusicAfterWeatherPrep(runId);
+    }, TEST3_MUSIC_PRE_DELAY_MS);
+  } catch (_) {}
 }
 // Mount the music card AFTER weather/steps have cleared row 2.
 function _mountTest3MusicAfterWeatherPrep(runId) {
@@ -8028,9 +8110,15 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     window.__mlpTest3WeatherDropped = false;
     window.__mlpTest3MusicShiftRunId = (window.__mlpTest3MusicShiftRunId || 0) + 1;
     window.__mlpTest3WeatherRainArmed = false;
+    window.__mlpTest3PillsRevealed = false;
+    window.__mlpTest3WeatherPrepPending = false;
     if (window.__mlpTest3WeatherRainTimer) {
       clearTimeout(window.__mlpTest3WeatherRainTimer);
       window.__mlpTest3WeatherRainTimer = null;
+    }
+    if (window.__mlpTest3PillsRevealTimer) {
+      clearTimeout(window.__mlpTest3PillsRevealTimer);
+      window.__mlpTest3PillsRevealTimer = null;
     }
     // No more home-enter slide-in/fade-in. Weather + Steps were
     // pre-rendered + faded in during the morph (see prefade code in
@@ -8177,7 +8265,13 @@ window.__mlpTest3GoHome = function __mlpTest3GoHome() {
     // pseudo-element animation ends + the ::after content disappears.
     try {
       var cEl = document.getElementById('canvas');
-      if (cEl) cEl.removeAttribute('data-test3-intro-exiting');
+      if (cEl) {
+        cEl.removeAttribute('data-test3-intro-exiting');
+        cEl.setAttribute('data-test3-home', '1');
+        if (typeof _armTest3PillsReveal === 'function') {
+          _armTest3PillsReveal(cEl);
+        }
+      }
     } catch (_) {}
   }
 
@@ -9111,6 +9205,8 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         window.__mlpTest3WeatherDropped = false;
         window.__mlpTest3MusicShiftRunId = (window.__mlpTest3MusicShiftRunId || 0) + 1;
         window.__mlpTest3WeatherRainArmed = false;
+        window.__mlpTest3PillsRevealed = false;
+        window.__mlpTest3WeatherPrepPending = false;
         if (window.__mlpTest3WeatherRainTimer) {
           clearTimeout(window.__mlpTest3WeatherRainTimer);
           window.__mlpTest3WeatherRainTimer = null;
@@ -9122,6 +9218,10 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         if (window.__mlpTest3MusicMountTimer) {
           clearTimeout(window.__mlpTest3MusicMountTimer);
           window.__mlpTest3MusicMountTimer = null;
+        }
+        if (window.__mlpTest3PillsRevealTimer) {
+          clearTimeout(window.__mlpTest3PillsRevealTimer);
+          window.__mlpTest3PillsRevealTimer = null;
         }
         // Stop the goal time + distance tickers when leaving the home
         // stage so they don't run forever on every page load. Also
@@ -9183,6 +9283,9 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       window.__mlpTestConfig &&
       window.__mlpTestConfig.homeStage === 'home') {
     canvas.setAttribute('data-test3-home', '1');
+    if (typeof _armTest3PillsReveal === 'function') {
+      _armTest3PillsReveal(canvas);
+    }
     if (!window.__mlpTest3GoalFreshDone) {
       canvas.setAttribute('data-test3-goal-fresh', '1');
       window.__mlpTest3GoalFreshDone = true;
@@ -9209,6 +9312,8 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     // Left home stage — clear all home flags.
     canvas.removeAttribute('data-test3-home');
     canvas.removeAttribute('data-test3-goal-fresh');
+    canvas.removeAttribute('data-test3-pills-reveal');
+    canvas.removeAttribute('data-test3-pills-revealed');
   }
 
   // test3: flip prep → enter on next frame, then tear down enter after animations complete
@@ -9283,29 +9388,7 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       if (stage === 'home' && !window.__mlpTest3MusicShifted && !window.__mlpTest3MusicShiftPrep) {
         var musicShiftRunId = window.__mlpTest3MusicShiftRunId || 0;
         window.__mlpTest3MusicShiftTimer = setTimeout(function () {
-          try {
-            var stillTest3 =
-              (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test3') ||
-              (document.body && document.body.dataset && document.body.dataset.mlpTest === 'test3');
-            if (!stillTest3) return;
-            if ((window.__mlpTest3MusicShiftRunId || 0) !== musicShiftRunId) return;
-            if (!window.__mlpTestConfig || window.__mlpTestConfig.homeStage !== 'home') return;
-            var c = document.getElementById('canvas');
-            if (!c || c.getAttribute('data-test-scope') !== 'test3') return;
-            // Phase 1 — weather + progress drop alone; music mounts after.
-            window.__mlpTest3MusicShiftPrep = true;
-            var weatherEl = c.querySelector('#test3-weather');
-            var stepsEl   = c.querySelector('#test3-steps');
-            if (weatherEl) weatherEl.classList.remove('test3-intro-prefade');
-            if (stepsEl)   stepsEl.classList.remove('test3-intro-prefade');
-            c.setAttribute('data-test3-weather-prep', '1');
-            if (typeof window.__mountTest3WeatherRainMotion === 'function') {
-              window.__mountTest3WeatherRainMotion(1020);
-            }
-            window.__mlpTest3MusicMountTimer = setTimeout(function () {
-              _mountTest3MusicAfterWeatherPrep(musicShiftRunId);
-            }, TEST3_MUSIC_PRE_DELAY_MS);
-          } catch (_) {}
+          _beginTest3WeatherPrep(musicShiftRunId);
         }, 5600);
       }
     } catch (_) {}
