@@ -302,7 +302,8 @@ export default function MlpTestPage({
   // falls back to the active badge.
   const activeIdx   = TESTS.findIndex(t => t.id === testId && !t.disabled);
   const focusIdx    = hoveredIdx >= 0 ? hoveredIdx : activeIdx;
-  const shouldOffsetStack = Boolean(hoveredId || (activeIdx >= 0 && testId !== "test1"));
+  // Badge stack spacing stays on flex gap: 24px — never shift on hover.
+  const shouldOffsetStack = false;
 
   const renderPersonaAvatar = (test) => {
     if (test.id === "test1") {
@@ -687,6 +688,28 @@ export default function MlpTestPage({
             bottom: 0 !important;
             z-index: 10 !important;
           }
+          /* Flex slot grows with the 1.8× badge so gap: 24px is kept
+             between slots and neighbours never overlap. */
+          .persona-slot {
+            --persona-badge-size: 76px;
+            --persona-hover-scale: 1.8;
+            width: var(--persona-badge-size) !important;
+            height: var(--persona-badge-size) !important;
+            flex: 0 0 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            transition: width 0.52s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        height 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+          }
+          .persona-slot:has(.persona-circle:not(.is-disabled):hover),
+          .persona-slot:has(.persona-circle:not(.is-disabled).is-hovered),
+          .persona-slot:has(.persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"])) {
+            width: calc(var(--persona-badge-size) * var(--persona-hover-scale)) !important;
+            height: calc(var(--persona-badge-size) * var(--persona-hover-scale)) !important;
+            z-index: 4 !important;
+          }
           .persona-circle {
             width: 76px !important;
             height: 76px !important;
@@ -873,19 +896,9 @@ export default function MlpTestPage({
           .persona-circle:not(.is-disabled):hover,
           .persona-circle:not(.is-disabled).is-hovered,
           .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"]) {
-            /* Enlarged state — applied for:
-                 :hover / .is-hovered → user pointing at a non-active badge
-                                        (preview state)
-                 .is-active           → the badge whose scenario is the
-                                        CURRENT page (the "you are here"
-                                        indicator per user direction
-                                        "enlarged when that scenario is
-                                        appeared on mobile screen").
-               Persona 1 (test1) stays base size at rest and only
-               enlarges on hover so it matches the other badges when
-               the pointer is away. Same 1.8× scale otherwise; the
-               22 px sibling-offset (set elsewhere) gives the enlarged
-               badge room to grow without overlapping its neighbours. */
+            /* Enlarged state — 1.8× scale; the parent .persona-slot grows
+               in flex layout by the same factor so gap: 24px between
+               slots is preserved and neighbours never overlap. */
             transform: scale(1.8) !important;
           }
           .persona-circle:not(.is-disabled):hover::before,
@@ -1558,30 +1571,32 @@ export default function MlpTestPage({
               const onMouseLeave = test.disabled ? undefined : () => setHoveredId(prev => prev === test.id ? null : prev);
               if (test.disabled) {
                 return (
-                  <span
-                    key={test.id}
-                    className={className}
-                    aria-disabled="true"
-                    title="준비 중"
-                    data-hover-offset={offset}
-                    data-avatar-key={test.id}
-                  >
-                    {renderPersonaAvatar(test)}
-                  </span>
+                  <div key={test.id} className="persona-slot">
+                    <span
+                      className={className}
+                      aria-disabled="true"
+                      title="준비 중"
+                      data-hover-offset={offset}
+                      data-avatar-key={test.id}
+                    >
+                      {renderPersonaAvatar(test)}
+                    </span>
+                  </div>
                 );
               }
               return (
-                <Link
-                  key={test.id}
-                  href={test.href}
-                  className={className}
-                  data-hover-offset={offset}
-                  data-avatar-key={test.id}
-                  onMouseEnter={onMouseEnter}
-                  onMouseLeave={onMouseLeave}
-                >
-                  {renderPersonaAvatar(test)}
-                </Link>
+                <div key={test.id} className="persona-slot">
+                  <Link
+                    href={test.href}
+                    className={className}
+                    data-hover-offset={offset}
+                    data-avatar-key={test.id}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                  >
+                    {renderPersonaAvatar(test)}
+                  </Link>
+                </div>
               );
             })}
             {/* Profile card — slides in from the right of the hovered
