@@ -364,19 +364,24 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test1') {
         // Persona 1 — static lockscreen mock (public/Lock Screen.png via CSS)
         var test1RevealAll = !!(window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll);
-        var test1LotteY = test1RevealAll ? 495 : 411;
-        var test1PillY = test1RevealAll ? 571 : (test1LotteY + 72 + 12);
+        var test1StackGap = 16;
+        var test1LotteY = test1RevealAll ? (411 + 72 + test1StackGap) : 411;
+        var test1PillY = test1LotteY + 72 + 6;
+        var test1TransitScale = 1.177;
+        var test1TransitVisW = Math.round(294 * test1TransitScale);
+        var test1TransitVisH = Math.round(134 * test1TransitScale);
+        var test1TransitX = Math.round((388 - test1TransitVisW) / 2) - 2;
         return {
           surfaceType,
           components: [
             { id: 'test1-now-bar-b', role: 'test1-now-bar-b', zone: 'viewing',
-              _rect: { x: 21, y: 411, w: 346, h: 72 } },
+              _rect: { x: 21, y: 421, w: 346, h: 72 } },
             { id: 'test1-now-bar', role: 'test1-now-bar', zone: 'viewing',
               _rect: { x: 21, y: test1LotteY, w: 346, h: 72 } },
             { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
               _rect: { x: 130, y: test1PillY, w: 127, h: 36 } },
             { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
-              _rect: { x: 38, y: 639, w: 313, h: 143 } },
+              _rect: { x: test1TransitX, y: 701, w: test1TransitVisW, h: test1TransitVisH } },
             { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
               _rect: { x: 28, y: 797, w: 60, h: 59 } },
             { id: 'test1-r-shortcut', role: 'test1-lock-shortcut-r', zone: 'bottomNav',
@@ -9161,6 +9166,12 @@ function installTest2P2TransitionBridge(canvas) {
 var TEST1_INTRO_DELAY_MS = 3000;
 var TEST1_LOTTE_INTRO_MS = 720;
 var TEST1_PILL_AFTER_LOTTE_MS = 1300;
+var TEST1_PILL_ANIM_MS = 3800;
+var TEST1_GREEN_AFTER_PILL_MS = 1500;
+var TEST1_SHORTCUTS_FADE_MS = 480;
+var TEST1_STACK_AFTER_GREEN_MS = 3500;
+var TEST1_STACK_ITEM_GAP_PX = 16;
+var TEST1_STACK_SHIFT_PX = 72 + TEST1_STACK_ITEM_GAP_PX;
 
 function _clearTest1IntroTimer() {
   if (window.__mlpTest1IntroTimer) {
@@ -9171,6 +9182,30 @@ function _clearTest1IntroTimer() {
     clearTimeout(window.__mlpTest1PillTimer);
     window.__mlpTest1PillTimer = null;
   }
+  if (window.__mlpTest1GreenTimer) {
+    clearTimeout(window.__mlpTest1GreenTimer);
+    window.__mlpTest1GreenTimer = null;
+  }
+  if (window.__mlpTest1StackTimer) {
+    clearTimeout(window.__mlpTest1StackTimer);
+    window.__mlpTest1StackTimer = null;
+  }
+  if (window.__mlpTest1ShortcutFadeTimer) {
+    clearTimeout(window.__mlpTest1ShortcutFadeTimer);
+    window.__mlpTest1ShortcutFadeTimer = null;
+  }
+}
+
+function _runTest1ShortcutsFade() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-shortcuts-out')) return;
+    c.setAttribute('data-test1-shortcuts-out', '1');
+    c.setAttribute('data-test1-shortcuts-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1ShortcutsOut = true;
+  } catch (_) {}
 }
 
 function _runTest1PillIntro() {
@@ -9188,10 +9223,65 @@ function _runTest1PillIntro() {
           if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
           canvas.removeAttribute('data-test1-pill-prep');
           canvas.setAttribute('data-test1-pill-run', '1');
+          _armTest1GreenDelay(canvas);
         } catch (_) {}
       });
     });
   } catch (_) {}
+}
+
+function _runTest1GreenIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.setAttribute('data-test1-green-run', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1GreenRun = true;
+    _armTest1StackDelay(c);
+  } catch (_) {}
+}
+
+function _runTest1StackIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.setAttribute('data-test1-stack-run', '1');
+    c.setAttribute('data-test1-stack-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1StackRun = true;
+  } catch (_) {}
+}
+
+function _armTest1StackDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (canvas.getAttribute('data-test1-stack-run')) return;
+  if (!canvas.getAttribute('data-test1-green-run')) return;
+  if (window.__mlpTest1StackTimer) return;
+  window.__mlpTest1StackTimer = setTimeout(function () {
+    window.__mlpTest1StackTimer = null;
+    _runTest1StackIntro();
+  }, TEST1_STACK_AFTER_GREEN_MS);
+}
+
+function _armTest1GreenDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (!canvas.getAttribute('data-test1-pill-run')) return;
+  var greenDelay = TEST1_PILL_ANIM_MS + TEST1_GREEN_AFTER_PILL_MS;
+  var shortcutDelay = Math.max(0, greenDelay - TEST1_SHORTCUTS_FADE_MS);
+  if (!canvas.getAttribute('data-test1-green-run') && !window.__mlpTest1GreenTimer) {
+    window.__mlpTest1GreenTimer = setTimeout(function () {
+      window.__mlpTest1GreenTimer = null;
+      _runTest1GreenIntro();
+    }, greenDelay);
+  }
+  if (!canvas.getAttribute('data-test1-shortcuts-out') && !window.__mlpTest1ShortcutFadeTimer) {
+    window.__mlpTest1ShortcutFadeTimer = setTimeout(function () {
+      window.__mlpTest1ShortcutFadeTimer = null;
+      _runTest1ShortcutsFade();
+    }, shortcutDelay);
+  }
 }
 
 function _armTest1PillDelay(canvas) {
@@ -9262,12 +9352,39 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         canvas.removeAttribute('data-test1-intro-run');
         canvas.removeAttribute('data-test1-pill-prep');
         canvas.removeAttribute('data-test1-pill-run');
+        canvas.removeAttribute('data-test1-green-run');
+        canvas.removeAttribute('data-test1-stack-run');
+        canvas.removeAttribute('data-test1-stack-animate');
+        canvas.removeAttribute('data-test1-shortcuts-out');
+        canvas.removeAttribute('data-test1-shortcuts-animate');
+        if (window.__mlpTestConfig) {
+          window.__mlpTestConfig.test1GreenRun = false;
+          window.__mlpTestConfig.test1StackRun = false;
+          window.__mlpTestConfig.test1ShortcutsOut = false;
+        }
       } else {
         canvas.removeAttribute('data-test1-reveal-all');
         canvas.removeAttribute('data-test1-intro');
         canvas.removeAttribute('data-test1-intro-run');
         canvas.removeAttribute('data-test1-pill-prep');
         canvas.removeAttribute('data-test1-pill-run');
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GreenRun) {
+          canvas.setAttribute('data-test1-green-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-green-run');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1StackRun) {
+          canvas.setAttribute('data-test1-stack-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-stack-run');
+          canvas.removeAttribute('data-test1-stack-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1ShortcutsOut) {
+          canvas.setAttribute('data-test1-shortcuts-out', '1');
+        } else {
+          canvas.removeAttribute('data-test1-shortcuts-out');
+          canvas.removeAttribute('data-test1-shortcuts-animate');
+        }
       }
     } else {
       _clearTest1IntroTimer();
@@ -9276,6 +9393,8 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       canvas.removeAttribute('data-test1-intro-run');
       canvas.removeAttribute('data-test1-pill-prep');
       canvas.removeAttribute('data-test1-pill-run');
+      canvas.removeAttribute('data-test1-green-run');
+      canvas.removeAttribute('data-test1-stack-run');
     }
     if (testScope === 'test3') {
       var homeStage = window.__mlpTestConfig && window.__mlpTestConfig.homeStage;
@@ -9352,6 +9471,10 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     canvas.removeAttribute('data-test1-intro-run');
     canvas.removeAttribute('data-test1-pill-prep');
     canvas.removeAttribute('data-test1-pill-run');
+    canvas.removeAttribute('data-test1-green-run');
+    canvas.removeAttribute('data-test1-stack-run');
+    canvas.removeAttribute('data-test1-shortcuts-out');
+    canvas.removeAttribute('data-test1-shortcuts-animate');
   }
   window.renderSurfacePlan(canvas, plan, layout);
   if (testScope === 'test1') {
@@ -9368,6 +9491,12 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       }
       if (window.__mlpTestConfig && !window.__mlpTestConfig.test1RevealAll) {
         _armTest1IntroDelay(canvas);
+        if (canvas.getAttribute('data-test1-pill-run')) {
+          _armTest1GreenDelay(canvas);
+        }
+        if (canvas.getAttribute('data-test1-green-run')) {
+          _armTest1StackDelay(canvas);
+        }
       }
     } catch (_) {}
   }

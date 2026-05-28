@@ -7,6 +7,9 @@ export default function Test1Page() {
 
     if (window.__mlpTestConfig) {
       window.__mlpTestConfig.test1RevealAll = false;
+      window.__mlpTestConfig.test1GreenRun = false;
+      window.__mlpTestConfig.test1StackRun = false;
+      window.__mlpTestConfig.test1ShortcutsOut = false;
     }
 
     var tries = 0;
@@ -18,6 +21,11 @@ export default function Test1Page() {
         canvas.removeAttribute("data-test1-intro-run");
         canvas.removeAttribute("data-test1-pill-prep");
         canvas.removeAttribute("data-test1-pill-run");
+        canvas.removeAttribute("data-test1-green-run");
+        canvas.removeAttribute("data-test1-stack-run");
+        canvas.removeAttribute("data-test1-stack-animate");
+        canvas.removeAttribute("data-test1-shortcuts-out");
+        canvas.removeAttribute("data-test1-shortcuts-animate");
         if (typeof window.__armTest1IntroDelay === "function") {
           window.__armTest1IntroDelay(canvas);
         }
