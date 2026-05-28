@@ -371,6 +371,7 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
         var test1TransitVisW = Math.round(294 * test1TransitScale);
         var test1TransitVisH = Math.round(134 * test1TransitScale);
         var test1TransitX = Math.round((388 - test1TransitVisW) / 2) - 2;
+        var test1LotteStackY = test1LotteY + 88;
         return {
           surfaceType,
           components: [
@@ -382,6 +383,12 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               _rect: { x: 130, y: test1PillY, w: 127, h: 36 } },
             { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
               _rect: { x: test1TransitX, y: 701, w: test1TransitVisW, h: test1TransitVisH } },
+            { id: 'test1-gradient-sweep-a', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: 21, y: 421, w: 346, h: 72 }, variant: { sweepShape: 'bar' } },
+            { id: 'test1-gradient-sweep-b', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: 21, y: test1LotteStackY, w: 346, h: 72 }, variant: { sweepShape: 'bar' } },
+            { id: 'test1-gradient-sweep-c', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: test1TransitX, y: 701, w: test1TransitVisW, h: test1TransitVisH }, variant: { sweepShape: 'card' } },
             { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
               _rect: { x: 28, y: 797, w: 60, h: 59 } },
             { id: 'test1-r-shortcut', role: 'test1-lock-shortcut-r', zone: 'bottomNav',
@@ -5801,6 +5808,17 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       '</div>';
     }
 
+    case 'test1-gradient-sweep': {
+      var sweepShape = (comp && comp.variant && comp.variant.sweepShape) || 'bar';
+      return '<div class="test1-gradient-sweep test1-gradient-sweep--' + sweepShape + '" aria-hidden="true">' +
+        '<div class="test1-gradient-sweep__glass">' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--1"></div>' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--2"></div>' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--3"></div>' +
+        '</div>' +
+      '</div>';
+    }
+
     case 'test1-lock-shortcut-l': {
       return '<div class="test1-lock-shortcut-l">' +
         '<div class="test1-lock-shortcut-l__ellipse" aria-hidden="true"></div>' +
@@ -9170,6 +9188,11 @@ var TEST1_PILL_ANIM_MS = 3800;
 var TEST1_GREEN_AFTER_PILL_MS = 1500;
 var TEST1_SHORTCUTS_FADE_MS = 480;
 var TEST1_STACK_AFTER_GREEN_MS = 3500;
+var TEST1_STACK_INTRO_MS = 720;
+var TEST1_AFTER_STACK_MS = 3000;
+var TEST1_PILL_OUT_FADE_MS = 520;
+var TEST1_GRADIENT_FLOW_MS = 5000;
+var TEST1_GRADIENT_OUT_FADE_MS = 600;
 var TEST1_STACK_ITEM_GAP_PX = 16;
 var TEST1_STACK_SHIFT_PX = 72 + TEST1_STACK_ITEM_GAP_PX;
 
@@ -9193,6 +9216,22 @@ function _clearTest1IntroTimer() {
   if (window.__mlpTest1ShortcutFadeTimer) {
     clearTimeout(window.__mlpTest1ShortcutFadeTimer);
     window.__mlpTest1ShortcutFadeTimer = null;
+  }
+  if (window.__mlpTest1PillOutDelayTimer) {
+    clearTimeout(window.__mlpTest1PillOutDelayTimer);
+    window.__mlpTest1PillOutDelayTimer = null;
+  }
+  if (window.__mlpTest1GradientStartTimer) {
+    clearTimeout(window.__mlpTest1GradientStartTimer);
+    window.__mlpTest1GradientStartTimer = null;
+  }
+  if (window.__mlpTest1GradientEndTimer) {
+    clearTimeout(window.__mlpTest1GradientEndTimer);
+    window.__mlpTest1GradientEndTimer = null;
+  }
+  if (window.__mlpTest1GradientOutTimer) {
+    clearTimeout(window.__mlpTest1GradientOutTimer);
+    window.__mlpTest1GradientOutTimer = null;
   }
 }
 
@@ -9249,6 +9288,69 @@ function _runTest1StackIntro() {
     c.setAttribute('data-test1-stack-run', '1');
     c.setAttribute('data-test1-stack-animate', '1');
     if (window.__mlpTestConfig) window.__mlpTestConfig.test1StackRun = true;
+    _armTest1PillOutDelay(c);
+  } catch (_) {}
+}
+
+function _armTest1PillOutDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (!canvas.getAttribute('data-test1-stack-run')) return;
+  if (canvas.getAttribute('data-test1-pill-out')) return;
+  if (window.__mlpTest1PillOutDelayTimer) return;
+  window.__mlpTest1PillOutDelayTimer = setTimeout(function () {
+    window.__mlpTest1PillOutDelayTimer = null;
+    _runTest1PillOut();
+  }, TEST1_AFTER_STACK_MS);
+}
+
+function _runTest1PillOut() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-pill-out')) return;
+    c.setAttribute('data-test1-pill-out', '1');
+    c.setAttribute('data-test1-pill-out-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1PillOut = true;
+    if (window.__mlpTest1GradientStartTimer) return;
+    window.__mlpTest1GradientStartTimer = setTimeout(function () {
+      window.__mlpTest1GradientStartTimer = null;
+      _runTest1GradientSweep();
+    }, TEST1_PILL_OUT_FADE_MS);
+  } catch (_) {}
+}
+
+function _runTest1GradientSweep() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-gradient-run')) return;
+    c.setAttribute('data-test1-gradient-run', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientRun = true;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var canvas = document.getElementById('canvas');
+          if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          canvas.setAttribute('data-test1-gradient-animate', '1');
+          if (window.__mlpTest1GradientEndTimer) return;
+          window.__mlpTest1GradientEndTimer = setTimeout(function () {
+            window.__mlpTest1GradientEndTimer = null;
+            canvas.setAttribute('data-test1-gradient-out', '1');
+            if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientOut = true;
+            if (window.__mlpTest1GradientOutTimer) return;
+            window.__mlpTest1GradientOutTimer = setTimeout(function () {
+              window.__mlpTest1GradientOutTimer = null;
+              canvas.removeAttribute('data-test1-gradient-animate');
+              if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientDone = true;
+            }, TEST1_GRADIENT_OUT_FADE_MS);
+          }, TEST1_GRADIENT_FLOW_MS);
+        } catch (_) {}
+      });
+    });
   } catch (_) {}
 }
 
@@ -9357,10 +9459,19 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         canvas.removeAttribute('data-test1-stack-animate');
         canvas.removeAttribute('data-test1-shortcuts-out');
         canvas.removeAttribute('data-test1-shortcuts-animate');
+        canvas.removeAttribute('data-test1-pill-out');
+        canvas.removeAttribute('data-test1-pill-out-animate');
+        canvas.removeAttribute('data-test1-gradient-run');
+        canvas.removeAttribute('data-test1-gradient-animate');
+        canvas.removeAttribute('data-test1-gradient-out');
         if (window.__mlpTestConfig) {
           window.__mlpTestConfig.test1GreenRun = false;
           window.__mlpTestConfig.test1StackRun = false;
           window.__mlpTestConfig.test1ShortcutsOut = false;
+          window.__mlpTestConfig.test1PillOut = false;
+          window.__mlpTestConfig.test1GradientRun = false;
+          window.__mlpTestConfig.test1GradientOut = false;
+          window.__mlpTestConfig.test1GradientDone = false;
         }
       } else {
         canvas.removeAttribute('data-test1-reveal-all');
@@ -9384,6 +9495,23 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         } else {
           canvas.removeAttribute('data-test1-shortcuts-out');
           canvas.removeAttribute('data-test1-shortcuts-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1PillOut) {
+          canvas.setAttribute('data-test1-pill-out', '1');
+        } else {
+          canvas.removeAttribute('data-test1-pill-out');
+          canvas.removeAttribute('data-test1-pill-out-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GradientRun) {
+          canvas.setAttribute('data-test1-gradient-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-gradient-run');
+          canvas.removeAttribute('data-test1-gradient-animate');
+          canvas.removeAttribute('data-test1-gradient-out');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GradientOut) {
+          canvas.setAttribute('data-test1-gradient-out', '1');
+          canvas.removeAttribute('data-test1-gradient-animate');
         }
       }
     } else {
@@ -9475,6 +9603,11 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     canvas.removeAttribute('data-test1-stack-run');
     canvas.removeAttribute('data-test1-shortcuts-out');
     canvas.removeAttribute('data-test1-shortcuts-animate');
+    canvas.removeAttribute('data-test1-pill-out');
+    canvas.removeAttribute('data-test1-pill-out-animate');
+    canvas.removeAttribute('data-test1-gradient-run');
+    canvas.removeAttribute('data-test1-gradient-animate');
+    canvas.removeAttribute('data-test1-gradient-out');
   }
   window.renderSurfacePlan(canvas, plan, layout);
   if (testScope === 'test1') {
@@ -9496,6 +9629,9 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         }
         if (canvas.getAttribute('data-test1-green-run')) {
           _armTest1StackDelay(canvas);
+        }
+        if (canvas.getAttribute('data-test1-stack-run')) {
+          _armTest1PillOutDelay(canvas);
         }
       }
     } catch (_) {}
