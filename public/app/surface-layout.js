@@ -363,15 +363,18 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
       }
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test1') {
         // Persona 1 — static lockscreen mock (public/Lock Screen.png via CSS)
+        var test1RevealAll = !!(window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll);
+        var test1LotteY = test1RevealAll ? 495 : 411;
+        var test1PillY = test1RevealAll ? 571 : (test1LotteY + 72 + 12);
         return {
           surfaceType,
           components: [
-            { id: 'test1-now-bar', role: 'test1-now-bar', zone: 'viewing',
-              _rect: { x: 21, y: 415, w: 346, h: 72 } },
-            { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
-              _rect: { x: 130, y: 491, w: 127, h: 36 } },
             { id: 'test1-now-bar-b', role: 'test1-now-bar-b', zone: 'viewing',
-              _rect: { x: 21, y: 539, w: 346, h: 72 } },
+              _rect: { x: 21, y: 411, w: 346, h: 72 } },
+            { id: 'test1-now-bar', role: 'test1-now-bar', zone: 'viewing',
+              _rect: { x: 21, y: test1LotteY, w: 346, h: 72 } },
+            { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
+              _rect: { x: 130, y: test1PillY, w: 127, h: 36 } },
             { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
               _rect: { x: 38, y: 639, w: 313, h: 143 } },
             { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
@@ -5732,7 +5735,12 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
     }
 
     case 'test1-assist-pill': {
-      return '<img class="test1-assist-pill" src="/test1-assist-pill.svg" alt="" draggable="false" />';
+      return '<div class="test1-assist-pill-wrap">' +
+        '<div class="test1-assist-pill-stage">' +
+          '<span class="test1-assist-pill-dot" aria-hidden="true"></span>' +
+          '<img class="test1-assist-pill-img" src="/test1-assist-pill.svg" alt="" draggable="false" />' +
+        '</div>' +
+        '</div>';
     }
 
     case 'test1-transit-card': {
@@ -9130,6 +9138,80 @@ function installTest2P2TransitionBridge(canvas) {
   }).observe(canvas, { attributes: true, attributeFilter: ['class'] });
 }
 
+var TEST1_INTRO_DELAY_MS = 3000;
+var TEST1_LOTTE_INTRO_MS = 720;
+var TEST1_PILL_AFTER_LOTTE_MS = 1300;
+
+function _clearTest1IntroTimer() {
+  if (window.__mlpTest1IntroTimer) {
+    clearTimeout(window.__mlpTest1IntroTimer);
+    window.__mlpTest1IntroTimer = null;
+  }
+  if (window.__mlpTest1PillTimer) {
+    clearTimeout(window.__mlpTest1PillTimer);
+    window.__mlpTest1PillTimer = null;
+  }
+}
+
+function _runTest1PillIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.removeAttribute('data-test1-pill-run');
+    c.setAttribute('data-test1-pill-prep', '1');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var canvas = document.getElementById('canvas');
+          if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          canvas.removeAttribute('data-test1-pill-prep');
+          canvas.setAttribute('data-test1-pill-run', '1');
+        } catch (_) {}
+      });
+    });
+  } catch (_) {}
+}
+
+function _armTest1PillDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (window.__mlpTest1PillTimer) return;
+  window.__mlpTest1PillTimer = setTimeout(function () {
+    window.__mlpTest1PillTimer = null;
+    _runTest1PillIntro();
+  }, TEST1_LOTTE_INTRO_MS + TEST1_PILL_AFTER_LOTTE_MS);
+}
+
+function _armTest1IntroDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (window.__mlpTest1IntroTimer) return;
+  window.__mlpTest1IntroTimer = setTimeout(function () {
+    window.__mlpTest1IntroTimer = null;
+    try {
+      var c = document.getElementById('canvas');
+      if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+      c.setAttribute('data-test1-intro-run', '1');
+      _armTest1PillDelay(c);
+    } catch (_) {}
+  }, TEST1_INTRO_DELAY_MS);
+}
+
+window.__armTest1IntroDelay = _armTest1IntroDelay;
+window.__clearTest1IntroTimer = _clearTest1IntroTimer;
+
+window.test1RevealAllComponents = function test1RevealAllComponents() {
+  if (!window.__mlpTestConfig || window.__mlpTestConfig.id !== 'test1') return;
+  _clearTest1IntroTimer();
+  window.__mlpTestConfig.test1RevealAll = true;
+  if (typeof window.generateSurfaceScenario === 'function') {
+    window.generateSurfaceScenario(window.currentSurfaceType || 'tab-root');
+  }
+};
+
 window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
@@ -9149,6 +9231,32 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   window.expandContainerComponents(plan, layout);
   if (testScope) {
     canvas.setAttribute('data-test-scope', testScope);
+    if (testScope === 'test1') {
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll == null) {
+        window.__mlpTestConfig.test1RevealAll = false;
+      }
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) {
+        _clearTest1IntroTimer();
+        canvas.setAttribute('data-test1-reveal-all', '1');
+        canvas.removeAttribute('data-test1-intro');
+        canvas.removeAttribute('data-test1-intro-run');
+        canvas.removeAttribute('data-test1-pill-prep');
+        canvas.removeAttribute('data-test1-pill-run');
+      } else {
+        canvas.removeAttribute('data-test1-reveal-all');
+        canvas.removeAttribute('data-test1-intro');
+        canvas.removeAttribute('data-test1-intro-run');
+        canvas.removeAttribute('data-test1-pill-prep');
+        canvas.removeAttribute('data-test1-pill-run');
+      }
+    } else {
+      _clearTest1IntroTimer();
+      canvas.removeAttribute('data-test1-reveal-all');
+      canvas.removeAttribute('data-test1-intro');
+      canvas.removeAttribute('data-test1-intro-run');
+      canvas.removeAttribute('data-test1-pill-prep');
+      canvas.removeAttribute('data-test1-pill-run');
+    }
     if (testScope === 'test3') {
       var homeStage = window.__mlpTestConfig && window.__mlpTestConfig.homeStage;
       var shouldEnter = (homeStage === 'home') && !!window.__mlpTest3HomeEnterArmed;
@@ -9214,12 +9322,35 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       window.__mlpTest3HoverPaused = false;
     }
   } else {
+    _clearTest1IntroTimer();
     canvas.removeAttribute('data-test-scope');
+    canvas.removeAttribute('data-test1-reveal-all');
     canvas.removeAttribute('data-test3-home-enter');
     canvas.removeAttribute('data-test3-home-prep');
     canvas.removeAttribute('data-test3-music-shift');
+    canvas.removeAttribute('data-test1-intro');
+    canvas.removeAttribute('data-test1-intro-run');
+    canvas.removeAttribute('data-test1-pill-prep');
+    canvas.removeAttribute('data-test1-pill-run');
   }
   window.renderSurfacePlan(canvas, plan, layout);
+  if (testScope === 'test1') {
+    try {
+      var pillItem = canvas.querySelector('#test1-assist-pill');
+      if (pillItem && !pillItem.querySelector('.test1-assist-pill-stage')) {
+        for (var pi = 0; pi < plan.components.length; pi++) {
+          if (plan.components[pi].id === 'test1-assist-pill') {
+            var pillRect = window.resolveComponentRect(plan.components[pi], layout, plan);
+            pillItem.innerHTML = window.renderAtomicForRole(plan.components[pi], pillRect);
+            break;
+          }
+        }
+      }
+      if (window.__mlpTestConfig && !window.__mlpTestConfig.test1RevealAll) {
+        _armTest1IntroDelay(canvas);
+      }
+    } catch (_) {}
+  }
   if (testScope === 'test2') {
     try {
       installTest2P2TransitionBridge(canvas);
