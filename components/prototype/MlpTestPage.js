@@ -1264,7 +1264,7 @@ export default function MlpTestPage({
           }
           /* test1 (지수) — test2 card shell, mint age/role row */
           .persona-profile-card--test2.persona-profile-card--test1 {
-            width: 382px;
+            width: 392px;
             padding: 22px 24px 20px;
           }
           .persona-profile-card--test1 .persona-profile-card__age {
@@ -1288,7 +1288,7 @@ export default function MlpTestPage({
             flex-direction: column;
             gap: 0;
             margin: 0;
-            font-size: 12.6px;
+            font-size: 14.9292px;
             line-height: 1.5;
             white-space: normal;
             word-break: keep-all;
