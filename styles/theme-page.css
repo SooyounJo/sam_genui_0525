@@ -13170,9 +13170,10 @@
     left: 50%;
     height: 100%;
     width: min(100%, calc(72px * 288 / 60));
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0);
     border-radius: 9999px;
     overflow: hidden;
+    isolation: isolate;
   }
 
   /* test1-transit-card 와 동일: 294×134 + scale(1.177) top-left */
@@ -13188,10 +13189,11 @@
     left: 0;
     width: 294px;
     height: 134px;
-    transform: scale(1.177);
+    transform: scale(1.177) translateZ(0);
     transform-origin: top left;
     border-radius: 35px;
     overflow: hidden;
+    isolation: isolate;
   }
 
   #canvas[data-test-scope="test1"] .test1-gradient-sweep--bar .test1-gradient-sweep__track,
@@ -13199,63 +13201,52 @@
     border-radius: inherit;
   }
 
-  /* 3 sequential passes (~1.667s each) in 5s — same left→right fill spread per pass */
+  #canvas[data-test-scope="test1"] {
+    --test1-pass-dur: 1.667s;
+    --test1-pass-overlap: 0.24s;
+    --test1-pass-step: calc(var(--test1-pass-dur) - var(--test1-pass-overlap));
+  }
+
+  /* 3 passes in ~5s — next pass starts before previous ends (no pause after full cover) */
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--1 {
-    animation:
-      test1GradientFillPass 1.667s linear 0s forwards,
-      test1GradientTrackOut 0.35s linear 1.45s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0s forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--2 {
-    animation:
-      test1GradientFillPass 1.667s linear 1.667s forwards,
-      test1GradientTrackOut 0.35s linear 3.117s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear var(--test1-pass-step) forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--3 {
-    animation: test1GradientFillPass 1.667s linear 3.334s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(var(--test1-pass-step) * 2) forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--1 {
-    animation:
-      test1GradientFillPass 1.667s linear 0.1s forwards,
-      test1GradientTrackOut 0.35s linear 1.55s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0.1s forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--2 {
-    animation:
-      test1GradientFillPass 1.667s linear 1.767s forwards,
-      test1GradientTrackOut 0.35s linear 3.217s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step)) forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--3 {
-    animation: test1GradientFillPass 1.667s linear 3.434s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step) * 2) forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--1 {
-    animation:
-      test1GradientFillPass 1.667s linear 0.2s forwards,
-      test1GradientTrackOut 0.35s linear 1.65s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0.2s forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--2 {
-    animation:
-      test1GradientFillPass 1.667s linear 1.867s forwards,
-      test1GradientTrackOut 0.35s linear 3.317s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step)) forwards;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--3 {
-    animation: test1GradientFillPass 1.667s linear 3.534s forwards;
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step) * 2) forwards;
   }
 
   @keyframes test1GradientFillPass {
     0% { --test1-fill: -4%; opacity: 1; }
     100% { --test1-fill: 128%; opacity: 1; }
-  }
-
-  @keyframes test1GradientTrackOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run] .test1-gradient-sweep {
@@ -13276,7 +13267,9 @@
     pointer-events: none;
     opacity: 0;
     --test1-fill: -4%;
-    will-change: --test1-fill, opacity;
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
     -webkit-backdrop-filter: blur(3.6px);
     backdrop-filter: blur(3.6px);
     background: linear-gradient(
@@ -13329,6 +13322,27 @@
 
   #canvas[data-test-scope="test1"] .test1-gradient-sweep__track--3 {
     z-index: 2;
+  }
+
+  /* gradient 동안 underlying component repaint flicker 방지 (gradient visual unchanged) */
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-transit-card {
+    isolation: isolate;
   }
 
   #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-animate]) .test1-gradient-sweep {
