@@ -12795,7 +12795,10 @@
   }
 
   #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-stage {
-    animation: test1AssistPillMorph 3.8s cubic-bezier(0.33, 1, 0.68, 1) both;
+    animation:
+      test1AssistPillFadeIn 0.532s cubic-bezier(0.33, 1, 0.68, 1) both,
+      test1AssistPillSlideLeft 1.14s cubic-bezier(0.45, 0, 0.55, 1) 0.532s both,
+      test1AssistPillExpandWidth 2.128s cubic-bezier(0.16, 1, 0.3, 1) 1.672s both;
   }
 
   #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-shell {
@@ -12822,42 +12825,38 @@
     animation: test1AssistPillIcon4 3.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  /* 1) center circle fade in + slide left  2) width-only expand (no distortion)  3) icons stagger in */
-  @keyframes test1AssistPillMorph {
+  /* 원 등장 14%(0.532s) 유지 → 슬라이드 14~44% → 1.672s에 expand 동시 시작 */
+  @keyframes test1AssistPillFadeIn {
     0% {
       opacity: 0;
-      left: 50%;
-      width: 36px;
-      transform: translate3d(-50%, 0, 0);
-    }
-    14% {
-      opacity: 1;
-      left: 50%;
-      width: 36px;
-      transform: translate3d(-50%, 0, 0);
-    }
-    44% {
-      opacity: 1;
-      left: 0;
-      width: 36px;
-      transform: translate3d(0, 0, 0);
-    }
-    50% {
-      opacity: 1;
-      left: 0;
-      width: 36px;
-      transform: translate3d(0, 0, 0);
     }
     100% {
       opacity: 1;
+    }
+  }
+
+  @keyframes test1AssistPillSlideLeft {
+    0% {
+      left: 50%;
+      transform: translate3d(-50%, 0, 0);
+    }
+    100% {
       left: 0;
-      width: 100%;
       transform: translate3d(0, 0, 0);
     }
   }
 
+  @keyframes test1AssistPillExpandWidth {
+    0% {
+      width: 36px;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
   @keyframes test1AssistPillShell {
-    0%, 50% {
+    0%, 44% {
       background-color: rgba(146, 146, 151, 0.92);
     }
     96% {
@@ -12878,10 +12877,10 @@
   }
 
   @keyframes test1AssistPillIcon1 {
-    0%, 54% {
+    0%, 48% {
       opacity: 0;
     }
-    68% {
+    62% {
       opacity: 1;
     }
     100% {
@@ -12890,10 +12889,10 @@
   }
 
   @keyframes test1AssistPillIcon2 {
-    0%, 62% {
+    0%, 56% {
       opacity: 0;
     }
-    76% {
+    70% {
       opacity: 1;
     }
     100% {
@@ -12902,10 +12901,10 @@
   }
 
   @keyframes test1AssistPillIcon3 {
-    0%, 70% {
+    0%, 64% {
       opacity: 0;
     }
-    84% {
+    78% {
       opacity: 1;
     }
     100% {
@@ -12914,10 +12913,10 @@
   }
 
   @keyframes test1AssistPillIcon4 {
-    0%, 78% {
+    0%, 72% {
       opacity: 0;
     }
-    92% {
+    86% {
       opacity: 1;
     }
     100% {
