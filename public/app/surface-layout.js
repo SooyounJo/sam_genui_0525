@@ -9190,9 +9190,10 @@ var TEST1_SHORTCUTS_FADE_MS = 480;
 var TEST1_STACK_AFTER_GREEN_MS = 3500;
 var TEST1_STACK_INTRO_MS = 720;
 var TEST1_AFTER_STACK_MS = 3000;
-var TEST1_PILL_OUT_FADE_MS = 520;
-var TEST1_GRADIENT_FLOW_MS = 5000;
-var TEST1_GRADIENT_OUT_FADE_MS = 600;
+var TEST1_PILL_OUT_FADE_MS = 800;
+var TEST1_PILL_OUT_GAP_MS = 420;
+var TEST1_GRADIENT_FLOW_MS = 4721;
+var TEST1_GRADIENT_OUT_FADE_MS = 3400;
 var TEST1_STACK_ITEM_GAP_PX = 16;
 var TEST1_STACK_SHIFT_PX = 72 + TEST1_STACK_ITEM_GAP_PX;
 
@@ -9220,6 +9221,10 @@ function _clearTest1IntroTimer() {
   if (window.__mlpTest1PillOutDelayTimer) {
     clearTimeout(window.__mlpTest1PillOutDelayTimer);
     window.__mlpTest1PillOutDelayTimer = null;
+  }
+  if (window.__mlpTest1PillOutEndTimer) {
+    clearTimeout(window.__mlpTest1PillOutEndTimer);
+    window.__mlpTest1PillOutEndTimer = null;
   }
   if (window.__mlpTest1GradientStartTimer) {
     clearTimeout(window.__mlpTest1GradientStartTimer);
@@ -9313,11 +9318,21 @@ function _runTest1PillOut() {
     c.setAttribute('data-test1-pill-out', '1');
     c.setAttribute('data-test1-pill-out-animate', '1');
     if (window.__mlpTestConfig) window.__mlpTestConfig.test1PillOut = true;
+    if (window.__mlpTest1PillOutEndTimer) clearTimeout(window.__mlpTest1PillOutEndTimer);
+    window.__mlpTest1PillOutEndTimer = setTimeout(function () {
+      window.__mlpTest1PillOutEndTimer = null;
+      try {
+        var pillCanvas = document.getElementById('canvas');
+        if (pillCanvas && pillCanvas.getAttribute('data-test-scope') === 'test1') {
+          pillCanvas.removeAttribute('data-test1-pill-out-animate');
+        }
+      } catch (_) {}
+    }, TEST1_PILL_OUT_FADE_MS);
     if (window.__mlpTest1GradientStartTimer) return;
     window.__mlpTest1GradientStartTimer = setTimeout(function () {
       window.__mlpTest1GradientStartTimer = null;
       _runTest1GradientSweep();
-    }, TEST1_PILL_OUT_FADE_MS);
+    }, TEST1_PILL_OUT_FADE_MS + TEST1_PILL_OUT_GAP_MS);
   } catch (_) {}
 }
 
@@ -9339,12 +9354,23 @@ function _runTest1GradientSweep() {
           if (window.__mlpTest1GradientEndTimer) return;
           window.__mlpTest1GradientEndTimer = setTimeout(function () {
             window.__mlpTest1GradientEndTimer = null;
-            canvas.setAttribute('data-test1-gradient-out', '1');
-            if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientOut = true;
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                try {
+                  var c2 = document.getElementById('canvas');
+                  if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+                  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+                  c2.setAttribute('data-test1-gradient-out-animate', '1');
+                } catch (_) {}
+              });
+            });
             if (window.__mlpTest1GradientOutTimer) return;
             window.__mlpTest1GradientOutTimer = setTimeout(function () {
               window.__mlpTest1GradientOutTimer = null;
+              canvas.setAttribute('data-test1-gradient-out', '1');
+              if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientOut = true;
               canvas.removeAttribute('data-test1-gradient-animate');
+              canvas.removeAttribute('data-test1-gradient-out-animate');
               if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientDone = true;
             }, TEST1_GRADIENT_OUT_FADE_MS);
           }, TEST1_GRADIENT_FLOW_MS);

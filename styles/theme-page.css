@@ -12944,8 +12944,8 @@
     visibility: hidden !important;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
-  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]) #test1-now-bar {
+  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar {
     display: block !important;
     visibility: visible !important;
     animation: test1LotteIntro 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
@@ -13012,8 +13012,8 @@
   }
 
   /* test1 intro — green: pill 완료 1.5초 후 30px 아래에서 rise-in */
-  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-transit-card"],
-  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]) #test1-transit-card {
+  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-transit-card {
     display: block !important;
     visibility: visible !important;
     pointer-events: none !important;
@@ -13050,8 +13050,8 @@
     transform: none;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar-b"],
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar-b {
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar-b {
     animation: test1LotteIntro 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
   }
 
@@ -13062,10 +13062,13 @@
     transform: translate3d(0, 88px, 0);
   }
 
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar,
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
-  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar {
+    animation: test1StackShift 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]):not([data-test1-pill-out-animate]):not([data-test1-pill-out]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]):not([data-test1-pill-out-animate]):not([data-test1-pill-out]) #test1-assist-pill {
     animation: test1StackShift 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
   }
 
@@ -13095,10 +13098,19 @@
   }
 
   /* test1 intro — stack 3초 후 assist pill fade out */
+  #canvas[data-test-scope="test1"] {
+    --test1-pill-out-dur: 0.8s;
+  }
+
   #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
   #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) #test1-assist-pill {
-    animation: test1PillOutFade 0.52s cubic-bezier(0.33, 1, 0.68, 1) both;
+    animation: test1PillOutFade var(--test1-pill-out-dur) cubic-bezier(0.22, 1, 0.36, 1) both;
     pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    transform: translate3d(0, 88px, 0);
   }
 
   #canvas[data-test-scope="test1"][data-test1-pill-out]:not([data-test1-reveal-all]):not([data-test1-pill-out-animate]) .canvas-item[data-role="test1-assist-pill"],
@@ -13108,14 +13120,27 @@
     pointer-events: none !important;
   }
 
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
   @keyframes test1PillOutFade {
     0% {
       opacity: 1;
       visibility: visible;
+      filter: blur(0px);
+    }
+    40% {
+      opacity: 0.82;
+      filter: blur(0.45px);
     }
     100% {
       opacity: 0;
       visibility: hidden;
+      filter: blur(2.2px);
     }
   }
 
@@ -13205,43 +13230,50 @@
     --test1-pass-dur: 1.667s;
     --test1-pass-overlap: 0.24s;
     --test1-pass-step: calc(var(--test1-pass-dur) - var(--test1-pass-overlap));
+    --test1-out-dur: 3.4s;
   }
 
   /* 3 passes in ~5s — next pass starts before previous ends (no pause after full cover) */
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--1 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--1 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear 0s forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--2 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--2 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear var(--test1-pass-step) forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a .test1-gradient-sweep__track--3 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--3 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear calc(var(--test1-pass-step) * 2) forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--1 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--1 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear 0.1s forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--2 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--2 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step)) forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b .test1-gradient-sweep__track--3 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--3 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step) * 2) forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--1 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--1 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear 0.2s forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--2 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--2 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step)) forwards;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c .test1-gradient-sweep__track--3 {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--3 {
     animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step) * 2) forwards;
+  }
+
+  @property --test1-out-fill {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
   }
 
   @keyframes test1GradientFillPass {
@@ -13249,13 +13281,123 @@
     100% { --test1-fill: 128%; opacity: 1; }
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run] .test1-gradient-sweep {
-    animation: test1GradientHide 0.6s cubic-bezier(0.33, 1, 0.68, 1) both;
+  /* 4th pass — airy dissolve left→right, all 3 components + sweeps together */
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-c {
+    --test1-out-fill: 0%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    animation: test1GradientFlowOut var(--test1-out-dur) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent calc(var(--test1-out-fill) - 44%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-out-fill) - 34%),
+      rgba(0, 0, 0, 0.06) calc(var(--test1-out-fill) - 26%),
+      rgba(0, 0, 0, 0.12) calc(var(--test1-out-fill) - 18%),
+      rgba(0, 0, 0, 0.22) calc(var(--test1-out-fill) - 11%),
+      rgba(0, 0, 0, 0.34) calc(var(--test1-out-fill) - 5%),
+      rgba(0, 0, 0, 0.48) calc(var(--test1-out-fill) + 2%),
+      rgba(0, 0, 0, 0.62) calc(var(--test1-out-fill) + 12%),
+      rgba(0, 0, 0, 0.76) calc(var(--test1-out-fill) + 24%),
+      rgba(0, 0, 0, 0.88) calc(var(--test1-out-fill) + 38%),
+      #000 calc(var(--test1-out-fill) + 54%),
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent calc(var(--test1-out-fill) - 44%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-out-fill) - 34%),
+      rgba(0, 0, 0, 0.06) calc(var(--test1-out-fill) - 26%),
+      rgba(0, 0, 0, 0.12) calc(var(--test1-out-fill) - 18%),
+      rgba(0, 0, 0, 0.22) calc(var(--test1-out-fill) - 11%),
+      rgba(0, 0, 0, 0.34) calc(var(--test1-out-fill) - 5%),
+      rgba(0, 0, 0, 0.48) calc(var(--test1-out-fill) + 2%),
+      rgba(0, 0, 0, 0.62) calc(var(--test1-out-fill) + 12%),
+      rgba(0, 0, 0, 0.76) calc(var(--test1-out-fill) + 24%),
+      rgba(0, 0, 0, 0.88) calc(var(--test1-out-fill) + 38%),
+      #000 calc(var(--test1-out-fill) + 54%),
+      #000 100%
+    );
   }
 
-  @keyframes test1GradientHide {
-    0% { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar {
+    transform: translate3d(0, 88px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .test1-gradient-sweep__track {
+    --test1-fill: 128%;
+    opacity: 1;
+    animation: test1GradientSweepAirOut var(--test1-out-dur) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+
+  @keyframes test1GradientFlowOut {
+    0% {
+      --test1-out-fill: -20%;
+      opacity: 1;
+      filter: blur(0px);
+    }
+    18% {
+      opacity: 0.97;
+      filter: blur(0.18px);
+    }
+    42% {
+      opacity: 0.84;
+      filter: blur(0.55px);
+    }
+    68% {
+      opacity: 0.48;
+      filter: blur(1.8px);
+    }
+    100% {
+      --test1-out-fill: 125%;
+      opacity: 0;
+      filter: blur(5px);
+    }
+  }
+
+  @keyframes test1GradientSweepAirOut {
+    0% {
+      opacity: 1;
+      filter: blur(0px);
+    }
+    30% {
+      opacity: 0.92;
+      filter: blur(0.25px);
+    }
+    62% {
+      opacity: 0.62;
+      filter: blur(1px);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(2.4px);
+    }
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-c {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   /* blur + black↔white boundary that spreads softly to the right (wide blend, no hard line) */
@@ -13325,29 +13467,24 @@
   }
 
   /* gradient 동안 underlying component repaint flicker 방지 (gradient visual unchanged) */
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-now-bar,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar-b"],
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-now-bar-b,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-transit-card"],
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-transit-card,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .canvas-item[data-role="test1-gradient-sweep"],
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-a,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-b,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) #test1-gradient-sweep-c {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-now-bar,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-now-bar-b,
-  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]) .test1-transit-card {
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-transit-card {
     isolation: isolate;
-  }
-
-  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-animate]) .test1-gradient-sweep {
-    opacity: 0;
-    visibility: hidden;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -13367,10 +13504,20 @@
       opacity: 1;
       --test1-fill: 128%;
     }
-    #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run] .test1-gradient-sweep {
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar-b"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar-b,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-transit-card"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-transit-card,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-gradient-sweep"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-a,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-b,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-c {
       animation: none;
+      --test1-out-fill: 125%;
       opacity: 0;
-      visibility: hidden;
+      filter: blur(5px);
     }
   }
 
