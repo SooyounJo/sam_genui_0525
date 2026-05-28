@@ -370,6 +370,8 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
               _rect: { x: 21, y: 415, w: 346, h: 72 } },
             { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
               _rect: { x: 130, y: 491, w: 127, h: 36 } },
+            { id: 'test1-now-bar-b', role: 'test1-now-bar-b', zone: 'viewing',
+              _rect: { x: 21, y: 539, w: 346, h: 72 } },
             { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
               _rect: { x: 38, y: 639, w: 313, h: 143 } },
             { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
@@ -5723,6 +5725,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
 
     case 'test1-now-bar': {
       return '<img class="test1-now-bar" src="/test1-now-bar.svg" alt="" draggable="false" />';
+    }
+
+    case 'test1-now-bar-b': {
+      return '<img class="test1-now-bar-b" src="/test1-now-bar-2.svg" alt="" draggable="false" />';
     }
 
     case 'test1-assist-pill': {
