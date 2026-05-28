@@ -12667,3 +12667,239 @@
     to { opacity: 1; transform: scaleY(1) translateY(0); }
   }
 
+  /* test1 — full-screen Lock Screen mock (388×880 canvas, image aspect preserved) */
+  #canvas[data-test-scope="test1"] {
+    background-color: #000 !important;
+    background-image: url("/Lock%20Screen.png") !important;
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+  }
+  #canvas[data-test-scope="test1"] .canvas-item {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"] #test1-now-bar,
+  #canvas[data-test-scope="test1"] #test1-assist-pill,
+  #canvas[data-test-scope="test1"] #test1-transit-card,
+  #canvas[data-test-scope="test1"] #test1-l-shortcut,
+  #canvas[data-test-scope="test1"] #test1-r-shortcut {
+    display: block !important;
+    pointer-events: auto !important;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-now-bar,
+  #canvas[data-test-scope="test1"] .test1-assist-pill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+  }
+
+  /* test1 — transit card (294×134, Figma CSS layers) */
+  #canvas[data-test-scope="test1"] .test1-transit-card {
+    position: relative;
+    width: 294px;
+    height: 134px;
+    overflow: hidden;
+    border-radius: 35px;
+    isolation: isolate;
+    pointer-events: none;
+    transform: scale(1.0626);
+    transform-origin: top left;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 35px;
+    background:
+      linear-gradient(0deg, rgba(110, 159, 121, 0.3), rgba(110, 159, 121, 0.3)),
+      linear-gradient(62.46deg, #349F4E 8.83%, #8BC499 27.21%, #CFE3AF 58.39%, #98CCA4 103.5%);
+    background-blend-mode: multiply, normal;
+    box-shadow:
+      inset 10px 15px 30px #7EBD88,
+      inset 4px 4px 20px #6BA679;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__avatar {
+    position: absolute;
+    left: 24px;
+    top: 21px;
+    width: 39px;
+    height: 39px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close {
+    position: absolute;
+    left: 241px;
+    top: 19px;
+    width: 32px;
+    height: 32px;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close-circle {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #1B6FEE;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    display: block;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__copy {
+    position: absolute;
+    left: 73px;
+    top: 23px;
+    width: 124px;
+    filter: drop-shadow(0px 0px 50px #509E62);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__title {
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__subtitle {
+    margin-top: 1px;
+    margin-left: 1px;
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__end {
+    position: absolute;
+    left: 123px;
+    top: 98px;
+    width: 49px;
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__progress {
+    position: absolute;
+    left: 25.2px;
+    top: 63px;
+    width: 245.98px;
+    height: 31px;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__track {
+    position: absolute;
+    left: 0;
+    top: 12.51px;
+    width: 245.98px;
+    height: 7.03px;
+    border-radius: 33.3832px;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__fill {
+    position: absolute;
+    left: 0;
+    top: 12.51px;
+    width: 188px;
+    height: 7.03px;
+    border-radius: 33.3832px;
+    background: #378644;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__thumb {
+    position: absolute;
+    left: 166.8px;
+    top: 0;
+    width: 31px;
+    height: 31px;
+    border-radius: 50%;
+    background: #1B6FEE;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0px 0px 1.9px rgba(0, 0, 0, 0.39);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__send {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    transform: translate(calc(-50% + 1px), -50%);
+    display: block;
+  }
+
+  /* test1 — left/right shortcuts share identical 59px teal circle */
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r {
+    position: relative;
+    width: 60px;
+    height: 59px;
+    isolation: isolate;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__ellipse,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__ellipse {
+    position: absolute;
+    width: 59px;
+    height: 59px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #155E75;
+    border-radius: 50%;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__phone,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__camera {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    mix-blend-mode: lighten;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+  }
+

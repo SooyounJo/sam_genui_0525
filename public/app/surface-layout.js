@@ -362,29 +362,20 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
         };
       }
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test1') {
-        // Persona 1 Gen Home (Figma 75:13339) — Goal + Music + Steps + Jogging + dot clock
+        // Persona 1 — static lockscreen mock (public/Lock Screen.png via CSS)
         return {
           surfaceType,
           components: [
-            { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
-            { id: 'p1-goal', role: 'dot-goal', zone: 'viewing',
-              variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' },
-              _rect: { x: 24, y: 42, w: 340, h: 168 } },
-            { id: 'p1-music', role: 'dot-music-1x1', zone: 'viewing',
-              variant: { artist: 'Jimmy Hall', album: 'Album', song: 'Concierto', current: '0:40', remaining: '-1:10', barFull: 120, barTrack: 31.48 },
-              _rect: { x: 24, y: 214, w: 168, h: 168 } },
-            { id: 'p1-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
-              variant: { count: '5,543' },
-              _rect: { x: 196, y: 214, w: 168, h: 82 } },
-            { id: 'p1-run', role: 'dot-running-compact', zone: 'viewing',
-              variant: { label: 'Jogging', time: '10:35' },
-              _rect: { x: 196, y: 300, w: 168, h: 82 } },
-            { id: 'p1-timemat', role: 'dot-time-matrix', zone: 'viewing',
-              variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' },
-              _rect: { x: 26, y: 386, w: 335, h: 165 } },
-            { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
-              content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
-            { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
+            { id: 'test1-now-bar', role: 'test1-now-bar', zone: 'viewing',
+              _rect: { x: 21, y: 415, w: 346, h: 72 } },
+            { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
+              _rect: { x: 130, y: 491, w: 127, h: 36 } },
+            { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
+              _rect: { x: 38, y: 639, w: 313, h: 143 } },
+            { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
+              _rect: { x: 28, y: 797, w: 60, h: 59 } },
+            { id: 'test1-r-shortcut', role: 'test1-lock-shortcut-r', zone: 'bottomNav',
+              _rect: { x: 300, y: 797, w: 60, h: 59 } }
           ]
         };
       }
@@ -5728,6 +5719,72 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">' +
         '<div style="width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,0.85);"></div>' +
       '</div>';
+    }
+
+    case 'test1-now-bar': {
+      return '<img class="test1-now-bar" src="/test1-now-bar.svg" alt="" draggable="false" />';
+    }
+
+    case 'test1-assist-pill': {
+      return '<img class="test1-assist-pill" src="/test1-assist-pill.svg" alt="" draggable="false" />';
+    }
+
+    case 'test1-transit-card': {
+      return '<div class="test1-transit-card">' +
+        '<div class="test1-transit-card__bg" aria-hidden="true"></div>' +
+        '<div class="test1-transit-card__avatar">' +
+          '<img class="test1-transit-card__avatar-img" src="/test1-bus-avatar.png" alt="" draggable="false" />' +
+        '</div>' +
+        '<div class="test1-transit-card__close" aria-hidden="true">' +
+          '<span class="test1-transit-card__close-circle"></span>' +
+          '<svg class="test1-transit-card__close-icon" viewBox="249 49 17 21" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M262.743 66.9492H251.258C251.258 67.0703 251.259 67.1871 251.258 67.3038C251.256 67.5357 251.265 67.7692 251.244 67.9999C251.19 68.5931 250.589 69.0495 250.005 68.9743C249.52 68.9118 249.094 68.5178 249.019 68.0215C249.007 67.939 249.001 67.8549 249.001 67.7714C249 62.7694 249 57.7675 249 52.7655C249 51.9787 249.537 51.3203 250.301 51.1665C250.38 51.151 250.461 51.146 250.541 51.146C251.349 51.1443 252.157 51.1443 252.964 51.146C253.017 51.146 253.041 51.1327 253.062 51.0813C253.122 50.9291 253.236 50.8207 253.368 50.7321C253.656 50.5407 253.976 50.4228 254.304 50.3277C254.82 50.1777 255.347 50.093 255.88 50.0388C256.442 49.9824 257.005 49.9674 257.569 49.9979C258.38 50.041 259.18 50.1478 259.953 50.4123C260.195 50.4953 260.431 50.5944 260.643 50.7432C260.775 50.8361 260.887 50.949 260.943 51.1062C260.959 51.1515 260.99 51.1449 261.022 51.1449C261.536 51.1449 262.05 51.1449 262.564 51.1449C262.846 51.1449 263.127 51.1438 263.409 51.1449C264.289 51.1471 264.995 51.8537 264.998 52.7445C265.002 54.0664 264.999 55.3877 264.999 56.7096C264.999 60.4062 265 64.1035 265 67.8002C265 68.3778 264.639 68.8393 264.096 68.9571C263.458 69.096 262.806 68.6196 262.756 67.9623C262.732 67.6552 262.746 67.3453 262.743 67.0366C262.743 67.0106 262.743 66.984 262.743 66.9486V66.9492ZM251.261 58.6412H262.737V53.8113H251.261V58.6412ZM251.258 62.5819C251.256 63.0898 251.651 63.4993 252.144 63.502C252.659 63.5048 253.062 63.1059 253.065 62.5924C253.067 62.0712 252.675 61.6667 252.164 61.665C251.661 61.6634 251.259 62.0695 251.258 62.5819ZM262.743 62.5891C262.743 62.0761 262.349 61.6661 261.855 61.665C261.338 61.6639 260.937 62.0656 260.937 62.5824C260.938 63.0948 261.337 63.5004 261.841 63.4998C262.343 63.4998 262.743 63.0953 262.743 62.5885V62.5891Z" fill="#FFFFFF"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="test1-transit-card__copy">' +
+          '<div class="test1-transit-card__title">이번 정류장에서 하차</div>' +
+          '<div class="test1-transit-card__subtitle">진천청구 타운 앞</div>' +
+        '</div>' +
+        '<div class="test1-transit-card__end">안내 종료</div>' +
+        '<div class="test1-transit-card__progress">' +
+          '<div class="test1-transit-card__track"></div>' +
+          '<div class="test1-transit-card__fill"></div>' +
+          '<div class="test1-transit-card__thumb">' +
+            '<svg class="test1-transit-card__send" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+              '<g clip-path="url(#clip0_test1_transit_send)">' +
+                '<path fill-rule="evenodd" clip-rule="evenodd" d="M11.2481 13.1411C11.366 13.3603 11.3743 13.621 11.2707 13.8472L9.44457 17.8188C9.11377 18.5614 9.34802 18.9516 9.51752 19.1204C9.83042 19.4302 10.3843 19.4472 10.9999 19.1671L21.7171 14.3855C22.2884 14.1224 22.6121 13.6338 22.5955 13.1319C22.5795 12.6306 22.2258 12.1642 21.6383 11.9376L10.6388 7.8488C10.0061 7.60914 9.45437 7.66149 9.16192 7.99176C9.00463 8.16985 8.7941 8.5748 9.17275 9.29472L11.2481 13.1411ZM16.4516 13.3288L11.4362 13.4891Z" fill="white"/>' +
+                '<path d="M16.4516 13.3288L11.4362 13.4891M11.2481 13.1411C11.366 13.3603 11.3743 13.621 11.2707 13.8472L9.44457 17.8188C9.11377 18.5614 9.34802 18.9516 9.51752 19.1204C9.83042 19.4302 10.3843 19.4472 10.9999 19.1671L21.7171 14.3855C22.2884 14.1224 22.6121 13.6338 22.5955 13.1319C22.5795 12.6306 22.2258 12.1642 21.6383 11.9376L10.6388 7.8488C10.0061 7.60914 9.45437 7.66149 9.16192 7.99176C9.00463 8.16985 8.7941 8.5748 9.17275 9.29472L11.2481 13.1411Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '</g>' +
+              '<defs><clipPath id="clip0_test1_transit_send"><rect width="19" height="19" fill="white" transform="translate(13) rotate(43.1698)"/></clipPath></defs>' +
+            '</svg>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-l': {
+      return '<div class="test1-lock-shortcut-l">' +
+        '<div class="test1-lock-shortcut-l__ellipse" aria-hidden="true"></div>' +
+        '<div class="test1-lock-shortcut-l__phone">' +
+          '<img class="test1-lock-shortcut-l__icon" src="/Phone.png" alt="" draggable="false" />' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-r': {
+      return '<div class="test1-lock-shortcut-r">' +
+        '<div class="test1-lock-shortcut-r__ellipse" aria-hidden="true"></div>' +
+        '<div class="test1-lock-shortcut-r__camera">' +
+          '<img class="test1-lock-shortcut-r__icon" src="/assets/figma/lock-screen/camera-icon.svg" alt="" draggable="false" />' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-asset': {
+      var t1Asset = (comp && comp.variant) || {};
+      var t1Src = t1Asset.src || '/Phone.png';
+      var t1Alt = t1Asset.alt || '';
+      return '<img class="test1-lock-shortcut-asset" src="' + t1Src + '" alt="' + t1Alt + '" draggable="false" />';
     }
 
     case 'unlock-hint': {
