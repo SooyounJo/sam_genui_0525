@@ -11,7 +11,7 @@ const HOME_BG = "/assets/bg-new.png?v=2";
 
 const TESTS = [
   {
-    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png?v=3", disabled: true,
+    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png?v=3",
     name: "Junseo",
     age: "32, Office Worker",
     bio: "효율적인 일상을 추구하는 직장인.\n짧은 시간 안에 최대의 효과를 얻는 운동을 선호.",
@@ -278,7 +278,10 @@ export default function MlpTestPage({
   // (so previewing a different persona shifts the layout), otherwise
   // falls back to the active badge.
   const activeIdx   = TESTS.findIndex(t => t.id === testId && !t.disabled);
-  const focusIdx    = hoveredIdx >= 0 ? hoveredIdx : activeIdx;
+  const focusIdx    = hoveredIdx >= 0
+    ? hoveredIdx
+    : (testId === "test1" ? -1 : activeIdx);
+  const shouldOffsetStack = Boolean(hoveredId || (activeIdx >= 0 && testId !== "test1"));
 
   // Per-badge palette extracted from each avatar image. Colors stay
   // close to the portrait (background, skin, clothing) — no forced
@@ -771,9 +774,19 @@ export default function MlpTestPage({
             pointer-events: none !important;
             box-shadow: none !important;
           }
+          .persona-circle[data-avatar-key="test1"]:not(:hover):not(.is-hovered) {
+            transform: none !important;
+          }
+          .persona-circle[data-avatar-key="test1"]:not(:hover):not(.is-hovered)::before {
+            animation: none !important;
+            opacity: 0 !important;
+            padding: 2px !important;
+            filter: none !important;
+            transform: none !important;
+          }
           .persona-circle:not(.is-disabled):hover,
           .persona-circle:not(.is-disabled).is-hovered,
-          .persona-circle:not(.is-disabled).is-active {
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]) {
             /* Enlarged state — applied for:
                  :hover / .is-hovered → user pointing at a non-active badge
                                         (preview state)
@@ -782,10 +795,11 @@ export default function MlpTestPage({
                                         indicator per user direction
                                         "enlarged when that scenario is
                                         appeared on mobile screen").
-               Same 1.8× scale for both so they share the same focal
-               weight; the 22 px sibling-offset (set elsewhere) gives
-               the enlarged badge room to grow without overlapping its
-               neighbours regardless of trigger. */
+               Persona 1 (test1) stays base size at rest and only
+               enlarges on hover so it matches the other badges when
+               the pointer is away. Same 1.8× scale otherwise; the
+               22 px sibling-offset (set elsewhere) gives the enlarged
+               badge room to grow without overlapping its neighbours. */
             transform: scale(1.8) !important;
           }
           .persona-circle:not(.is-disabled):hover::before,
@@ -806,7 +820,7 @@ export default function MlpTestPage({
               personaCircleHoverSpin 8s linear 1 forwards,
               personaCircleHoverRotate 1.6s linear 5 forwards;
           }
-          .persona-circle:not(.is-disabled).is-active::before {
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"])::before {
             /* INITIAL state of active badge — rotates on page load as
                a "look here, this scenario is yours" signal. Same
                animation as hover (infinite spin + rotate). The
@@ -823,7 +837,7 @@ export default function MlpTestPage({
               personaCircleHoverSpin 8s linear infinite,
               personaCircleHoverRotate 1.6s linear infinite;
           }
-          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active::before {
+          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"])::before {
             /* AFTER the user has hovered any badge at least once, the
                active badge falls back to a quiet STATIC state when
                un-hovered. User has demonstrated awareness of the badge
@@ -840,10 +854,10 @@ export default function MlpTestPage({
              rotation — per user direction "when hovered, it should
              rotate". Higher specificity than .has-interacted .is-active
              alone, so this wins the cascade for the active+hover case. */
-          .persona-circle:not(.is-disabled).is-active:hover::before,
-          .persona-circle:not(.is-disabled).is-active.is-hovered::before,
-          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active:hover::before,
-          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active.is-hovered::before {
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):hover::before,
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]).is-hovered::before,
+          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):hover::before,
+          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]).is-hovered::before {
             /* Same one-shot 8 s lifecycle as the non-active hover rule —
                rotation runs 5 iterations then stops, matching the spin
                window so no infinite repeat. Re-hover restarts. */
@@ -1407,7 +1421,7 @@ export default function MlpTestPage({
         </nav>
 
         <div className="mlp-workspace">
-          <aside className={`mlp-left${(hoveredId || activeIdx >= 0) ? " is-hovering" : ""}${hasInteracted ? " has-interacted" : ""}`}>
+          <aside className={`mlp-left${shouldOffsetStack ? " is-hovering" : ""}${hasInteracted ? " has-interacted" : ""}`}>
             {TESTS.map((test, idx) => {
               // Each badge's `data-hover-offset` is one of: -1 (above the
               // hovered badge — nudge up), 0 (the hovered badge or no

@@ -4282,17 +4282,14 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           barTrack: expandedBarTrack
         }
       }, rect);
-      // Search/loading copy that appears WHILE the LLM resolves a real
-      // track recommendation. Previously a generic "운동할 때 듣기 좋은
-      // 곡을 찾아드릴게요"; now references the three real factors the
-      // recommendation actually uses — pace BPM, weather tone, distance-
-      // based historical preference — to make the wait feel like the AI
-      // is actively reasoning about THIS run. Uses {weather} / {distance}
-      // template substitution from the searchWeather / searchDistance
-      // overrides (defaults: '비 오는 날' / '5km').
-      var _sw = mv.searchWeather  || '비 오는 날';
-      var _sd = mv.searchDistance || '5km';
-      var compactTitle = mv.compactTitle || (_sw + ' ' + _sd + ' 러닝에 맞는\nBPM과 선호 톤으로\n트랙을 찾고 있어요');
+      // Compact loading copy shown while the track recommendation resolves.
+      var compactTitleHtml = mv.compactTitle
+        ? String(mv.compactTitle).split('\n').map(function (line) {
+            return '<span class="dot-music1__singerLine">' + line + '</span>';
+          }).join('')
+        : ('<span class="dot-music1__singerLine">비 오는 날 러닝에</span>' +
+           '<span class="dot-music1__singerLine">맞는 BPM과 트랙을</span>' +
+           '<span class="dot-music1__singerLine">찾고\u00A0있어요.</span>');
       var compactIconHtml = '' +
         '<svg class="dot-music1__noteSvg" width="32" height="32" viewBox="-2 -2 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
           '<circle cx="19.85" cy="3.49" r="3.5" fill="#000000"/><circle cx="27.98" cy="3.49" r="3.5" fill="#000000"/><circle cx="35.66" cy="3.49" r="3.5" fill="#000000"/><circle cx="44.25" cy="3.49" r="3.5" fill="#000000"/><circle cx="52.39" cy="3.49" r="3.5" fill="#000000"/><circle cx="60.52" cy="3.49" r="3.5" fill="#000000"/>' +
@@ -4315,7 +4312,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '</div>' +
           '</div>')
         : ('<div class="dot-music1__player" aria-hidden="true">' +
-            '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
+            '<div class="dot-music1__singer-name">' + compactTitleHtml + '</div>' +
             '<div class="dot-music1__iconBg"></div>' +
             '<div class="dot-music1__musicIcon">' + compactIconHtml + '</div>' +
           '</div>');
