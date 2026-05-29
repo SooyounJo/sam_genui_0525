@@ -12683,11 +12683,13 @@
   #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-transit-card"],
   #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-l"],
   #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-bottom-pill"],
   #canvas[data-test-scope="test1"] #test1-now-bar,
   #canvas[data-test-scope="test1"] #test1-now-bar-b,
   #canvas[data-test-scope="test1"] #test1-transit-card,
   #canvas[data-test-scope="test1"] #test1-l-shortcut,
-  #canvas[data-test-scope="test1"] #test1-r-shortcut {
+  #canvas[data-test-scope="test1"] #test1-r-shortcut,
+  #canvas[data-test-scope="test1"] #test1-bottom-pill {
     display: block !important;
     pointer-events: auto !important;
   }
@@ -13731,5 +13733,152 @@
     object-position: center;
     display: block;
     pointer-events: none;
+  }
+
+  /* test1 — bottom search pill hidden until coda phase */
+  #canvas[data-test-scope="test1"]:not([data-test1-coda-run]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"]:not([data-test1-coda-run]):not([data-test1-reveal-all]) #test1-bottom-pill {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] #test1-bottom-pill {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+  }
+
+  /* test1 coda — 1.5s after gradient out: shortcuts + bottom pill fade in together */
+  #canvas[data-test-scope="test1"] {
+    --test1-coda-in-dur: 1s;
+    --test1-coda-shortcut-size: 57px;
+    --test1-coda-shortcut-icon: 29px;
+    --test1-coda-pill-w: 215px;
+    --test1-coda-pill-h: 57px;
+    --test1-coda-pill-left: calc((388px - var(--test1-coda-pill-w)) / 2 - 0.5px);
+    --test1-coda-pill-top: 795px;
+  }
+
+  /* coda — shortcut inner shell matches pillar height (57px) */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* coda — shortcut circles match center pill height (57px); intro position/size untouched */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l__ellipse,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r__ellipse {
+    width: var(--test1-coda-shortcut-size);
+    height: var(--test1-coda-shortcut-size);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l__phone,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r__camera {
+    width: var(--test1-coda-shortcut-icon);
+    height: var(--test1-coda-shortcut-icon);
+  }
+
+  /* coda-only shortcut layout — same top/height as pillar (57px) */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-lock-shortcut-l"] {
+    left: 16.5px !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: 64px !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-r-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-lock-shortcut-r"] {
+    left: 307.5px !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: 64px !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  /* coda-only — pillar centered on 388px frame */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-bottom-pill,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-bottom-pill"] {
+    left: var(--test1-coda-pill-left) !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: var(--test1-coda-pill-w) !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-r-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-bottom-pill {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-lock-shortcut-r,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-bottom-pill {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-r,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill {
+    opacity: 1;
+    transform: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-r,
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+    animation: test1CodaFadeIn var(--test1-coda-in-dur) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) #test1-r-shortcut {
+    pointer-events: auto !important;
+  }
+
+  @keyframes test1CodaFadeIn {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 14px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-r,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 

@@ -392,7 +392,9 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
             { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
               _rect: { x: 28, y: 797, w: 60, h: 59 } },
             { id: 'test1-r-shortcut', role: 'test1-lock-shortcut-r', zone: 'bottomNav',
-              _rect: { x: 300, y: 797, w: 60, h: 59 } }
+              _rect: { x: 300, y: 797, w: 60, h: 59 } },
+            { id: 'test1-bottom-pill', role: 'test1-bottom-pill', zone: 'bottomNav',
+              _rect: { x: 96.5, y: 797, w: 215, h: 57 } }
           ]
         };
       }
@@ -5837,6 +5839,10 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       '</div>';
     }
 
+    case 'test1-bottom-pill': {
+      return '<img class="test1-bottom-pill" src="/test1-bottom-pill.svg" alt="" draggable="false" />';
+    }
+
     case 'test1-lock-shortcut-asset': {
       var t1Asset = (comp && comp.variant) || {};
       var t1Src = t1Asset.src || '/Phone.png';
@@ -9194,6 +9200,8 @@ var TEST1_PILL_OUT_FADE_MS = 800;
 var TEST1_PILL_OUT_GAP_MS = 420;
 var TEST1_GRADIENT_FLOW_MS = 4721;
 var TEST1_GRADIENT_OUT_FADE_MS = 3400;
+var TEST1_AFTER_GRADIENT_CODA_MS = 1500;
+var TEST1_CODA_FADE_IN_MS = 1000;
 var TEST1_STACK_ITEM_GAP_PX = 16;
 var TEST1_STACK_SHIFT_PX = 72 + TEST1_STACK_ITEM_GAP_PX;
 
@@ -9237,6 +9245,14 @@ function _clearTest1IntroTimer() {
   if (window.__mlpTest1GradientOutTimer) {
     clearTimeout(window.__mlpTest1GradientOutTimer);
     window.__mlpTest1GradientOutTimer = null;
+  }
+  if (window.__mlpTest1CodaTimer) {
+    clearTimeout(window.__mlpTest1CodaTimer);
+    window.__mlpTest1CodaTimer = null;
+  }
+  if (window.__mlpTest1CodaEndTimer) {
+    clearTimeout(window.__mlpTest1CodaEndTimer);
+    window.__mlpTest1CodaEndTimer = null;
   }
 }
 
@@ -9372,11 +9388,60 @@ function _runTest1GradientSweep() {
               canvas.removeAttribute('data-test1-gradient-animate');
               canvas.removeAttribute('data-test1-gradient-out-animate');
               if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientDone = true;
+              _armTest1CodaDelay(canvas);
             }, TEST1_GRADIENT_OUT_FADE_MS);
           }, TEST1_GRADIENT_FLOW_MS);
         } catch (_) {}
       });
     });
+  } catch (_) {}
+}
+
+function _armTest1CodaDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (canvas.getAttribute('data-test1-coda-run')) return;
+  if (window.__mlpTest1CodaTimer) return;
+  window.__mlpTest1CodaTimer = setTimeout(function () {
+    window.__mlpTest1CodaTimer = null;
+    _runTest1CodaIntro();
+  }, TEST1_AFTER_GRADIENT_CODA_MS);
+}
+
+function _runTest1CodaIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-coda-run')) return;
+    c.removeAttribute('data-test1-shortcuts-out');
+    c.removeAttribute('data-test1-shortcuts-animate');
+    c.setAttribute('data-test1-coda-run', '1');
+    if (window.__mlpTestConfig) {
+      window.__mlpTestConfig.test1ShortcutsOut = false;
+      window.__mlpTestConfig.test1CodaRun = true;
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var c2 = document.getElementById('canvas');
+          if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          c2.setAttribute('data-test1-coda-animate', '1');
+        } catch (_) {}
+      });
+    });
+    if (window.__mlpTest1CodaEndTimer) clearTimeout(window.__mlpTest1CodaEndTimer);
+    window.__mlpTest1CodaEndTimer = setTimeout(function () {
+      window.__mlpTest1CodaEndTimer = null;
+        try {
+          var c2 = document.getElementById('canvas');
+          if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+          c2.removeAttribute('data-test1-coda-animate');
+          c2.setAttribute('data-test1-coda-done', '1');
+          if (window.__mlpTestConfig) window.__mlpTestConfig.test1CodaDone = true;
+        } catch (_) {}
+    }, TEST1_CODA_FADE_IN_MS);
   } catch (_) {}
 }
 
@@ -9490,6 +9555,9 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         canvas.removeAttribute('data-test1-gradient-run');
         canvas.removeAttribute('data-test1-gradient-animate');
         canvas.removeAttribute('data-test1-gradient-out');
+        canvas.removeAttribute('data-test1-coda-run');
+        canvas.removeAttribute('data-test1-coda-animate');
+        canvas.removeAttribute('data-test1-coda-done');
         if (window.__mlpTestConfig) {
           window.__mlpTestConfig.test1GreenRun = false;
           window.__mlpTestConfig.test1StackRun = false;
@@ -9498,6 +9566,8 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
           window.__mlpTestConfig.test1GradientRun = false;
           window.__mlpTestConfig.test1GradientOut = false;
           window.__mlpTestConfig.test1GradientDone = false;
+          window.__mlpTestConfig.test1CodaRun = false;
+          window.__mlpTestConfig.test1CodaDone = false;
         }
       } else {
         canvas.removeAttribute('data-test1-reveal-all');
@@ -9538,6 +9608,16 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
         if (window.__mlpTestConfig && window.__mlpTestConfig.test1GradientOut) {
           canvas.setAttribute('data-test1-gradient-out', '1');
           canvas.removeAttribute('data-test1-gradient-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1CodaRun) {
+          canvas.setAttribute('data-test1-coda-run', '1');
+          if (window.__mlpTestConfig.test1CodaDone) {
+            canvas.setAttribute('data-test1-coda-done', '1');
+          }
+        } else {
+          canvas.removeAttribute('data-test1-coda-run');
+          canvas.removeAttribute('data-test1-coda-animate');
+          canvas.removeAttribute('data-test1-coda-done');
         }
       }
     } else {
@@ -9634,6 +9714,9 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
     canvas.removeAttribute('data-test1-gradient-run');
     canvas.removeAttribute('data-test1-gradient-animate');
     canvas.removeAttribute('data-test1-gradient-out');
+    canvas.removeAttribute('data-test1-coda-run');
+    canvas.removeAttribute('data-test1-coda-animate');
+    canvas.removeAttribute('data-test1-coda-done');
   }
   window.renderSurfacePlan(canvas, plan, layout);
   if (testScope === 'test1') {

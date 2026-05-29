@@ -10,6 +10,12 @@ export default function Test1Page() {
       window.__mlpTestConfig.test1GreenRun = false;
       window.__mlpTestConfig.test1StackRun = false;
       window.__mlpTestConfig.test1ShortcutsOut = false;
+      window.__mlpTestConfig.test1PillOut = false;
+      window.__mlpTestConfig.test1GradientRun = false;
+      window.__mlpTestConfig.test1GradientOut = false;
+      window.__mlpTestConfig.test1GradientDone = false;
+      window.__mlpTestConfig.test1CodaRun = false;
+      window.__mlpTestConfig.test1CodaDone = false;
     }
 
     var tries = 0;
@@ -26,6 +32,15 @@ export default function Test1Page() {
         canvas.removeAttribute("data-test1-stack-animate");
         canvas.removeAttribute("data-test1-shortcuts-out");
         canvas.removeAttribute("data-test1-shortcuts-animate");
+        canvas.removeAttribute("data-test1-pill-out");
+        canvas.removeAttribute("data-test1-pill-out-animate");
+        canvas.removeAttribute("data-test1-gradient-run");
+        canvas.removeAttribute("data-test1-gradient-animate");
+        canvas.removeAttribute("data-test1-gradient-out");
+        canvas.removeAttribute("data-test1-gradient-out-animate");
+        canvas.removeAttribute("data-test1-coda-run");
+        canvas.removeAttribute("data-test1-coda-animate");
+        canvas.removeAttribute("data-test1-coda-done");
         if (typeof window.__armTest1IntroDelay === "function") {
           window.__armTest1IntroDelay(canvas);
         }
