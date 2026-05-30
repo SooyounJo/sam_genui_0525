@@ -367,29 +367,39 @@ window.composeSurfacePlan = function composeSurfacePlan(surfaceType, layout) {
         };
       }
       if (window.__mlpTestConfig && window.__mlpTestConfig.id === 'test1') {
-        // Persona 1 Gen Home (Figma 75:13339) — Goal + Music + Steps + Jogging + dot clock
+        // Persona 1 — static lockscreen mock (public/Lock Screen.png via CSS)
+        var test1RevealAll = !!(window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll);
+        var test1StackGap = 16;
+        var test1LotteY = test1RevealAll ? (411 + 72 + test1StackGap) : 411;
+        var test1PillY = test1LotteY + 72 + 6;
+        var test1TransitScale = 1.177;
+        var test1TransitVisW = Math.round(294 * test1TransitScale);
+        var test1TransitVisH = Math.round(134 * test1TransitScale);
+        var test1TransitX = Math.round((388 - test1TransitVisW) / 2) - 2;
+        var test1LotteStackY = test1LotteY + 88;
         return {
           surfaceType,
           components: [
-            { id: 'status-bar', role: 'status-bar', zone: 'topSystem' },
-            { id: 'p1-goal', role: 'dot-goal', zone: 'viewing',
-              variant: { title: "Today's Goal", time: '01:42:43', timeSuffix: 'Within', distance: '15km' },
-              _rect: { x: 24, y: 42, w: 340, h: 168 } },
-            { id: 'p1-music', role: 'dot-music-1x1', zone: 'viewing',
-              variant: { artist: 'Jimmy Hall', album: 'Album', song: 'Concierto', current: '0:40', remaining: '-1:10', barFull: 120, barTrack: 31.48 },
-              _rect: { x: 24, y: 214, w: 168, h: 168 } },
-            { id: 'p1-steps', role: 'dot-total-steps-2x1', zone: 'viewing',
-              variant: { count: '5,543' },
-              _rect: { x: 196, y: 214, w: 168, h: 82 } },
-            { id: 'p1-run', role: 'dot-running-compact', zone: 'viewing',
-              variant: { label: 'Jogging', time: '10:35' },
-              _rect: { x: 196, y: 300, w: 168, h: 82 } },
-            { id: 'p1-timemat', role: 'dot-time-matrix', zone: 'viewing',
-              variant: { bgColor: 'transparent', dotColor: '#FF7F24', time: '12:45', meta: 'MON', dayDigits: '  ' },
-              _rect: { x: 26, y: 386, w: 335, h: 165 } },
-            { id: 'app-dock', role: 'app-dock', zone: 'bottomNav',
-              content: { apps: ['Camera','Gallery','Maps','YT Music'] } },
-            { id: 'gesture-bar', role: 'gestureBar', zone: 'bottomAction' }
+            { id: 'test1-now-bar-b', role: 'test1-now-bar-b', zone: 'viewing',
+              _rect: { x: 21, y: 421, w: 346, h: 72 } },
+            { id: 'test1-now-bar', role: 'test1-now-bar', zone: 'viewing',
+              _rect: { x: 21, y: test1LotteY, w: 346, h: 72 } },
+            { id: 'test1-assist-pill', role: 'test1-assist-pill', zone: 'viewing',
+              _rect: { x: 130, y: test1PillY, w: 127, h: 36 } },
+            { id: 'test1-transit-card', role: 'test1-transit-card', zone: 'viewing',
+              _rect: { x: test1TransitX, y: 701, w: test1TransitVisW, h: test1TransitVisH } },
+            { id: 'test1-gradient-sweep-a', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: 21, y: 421, w: 346, h: 72 }, variant: { sweepShape: 'bar' } },
+            { id: 'test1-gradient-sweep-b', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: 21, y: test1LotteStackY, w: 346, h: 72 }, variant: { sweepShape: 'bar' } },
+            { id: 'test1-gradient-sweep-c', role: 'test1-gradient-sweep', zone: 'viewing',
+              _rect: { x: test1TransitX, y: 701, w: test1TransitVisW, h: test1TransitVisH }, variant: { sweepShape: 'card' } },
+            { id: 'test1-l-shortcut', role: 'test1-lock-shortcut-l', zone: 'bottomNav',
+              _rect: { x: 28, y: 797, w: 60, h: 59 } },
+            { id: 'test1-r-shortcut', role: 'test1-lock-shortcut-r', zone: 'bottomNav',
+              _rect: { x: 300, y: 797, w: 60, h: 59 } },
+            { id: 'test1-bottom-pill', role: 'test1-bottom-pill', zone: 'bottomNav',
+              _rect: { x: 96.5, y: 797, w: 215, h: 57 } }
           ]
         };
       }
@@ -4290,17 +4300,14 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
           barTrack: expandedBarTrack
         }
       }, rect);
-      // Search/loading copy that appears WHILE the LLM resolves a real
-      // track recommendation. Previously a generic "운동할 때 듣기 좋은
-      // 곡을 찾아드릴게요"; now references the three real factors the
-      // recommendation actually uses — pace BPM, weather tone, distance-
-      // based historical preference — to make the wait feel like the AI
-      // is actively reasoning about THIS run. Uses {weather} / {distance}
-      // template substitution from the searchWeather / searchDistance
-      // overrides (defaults: '비 오는 날' / '5km').
-      var _sw = mv.searchWeather  || '비 오는 날';
-      var _sd = mv.searchDistance || '5km';
-      var compactTitle = mv.compactTitle || (_sw + ' ' + _sd + ' 러닝에 맞는\nBPM과 선호 톤으로\n트랙을 찾고 있어요');
+      // Compact loading copy shown while the track recommendation resolves.
+      var compactTitleHtml = mv.compactTitle
+        ? String(mv.compactTitle).split('\n').map(function (line) {
+            return '<span class="dot-music1__singerLine">' + line + '</span>';
+          }).join('')
+        : ('<span class="dot-music1__singerLine">비 오는 날 러닝에</span>' +
+           '<span class="dot-music1__singerLine">맞는 BPM과 트랙을</span>' +
+           '<span class="dot-music1__singerLine">찾고\u00A0있어요.</span>');
       var compactIconHtml = '' +
         '<svg class="dot-music1__noteSvg" width="32" height="32" viewBox="-2 -2 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
           '<circle cx="19.85" cy="3.49" r="3.5" fill="#000000"/><circle cx="27.98" cy="3.49" r="3.5" fill="#000000"/><circle cx="35.66" cy="3.49" r="3.5" fill="#000000"/><circle cx="44.25" cy="3.49" r="3.5" fill="#000000"/><circle cx="52.39" cy="3.49" r="3.5" fill="#000000"/><circle cx="60.52" cy="3.49" r="3.5" fill="#000000"/>' +
@@ -4323,7 +4330,7 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
             '</div>' +
           '</div>')
         : ('<div class="dot-music1__player" aria-hidden="true">' +
-            '<div class="dot-music1__singer-name">' + String(compactTitle).replace(/\n/g, '<br/>') + '</div>' +
+            '<div class="dot-music1__singer-name">' + compactTitleHtml + '</div>' +
             '<div class="dot-music1__iconBg"></div>' +
             '<div class="dot-music1__musicIcon">' + compactIconHtml + '</div>' +
           '</div>');
@@ -5745,6 +5752,181 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
       return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">' +
         '<div style="width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,0.85);"></div>' +
       '</div>';
+    }
+
+    case 'test1-now-bar': {
+      return '<img class="test1-now-bar" src="/test1-now-bar.svg" alt="" draggable="false" />';
+    }
+
+    case 'test1-now-bar-b': {
+      return '<img class="test1-now-bar-b" src="/test1-now-bar-2.svg" alt="" draggable="false" />';
+    }
+
+    case 'test1-assist-pill': {
+      return '<div class="test1-assist-pill-wrap">' +
+        '<div class="test1-assist-pill-stage">' +
+          '<span class="test1-assist-pill-shell" aria-hidden="true"></span>' +
+          '<div class="test1-assist-pill-body">' +
+            '<svg class="test1-assist-pill-svg" viewBox="0 0 98 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+              '<rect class="test1-assist-pill-bg" width="97.5364" height="27.6699" rx="13.835" fill="#17171A" fill-opacity="0.6"/>' +
+              '<g class="test1-assist-pill-icon test1-assist-pill-icon--1">' +
+                '<path fill-rule="evenodd" clip-rule="evenodd" d="M10.2584 16.3014L11.426 15.4394H11.4298L11.8942 17.8988L10.2584 16.3014ZM15.3574 12.0561C15.7556 12.0561 15.8218 11.1257 15.8328 10.8201C15.835 10.7653 15.8087 10.7045 15.7643 10.6722C15.6417 10.5824 15.6548 10.4712 15.6543 10.2916C15.6543 10.2741 15.6537 10.256 15.6537 10.2369L15.663 10.0096L15.6718 9.81956C15.674 9.57094 15.5929 9.33545 15.456 9.1279V9.12681C15.2983 8.88694 15.0245 8.68377 14.7173 8.5381C14.6148 8.48991 14.5092 8.44829 14.4024 8.41324C14.2485 8.36888 14.0858 8.34424 13.9177 8.34424C12.9517 8.34424 12.1691 9.12735 12.1691 10.0934C12.1691 10.187 12.1768 10.2796 12.191 10.3699C12.2036 10.4302 12.2179 10.491 12.2359 10.5523C12.289 10.733 12.3701 10.8968 12.4588 11.0528H11.9583C11.3942 11.0682 10.8471 11.296 10.4419 11.7023L9.91451 12.2302C9.83784 12.3036 9.61933 12.526 9.37235 12.2439L9.61934 12.526C10.0728 13.0654 10.886 13.0895 11.3696 12.578L12.57 11.2396C12.6297 11.3387 12.6899 11.4373 12.7452 11.5353L12.7688 11.578C12.7912 11.6191 12.8131 11.6607 12.8328 11.7029C12.9654 11.9811 12.9845 12.4082 12.8701 12.7812C12.7507 12.751 12.628 12.7352 12.5054 12.7352C12.4156 12.7352 12.3257 12.7434 12.237 12.7604C12.1582 12.7751 12.0881 12.7943 12.0311 12.8184C11.8066 12.9005 11.6122 13.0309 11.4676 13.1881L8.93479 15.8802C8.57445 16.2285 8.63743 16.8243 9.05582 17.0993L11.1894 18.6512C11.6363 18.9251 12.1587 19.1846 12.6483 19.2799C12.9347 19.3101 13.226 19.3259 13.5223 19.3259C14.1143 19.3259 14.6888 19.2646 15.237 19.1501C15.3246 19.1211 15.4637 19.0664 15.6307 18.9787V18.9815C15.6439 18.9738 15.6586 18.9645 15.6729 18.9563C15.6866 18.9486 15.6992 18.9426 15.7134 18.9349V18.9322C15.8689 18.8391 16.0414 18.7203 16.2194 18.5647L17.9171 16.8134C18.0124 16.7165 18.0814 16.6414 18.1334 16.5746C18.2254 16.4854 18.2823 16.3616 18.2823 16.2241V15.3331C18.2823 15.3123 18.2807 15.2932 18.2791 15.2745C18.278 15.2647 18.2763 15.2548 18.2747 15.245L18.2698 15.2225C18.267 15.2121 18.2643 15.2017 18.2615 15.1913C18.1761 14.9257 17.859 14.9043 17.859 14.9043C17.8541 14.9038 17.8492 14.9038 17.8453 14.9038C17.8004 14.9038 17.7539 14.912 17.7062 14.9257C17.4735 14.9931 17.2287 15.1918 17.2199 15.1984L17.2188 15.199C17.1088 15.2888 17.0381 15.4246 17.0381 15.5768L17.1602 16.2241C17.1602 16.2723 17.1674 16.3178 17.1805 16.3616L15.7134 17.4673V17.1321L15.6548 14.964L15.6526 14.9668C15.5874 14.1639 14.674 13.4389 14.6148 13.3929L14.8744 12.0561H15.3574Z" fill="white"/>' +
+              '</g>' +
+              '<g class="test1-assist-pill-icon test1-assist-pill-icon--2">' +
+                '<path fill-rule="evenodd" clip-rule="evenodd" d="M33.5466 17.6281C32.4098 17.6281 31.3972 17.1006 30.7378 16.278C31.0256 14.9914 32.1734 14.0293 33.5466 14.0293C34.9196 14.0293 36.0676 14.9914 36.3551 16.278C35.6958 17.1006 34.6834 17.6281 33.5466 17.6281ZM33.5371 10.4562C34.2717 10.4562 34.8669 11.0516 34.8669 11.7861C34.8669 12.5205 34.2717 13.1162 33.5371 13.1162C32.8024 13.1162 32.207 12.5205 32.207 11.7861C32.207 11.0516 32.8024 10.4562 33.5371 10.4562ZM33.5468 8.35864C30.5221 8.35864 28.0703 10.8105 28.0703 13.835C28.0703 16.8596 30.5221 19.3113 33.5468 19.3113C36.5712 19.3113 39.023 16.8596 39.023 13.835C39.023 10.8105 36.5712 8.35864 33.5468 8.35864Z" fill="white"/>' +
+              '</g>' +
+              '<g class="test1-assist-pill-icon test1-assist-pill-icon--3">' +
+                '<path d="M58.979 12.7624H58.5378V12.7397H53.6091V14.9302H56.7041C56.2526 16.2054 55.0393 17.1208 53.6091 17.1208C51.7946 17.1208 50.3233 15.6496 50.3233 13.835C50.3233 12.0204 51.7946 10.5492 53.6091 10.5492C54.4468 10.5492 55.2088 10.8652 55.789 11.3813L57.338 9.83232C56.3599 8.92079 55.0516 8.35864 53.6091 8.35864C50.5848 8.35864 48.1328 10.8107 48.1328 13.835C48.1328 16.8593 50.5848 19.3113 53.6091 19.3113C56.6335 19.3113 59.0855 16.8593 59.0855 13.835C59.0855 13.4678 59.0477 13.1094 58.979 12.7624Z" fill="white"/>' +
+                '<path d="M48.7656 11.286L50.5649 12.6055C51.0517 11.4002 52.2308 10.5492 53.6105 10.5492C54.4481 10.5492 55.2102 10.8652 55.7904 11.3813L57.3394 9.83232C56.3613 8.92079 55.053 8.35864 53.6105 8.35864C51.5071 8.35864 49.6829 9.54619 48.7656 11.286Z" fill="white"/>' +
+                '<path d="M53.6097 19.3113C55.0242 19.3113 56.3095 18.77 57.2813 17.8897L55.5864 16.4554C55.0365 16.8719 54.3531 17.1208 53.6097 17.1208C52.1853 17.1208 50.9758 16.2126 50.5202 14.9451L48.7344 16.321C49.6407 18.0945 51.4813 19.3113 53.6097 19.3113Z" fill="white"/>' +
+                '<path d="M58.9792 12.7625H58.5381V12.7397H53.6094V14.9303H56.7043C56.4875 15.5428 56.0934 16.071 55.5852 16.4557L55.5861 16.4552L57.281 17.8894C57.1611 17.9984 59.0857 16.5732 59.0857 13.835C59.0857 13.4678 59.0479 13.1094 58.9792 12.7625Z" fill="white"/>' +
+              '</g>' +
+              '<g class="test1-assist-pill-icon test1-assist-pill-icon--4">' +
+                '<rect x="67.0977" y="5.53394" width="23.5194" height="16.6019" rx="8.30097" fill="white"/>' +
+                '<path d="M71.7193 17L71.7013 16.1727L73.9494 14.0144C74.5969 13.3669 74.9297 12.9892 74.9386 12.4497C74.9297 11.8562 74.462 11.4875 73.8415 11.4785C73.1851 11.4875 72.7624 11.8921 72.7624 12.5396H71.6833C71.6743 11.3346 72.5826 10.5522 73.8595 10.5612C75.1455 10.5522 76.0268 11.3256 76.0358 12.3957C76.0268 13.1151 75.676 13.6997 74.4351 14.8777L73.302 15.9928V16.0468H76.1257V17H71.7193ZM76.8713 15.813V14.8957L79.6231 10.6332H81.0439V14.8777H81.8713V15.813H81.0439V17H79.9468V15.813H76.8713ZM78.0404 14.8777H79.9648V11.9461H79.9108L78.0404 14.8238V14.8777ZM84.6813 15.9748V14.3202H83.0267V13.349H84.6813V11.6763H85.6526V13.349H87.3252V14.3202H85.6526V15.9748H84.6813Z" fill="black"/>' +
+              '</g>' +
+            '</svg>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    }
+
+    case 'test1-transit-card': {
+      return '<div class="test1-transit-card">' +
+        '<div class="test1-transit-card__bg" aria-hidden="true"></div>' +
+        '<div class="test1-transit-card__avatar">' +
+          '<img class="test1-transit-card__avatar-img" src="/test1-bus-avatar.png" alt="" draggable="false" />' +
+        '</div>' +
+        '<div class="test1-transit-card__close" aria-hidden="true">' +
+          '<span class="test1-transit-card__close-circle"></span>' +
+          '<svg class="test1-transit-card__close-icon" viewBox="249 49 17 21" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M262.743 66.9492H251.258C251.258 67.0703 251.259 67.1871 251.258 67.3038C251.256 67.5357 251.265 67.7692 251.244 67.9999C251.19 68.5931 250.589 69.0495 250.005 68.9743C249.52 68.9118 249.094 68.5178 249.019 68.0215C249.007 67.939 249.001 67.8549 249.001 67.7714C249 62.7694 249 57.7675 249 52.7655C249 51.9787 249.537 51.3203 250.301 51.1665C250.38 51.151 250.461 51.146 250.541 51.146C251.349 51.1443 252.157 51.1443 252.964 51.146C253.017 51.146 253.041 51.1327 253.062 51.0813C253.122 50.9291 253.236 50.8207 253.368 50.7321C253.656 50.5407 253.976 50.4228 254.304 50.3277C254.82 50.1777 255.347 50.093 255.88 50.0388C256.442 49.9824 257.005 49.9674 257.569 49.9979C258.38 50.041 259.18 50.1478 259.953 50.4123C260.195 50.4953 260.431 50.5944 260.643 50.7432C260.775 50.8361 260.887 50.949 260.943 51.1062C260.959 51.1515 260.99 51.1449 261.022 51.1449C261.536 51.1449 262.05 51.1449 262.564 51.1449C262.846 51.1449 263.127 51.1438 263.409 51.1449C264.289 51.1471 264.995 51.8537 264.998 52.7445C265.002 54.0664 264.999 55.3877 264.999 56.7096C264.999 60.4062 265 64.1035 265 67.8002C265 68.3778 264.639 68.8393 264.096 68.9571C263.458 69.096 262.806 68.6196 262.756 67.9623C262.732 67.6552 262.746 67.3453 262.743 67.0366C262.743 67.0106 262.743 66.984 262.743 66.9486V66.9492ZM251.261 58.6412H262.737V53.8113H251.261V58.6412ZM251.258 62.5819C251.256 63.0898 251.651 63.4993 252.144 63.502C252.659 63.5048 253.062 63.1059 253.065 62.5924C253.067 62.0712 252.675 61.6667 252.164 61.665C251.661 61.6634 251.259 62.0695 251.258 62.5819ZM262.743 62.5891C262.743 62.0761 262.349 61.6661 261.855 61.665C261.338 61.6639 260.937 62.0656 260.937 62.5824C260.938 63.0948 261.337 63.5004 261.841 63.4998C262.343 63.4998 262.743 63.0953 262.743 62.5885V62.5891Z" fill="#FFFFFF"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="test1-transit-card__copy">' +
+          '<div class="test1-transit-card__title">이번 정류장에서 하차</div>' +
+          '<div class="test1-transit-card__subtitle">진천청구 타운 앞</div>' +
+        '</div>' +
+        '<div class="test1-transit-card__end">안내 종료</div>' +
+        '<div class="test1-transit-card__progress">' +
+          '<div class="test1-transit-card__track"></div>' +
+          '<div class="test1-transit-card__fill"></div>' +
+          '<div class="test1-transit-card__thumb">' +
+            '<svg class="test1-transit-card__send" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+              '<g clip-path="url(#clip0_test1_transit_send)">' +
+                '<path fill-rule="evenodd" clip-rule="evenodd" d="M11.2481 13.1411C11.366 13.3603 11.3743 13.621 11.2707 13.8472L9.44457 17.8188C9.11377 18.5614 9.34802 18.9516 9.51752 19.1204C9.83042 19.4302 10.3843 19.4472 10.9999 19.1671L21.7171 14.3855C22.2884 14.1224 22.6121 13.6338 22.5955 13.1319C22.5795 12.6306 22.2258 12.1642 21.6383 11.9376L10.6388 7.8488C10.0061 7.60914 9.45437 7.66149 9.16192 7.99176C9.00463 8.16985 8.7941 8.5748 9.17275 9.29472L11.2481 13.1411ZM16.4516 13.3288L11.4362 13.4891Z" fill="white"/>' +
+                '<path d="M16.4516 13.3288L11.4362 13.4891M11.2481 13.1411C11.366 13.3603 11.3743 13.621 11.2707 13.8472L9.44457 17.8188C9.11377 18.5614 9.34802 18.9516 9.51752 19.1204C9.83042 19.4302 10.3843 19.4472 10.9999 19.1671L21.7171 14.3855C22.2884 14.1224 22.6121 13.6338 22.5955 13.1319C22.5795 12.6306 22.2258 12.1642 21.6383 11.9376L10.6388 7.8488C10.0061 7.60914 9.45437 7.66149 9.16192 7.99176C9.00463 8.16985 8.7941 8.5748 9.17275 9.29472L11.2481 13.1411Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '</g>' +
+              '<defs><clipPath id="clip0_test1_transit_send"><rect width="19" height="19" fill="white" transform="translate(13) rotate(43.1698)"/></clipPath></defs>' +
+            '</svg>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-gradient-sweep': {
+      var sweepShape = (comp && comp.variant && comp.variant.sweepShape) || 'bar';
+      return '<div class="test1-gradient-sweep test1-gradient-sweep--' + sweepShape + '" aria-hidden="true">' +
+        '<div class="test1-gradient-sweep__glass">' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--1"></div>' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--2"></div>' +
+          '<div class="test1-gradient-sweep__track test1-gradient-sweep__track--3"></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-l': {
+      return '<div class="test1-lock-shortcut-l">' +
+        '<div class="test1-lock-shortcut-l__ellipse" aria-hidden="true"></div>' +
+        '<div class="test1-lock-shortcut-l__phone">' +
+          '<img class="test1-lock-shortcut-l__icon" src="/Phone.png" alt="" draggable="false" />' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-r': {
+      return '<div class="test1-lock-shortcut-r">' +
+        '<div class="test1-lock-shortcut-r__ellipse" aria-hidden="true"></div>' +
+        '<div class="test1-lock-shortcut-r__camera">' +
+          '<img class="test1-lock-shortcut-r__icon" src="/assets/figma/lock-screen/camera-icon.svg" alt="" draggable="false" />' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-bottom-pill': {
+      var test1bpTextAPathD = "M64.9217 12.5759V22.6187H63.6752V12.5759H64.9217ZM56.3299 17.2434C57.6 17.2434 59.047 17.2316 60.498 17.1608C60.73 15.9222 60.7811 14.9784 60.7929 14.2942H57.1792V13.2994H62.0237V13.8106C62.0198 14.4908 62.0198 15.5801 61.7642 17.0861C62.1967 17.0546 62.6253 17.0192 63.0461 16.9721L63.1365 17.8961C62.177 18.0259 61.1901 18.1124 60.2228 18.1674V22.0524H58.9802V18.2225C58.1072 18.25 57.2657 18.2618 56.4872 18.2618L56.3299 17.2434ZM74.1108 12.5759V16.5002H75.6011V17.5265H74.1108V22.6029H72.8722V12.5759H74.1108ZM66.1874 19.8583C68.6333 18.6314 69.9545 16.9249 70.1983 14.6363H66.7222V13.6179H71.4566C71.4487 16.571 70.2258 19.1662 66.8834 20.8099L66.1874 19.8583ZM87.4453 13.6533V14.6521H79.2349V13.6533H82.7424V12.5483H83.9693V13.6533H87.4453ZM78.7827 20.0785V19.0718H87.9722V20.0785H83.9693V22.6344H82.7424V20.0785H78.7827ZM79.9545 16.8148C79.9466 15.7098 81.2246 15.1082 83.3558 15.1082C85.4792 15.1082 86.7572 15.7098 86.7611 16.8148C86.7572 17.9079 85.4792 18.5095 83.3558 18.5135C81.2246 18.5095 79.9466 17.9079 79.9545 16.8148ZM81.2403 16.8148C81.2325 17.322 81.9639 17.5894 83.3558 17.5855C84.74 17.5894 85.4714 17.322 85.4792 16.8148C85.4714 16.2957 84.74 16.0283 83.3558 16.0283C81.9639 16.0283 81.2325 16.2957 81.2403 16.8148ZM99.7614 12.5759V22.6423H98.5188V17.1411H96.5881V16.1306H98.5188V12.5759H99.7614ZM91.1932 19.7403C92.8014 18.9853 93.753 17.0822 93.757 15.2458V14.5695H91.6061V13.5668H97.178V14.5695H95.0192V15.2458C95.0153 16.9799 95.959 18.8162 97.5751 19.528L96.8437 20.5071C95.6759 19.9526 94.8422 18.8398 94.4018 17.5108C93.9614 18.9303 93.1042 20.1257 91.9324 20.7155L91.1932 19.7403ZM102.97 13.146V17.2316C104.373 17.2237 105.474 17.1529 106.717 16.9288L106.866 17.9354C105.455 18.2107 104.181 18.2775 102.517 18.2775H101.747V13.146H102.97ZM102.714 20.0431V19.0443H109.588V22.6187H108.353V20.0431H102.714ZM105.754 16.4019V15.4582H108.353V14.6167H105.754V13.6769H108.353V12.5759H109.588V18.6078H108.353V16.4019H105.754ZM122.049 13.032V14.015H119.131C119.245 14.9666 120.472 15.8671 122.415 16.0991L121.955 17.0743C120.15 16.8541 118.821 16.0637 118.282 14.9824C117.743 16.0598 116.426 16.8541 114.625 17.0743L114.173 16.0991C116.111 15.8671 117.327 14.9627 117.444 14.015H114.55V13.032H122.049ZM113.701 18.6314V17.6327H122.891V18.6314H119.01V20.4678H117.787V18.6314H113.701ZM114.814 22.4299V19.5398H116.049V21.4272H121.876V22.4299H114.814ZM131.918 12.5759V22.6423H130.672V12.5759H131.918ZM124.082 20.2672V13.3938H125.32V15.9064H127.754V13.3938H128.977V20.2672H124.082ZM125.32 19.2527H127.754V16.8737H125.32V19.2527ZM64.3476 27.5759V31.7243H65.7553V32.7506H64.3476V37.6187H63.105V27.5759H64.3476ZM56.2748 34.8386C57.0377 34.8386 57.9224 34.8347 58.8465 34.8111V33.8674C57.7494 33.6826 57.0337 32.9984 57.0377 32.0507C57.0337 30.9222 58.0286 30.1672 59.4756 30.1672C60.903 30.1672 61.9136 30.9222 61.9215 32.0507C61.9136 32.9984 61.1822 33.6865 60.0891 33.8713V34.7639C60.9305 34.7206 61.776 34.6499 62.5663 34.5398L62.6489 35.4481C60.4901 35.8374 58.1623 35.857 56.4518 35.857L56.2748 34.8386ZM56.4636 29.711V28.7319H58.8465V27.6152H60.0891V28.7319H62.4562V29.711H56.4636ZM58.2095 32.0507C58.2055 32.6327 58.7128 32.9748 59.4756 32.9708C60.2267 32.9748 60.7339 32.6327 60.7339 32.0507C60.7339 31.4687 60.2267 31.1148 59.4756 31.1148C58.7128 31.1148 58.2055 31.4687 58.2095 32.0507ZM71.3937 28.4134V29.2195H73.4227V27.5837H74.6574V34.8976H73.4227V32.3692H71.3937V33.2343H66.675V28.4134H71.3937ZM67.9019 32.263H70.1786V29.4004H67.9019V32.263ZM68.0316 37.4299V34.2213H69.2821V36.4272H74.8776V37.4299H68.0316ZM71.3937 31.3783H73.4227V30.2262H71.3937V31.3783ZM80.6535 27.7292C82.942 27.7292 84.2711 28.3387 84.2711 29.4476C84.2711 30.5722 82.942 31.1817 80.6535 31.1856C78.365 31.1817 77.028 30.5722 77.032 29.4476C77.028 28.3387 78.365 27.7292 80.6535 27.7292ZM76.0804 32.7113V31.7243H85.2384V32.7113H76.0804ZM77.1578 34.3038V33.3837H84.0981V35.8453H78.3807V36.5924H84.3734V37.5361H77.1696V34.9684H82.8791V34.3038H77.1578ZM78.3257 29.4476C78.3178 30.006 79.12 30.2616 80.6535 30.2655C82.2028 30.2616 83.001 30.006 83.001 29.4476C83.001 28.9325 82.2028 28.6415 80.6535 28.6415C79.12 28.6415 78.3178 28.9325 78.3257 29.4476ZM96.6619 28.1854V29.0819C96.6619 30.0217 96.6619 31.0519 96.3945 32.4714H97.7826V33.4781H93.7914V37.6344H92.5449V33.4781H88.6245V32.4714H95.1441C95.4194 31.103 95.4312 30.0807 95.4312 29.1802H89.7098V28.1854H96.6619ZM102.147 29.0111C102.139 30.3874 102.941 31.6339 104.51 32.1333L103.846 33.1006C102.752 32.7113 101.982 31.9799 101.553 31.0244C101.113 32.1215 100.275 32.9826 99.0601 33.4073L98.3995 32.4125C100.063 31.8659 100.896 30.5211 100.904 29.0662V28.1185H102.147V29.0111ZM100.063 35.688C100.059 34.4651 101.36 33.7533 103.484 33.7533C105.611 33.7533 106.913 34.4651 106.913 35.688C106.913 36.9148 105.611 37.6147 103.484 37.6108C101.36 37.6147 100.059 36.9148 100.063 35.688ZM101.294 35.688C101.286 36.3014 102.084 36.6435 103.484 36.6396C104.888 36.6435 105.682 36.3014 105.686 35.688C105.682 35.0549 104.888 34.7167 103.484 34.7167C102.084 34.7167 101.286 35.0549 101.294 35.688ZM103.649 30.5329V29.5184H105.65V27.5759H106.885V33.482H105.65V30.5329H103.649ZM116.18 27.5759V31.5788H117.73V32.5973H116.18V37.6187H114.958V27.5759H116.18ZM108.253 30.1121V29.1134H110.628V27.7174H111.863V29.1134H114.183V30.1121H108.253ZM108.717 33.1281C108.709 31.7401 109.787 30.7609 111.253 30.7609C112.7 30.7609 113.774 31.7401 113.782 33.1281C113.774 34.5162 112.7 35.4914 111.253 35.4914C109.787 35.4914 108.709 34.5162 108.717 33.1281ZM109.901 33.1281C109.893 33.9539 110.467 34.4769 111.253 34.469C112.028 34.4769 112.59 33.9539 112.598 33.1281C112.59 32.3142 112.028 31.7754 111.253 31.7754C110.467 31.7754 109.893 32.3142 109.901 33.1281ZM126.294 30.4149V31.394H119.326V27.9376H120.557V30.4149H126.294ZM118.138 33.541V32.5658H127.328V33.541H118.138ZM119.243 37.3906V34.4297H120.478V36.3879H126.356V37.3906H119.243ZM139.852 32.1844V33.1832H135.881V34.0364C137.674 34.1505 138.739 34.7718 138.743 35.8177C138.739 36.9699 137.426 37.6147 135.259 37.6108C133.069 37.6147 131.76 36.9699 131.76 35.8177C131.76 34.7678 132.829 34.1426 134.654 34.0325V33.1832H130.694V32.1844H139.852ZM131.135 30.7531C132.983 30.5801 134.194 29.829 134.402 29.0033H131.532V28.0163H139.03V29.0033H136.136C136.337 29.8329 137.532 30.5801 139.424 30.7531L138.987 31.7283C137.163 31.5434 135.81 30.8199 135.263 29.7976C134.721 30.816 133.384 31.5434 131.555 31.7283L131.135 30.7531ZM133.018 35.8177C133.01 36.3682 133.801 36.6749 135.259 36.6671C136.703 36.6749 137.501 36.3682 137.509 35.8177C137.501 35.2554 136.703 34.9644 135.259 34.9566C133.801 34.9644 133.01 35.2554 133.018 35.8177Z";
+      return '<div class="test1-bottom-pill" aria-hidden="true">' +
+        '<div class="test1-bottom-pill__bg">' +
+          '<div class="test1-bottom-pill__bg-base"></div>' +
+          '<div class="test1-bottom-pill__bg-blue"></div>' +
+          '<div class="test1-bottom-pill__bg-blue-cover"></div>' +
+          '<div class="test1-bottom-pill__grad-sweep">' +
+            '<div class="test1-bottom-pill__grad-sweep-track test1-bottom-pill__grad-sweep-track--1"></div>' +
+            '<div class="test1-bottom-pill__grad-sweep-track test1-bottom-pill__grad-sweep-track--2"></div>' +
+            '<div class="test1-bottom-pill__grad-sweep-track test1-bottom-pill__grad-sweep-track--3"></div>' +
+          '</div>' +
+        '</div>' +
+        '<svg class="test1-bottom-pill__svg" viewBox="0 0 200 53" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<defs>' +
+            '<style>' +
+              '@font-face{font-family:\'Pretendard SB\';src:url(\'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/woff2/Pretendard-SemiBold.woff2\') format(\'woff2\');font-weight:600;font-style:normal;}' +
+              '.test1-bottom-pill__text--b,.test1-bottom-pill__text--b tspan{font-family:\'Pretendard SB\',sans-serif;font-weight:600;font-synthesis:none;}' +
+            '</style>' +
+            '<linearGradient id="test1bp_paint1" x1="14.5547" y1="7" x2="34.0547" y2="46" gradientUnits="userSpaceOnUse">' +
+              '<stop stop-color="#EECBFF"/>' +
+              '<stop offset="1" stop-color="white"/>' +
+            '</linearGradient>' +
+            '<linearGradient id="test1bp_text_a_highlight" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="1" y2="0">' +
+              '<stop offset="0%" stop-color="white" stop-opacity="0"/>' +
+              '<stop offset="10%" stop-color="white" stop-opacity="0"/>' +
+              '<stop offset="24%" stop-color="white" stop-opacity="0.28"/>' +
+              '<stop offset="38%" stop-color="white" stop-opacity="0.72"/>' +
+              '<stop offset="50%" stop-color="white" stop-opacity="1"/>' +
+              '<stop offset="62%" stop-color="white" stop-opacity="0.72"/>' +
+              '<stop offset="76%" stop-color="white" stop-opacity="0.28"/>' +
+              '<stop offset="90%" stop-color="white" stop-opacity="0"/>' +
+              '<stop offset="100%" stop-color="white" stop-opacity="0"/>' +
+            '</linearGradient>' +
+            '<mask id="test1bp_text_a_mask" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="53">' +
+              '<path d="' + test1bpTextAPathD + '" fill="white"/>' +
+            '</mask>' +
+          '</defs>' +
+          '<circle class="test1-bottom-pill__icon" cx="26.2791" cy="26.2791" r="19.2713" fill="url(#test1bp_paint1)"/>' +
+          '<g class="test1-bottom-pill__text-stage">' +
+              '<g class="test1-bottom-pill__text-a-stage">' +
+              '<path class="test1-bottom-pill__text test1-bottom-pill__text--a" d="' + test1bpTextAPathD + '" fill="white"/>' +
+              '<g class="test1-bottom-pill__text-a-highlight" mask="url(#test1bp_text_a_mask)">' +
+                '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--1">' +
+                  '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
+                '</g>' +
+                '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--2">' +
+                  '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
+                '</g>' +
+                '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--3">' +
+                  '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
+                '</g>' +
+              '</g>' +
+            '</g>' +
+            '<text class="test1-bottom-pill__text test1-bottom-pill__text--b" fill="white" font-family="Pretendard SB, sans-serif" font-size="10.2" font-weight="600" letter-spacing="-0.02em">' +
+              '<tspan x="58" y="21.2" font-family="Pretendard SB, sans-serif" font-weight="600">저녁 식사 준비를 돕는</tspan>' +
+              '<tspan x="58" y="37.2" font-family="Pretendard SB, sans-serif" font-weight="600">화면을 구성했어요.</tspan>' +
+            '</text>' +
+          '</g>' +
+        '</svg>' +
+        '<div class="test1-bottom-pill__text-sweep">' +
+          '<div class="test1-bottom-pill__text-sweep-track test1-bottom-pill__text-sweep-track--reveal"></div>' +
+          '<div class="test1-bottom-pill__text-sweep-track test1-bottom-pill__text-sweep-track--1"></div>' +
+          '<div class="test1-bottom-pill__text-sweep-track test1-bottom-pill__text-sweep-track--2"></div>' +
+          '<div class="test1-bottom-pill__text-sweep-track test1-bottom-pill__text-sweep-track--3"></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    case 'test1-lock-shortcut-asset': {
+      var t1Asset = (comp && comp.variant) || {};
+      var t1Src = t1Asset.src || '/Phone.png';
+      var t1Alt = t1Asset.alt || '';
+      return '<img class="test1-lock-shortcut-asset" src="' + t1Src + '" alt="' + t1Alt + '" draggable="false" />';
     }
 
     case 'unlock-hint': {
@@ -9164,6 +9346,379 @@ function installTest2P2TransitionBridge(canvas) {
   }).observe(canvas, { attributes: true, attributeFilter: ['class'] });
 }
 
+var TEST1_INTRO_DELAY_MS = 3000;
+var TEST1_LOTTE_INTRO_MS = 720;
+var TEST1_PILL_AFTER_LOTTE_MS = 1300;
+var TEST1_PILL_ANIM_MS = 3800;
+var TEST1_GREEN_AFTER_PILL_MS = 1500;
+var TEST1_SHORTCUTS_FADE_MS = 480;
+var TEST1_STACK_AFTER_GREEN_MS = 3500;
+var TEST1_STACK_INTRO_MS = 720;
+var TEST1_AFTER_STACK_MS = 3000;
+var TEST1_PILL_OUT_FADE_MS = 800;
+var TEST1_PILL_OUT_GAP_MS = 420;
+var TEST1_GRADIENT_FLOW_MS = 4721;
+var TEST1_GRADIENT_OUT_FADE_MS = 3400;
+var TEST1_AFTER_GRADIENT_CODA_MS = 1500;
+var TEST1_PILL_BG_DELAY_MS = 550;
+var TEST1_PILL_BG_IN_MS = 950;
+var TEST1_PILL_ICON_TEXT_DELAY_MS = TEST1_PILL_BG_DELAY_MS;
+var TEST1_PILL_TEXT_A_IN_MS = TEST1_PILL_BG_IN_MS;
+var TEST1_PILL_TEXT_HOLD_MS = 3000;
+var TEST1_PASS_DUR_MS = 1667;
+var TEST1_PASS_OVERLAP_MS = 240;
+var TEST1_PASS_STEP_MS = TEST1_PASS_DUR_MS - TEST1_PASS_OVERLAP_MS;
+var TEST1_PILL_GRAD_PASS_OVERLAP_MS = 620;
+var TEST1_PILL_GRAD_PASS_STEP_MS = TEST1_PASS_DUR_MS - TEST1_PILL_GRAD_PASS_OVERLAP_MS;
+var TEST1_PILL_TEXT_SWEEP_MS = TEST1_PASS_DUR_MS + TEST1_PASS_STEP_MS * 2;
+var TEST1_PILL_TEXT_A_OUT_MS = 1150;
+var TEST1_PILL_CROSSFADE_LEAD_MS = 350;
+var TEST1_PILL_PINK_FLOW_MS = TEST1_PASS_DUR_MS + TEST1_PILL_GRAD_PASS_STEP_MS * 2;
+var TEST1_PILL_TEXT_B_DUR_MS = 1400;
+var TEST1_PILL_TEXT_B_LEAD_MS = 850;
+var TEST1_PILL_TEXT_A_SHIMMER_DELAY_MS = 1000;
+var TEST1_PILL_TEXT_A_SHIMMER_START_MS = TEST1_PILL_ICON_TEXT_DELAY_MS + TEST1_PILL_TEXT_A_IN_MS + TEST1_PILL_TEXT_A_SHIMMER_DELAY_MS;
+var TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS = 2850;
+var TEST1_PILL_TEXT_A_HIGHLIGHT_STEP_MS = 500;
+var TEST1_PILL_TEXT_A_HIGHLIGHT_OVERLAP_MS = TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS - TEST1_PILL_TEXT_A_HIGHLIGHT_STEP_MS;
+var TEST1_PILL_TEXT_A_SHIMMER_DUR_MS = TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS + TEST1_PILL_TEXT_A_HIGHLIGHT_STEP_MS * 2;
+var TEST1_PILL_PINK_FLOW_DELAY_MS = TEST1_PILL_TEXT_A_SHIMMER_START_MS + TEST1_PILL_TEXT_A_SHIMMER_DUR_MS;
+var TEST1_PILL_PINK_SWEEP_START_MS = TEST1_PILL_PINK_FLOW_DELAY_MS;
+var TEST1_PILL_TEXT_B_DELAY_MS = TEST1_PILL_PINK_FLOW_DELAY_MS + TEST1_PILL_PINK_FLOW_MS - TEST1_PILL_TEXT_B_LEAD_MS;
+var TEST1_CODA_FADE_IN_MS = TEST1_PILL_TEXT_B_DELAY_MS + TEST1_PILL_TEXT_B_DUR_MS + 500;
+var TEST1_STACK_ITEM_GAP_PX = 16;
+var TEST1_STACK_SHIFT_PX = 72 + TEST1_STACK_ITEM_GAP_PX;
+
+function _clearTest1IntroTimer() {
+  if (window.__mlpTest1IntroTimer) {
+    clearTimeout(window.__mlpTest1IntroTimer);
+    window.__mlpTest1IntroTimer = null;
+  }
+  if (window.__mlpTest1PillTimer) {
+    clearTimeout(window.__mlpTest1PillTimer);
+    window.__mlpTest1PillTimer = null;
+  }
+  if (window.__mlpTest1GreenTimer) {
+    clearTimeout(window.__mlpTest1GreenTimer);
+    window.__mlpTest1GreenTimer = null;
+  }
+  if (window.__mlpTest1StackTimer) {
+    clearTimeout(window.__mlpTest1StackTimer);
+    window.__mlpTest1StackTimer = null;
+  }
+  if (window.__mlpTest1ShortcutFadeTimer) {
+    clearTimeout(window.__mlpTest1ShortcutFadeTimer);
+    window.__mlpTest1ShortcutFadeTimer = null;
+  }
+  if (window.__mlpTest1PillOutDelayTimer) {
+    clearTimeout(window.__mlpTest1PillOutDelayTimer);
+    window.__mlpTest1PillOutDelayTimer = null;
+  }
+  if (window.__mlpTest1PillOutEndTimer) {
+    clearTimeout(window.__mlpTest1PillOutEndTimer);
+    window.__mlpTest1PillOutEndTimer = null;
+  }
+  if (window.__mlpTest1GradientStartTimer) {
+    clearTimeout(window.__mlpTest1GradientStartTimer);
+    window.__mlpTest1GradientStartTimer = null;
+  }
+  if (window.__mlpTest1GradientEndTimer) {
+    clearTimeout(window.__mlpTest1GradientEndTimer);
+    window.__mlpTest1GradientEndTimer = null;
+  }
+  if (window.__mlpTest1GradientOutTimer) {
+    clearTimeout(window.__mlpTest1GradientOutTimer);
+    window.__mlpTest1GradientOutTimer = null;
+  }
+  if (window.__mlpTest1CodaTimer) {
+    clearTimeout(window.__mlpTest1CodaTimer);
+    window.__mlpTest1CodaTimer = null;
+  }
+  if (window.__mlpTest1CodaEndTimer) {
+    clearTimeout(window.__mlpTest1CodaEndTimer);
+    window.__mlpTest1CodaEndTimer = null;
+  }
+  if (window.__mlpTest1PinkFlowTimer) {
+    clearTimeout(window.__mlpTest1PinkFlowTimer);
+    window.__mlpTest1PinkFlowTimer = null;
+  }
+  if (window.__mlpTest1TextLoopTimer) {
+    clearTimeout(window.__mlpTest1TextLoopTimer);
+    window.__mlpTest1TextLoopTimer = null;
+  }
+  if (window.__mlpTest1TextLoopEndTimer) {
+    clearTimeout(window.__mlpTest1TextLoopEndTimer);
+    window.__mlpTest1TextLoopEndTimer = null;
+  }
+  if (window.__mlpTest1PinkFlowLoopTimer) {
+    clearTimeout(window.__mlpTest1PinkFlowLoopTimer);
+    window.__mlpTest1PinkFlowLoopTimer = null;
+  }
+  if (window.__mlpTest1PinkFlowStopTimer) {
+    clearTimeout(window.__mlpTest1PinkFlowStopTimer);
+    window.__mlpTest1PinkFlowStopTimer = null;
+  }
+}
+
+function _runTest1ShortcutsFade() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-shortcuts-out')) return;
+    c.setAttribute('data-test1-shortcuts-out', '1');
+    c.setAttribute('data-test1-shortcuts-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1ShortcutsOut = true;
+  } catch (_) {}
+}
+
+function _runTest1PillIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.removeAttribute('data-test1-pill-run');
+    c.setAttribute('data-test1-pill-prep', '1');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var canvas = document.getElementById('canvas');
+          if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          canvas.removeAttribute('data-test1-pill-prep');
+          canvas.setAttribute('data-test1-pill-run', '1');
+          _armTest1GreenDelay(canvas);
+        } catch (_) {}
+      });
+    });
+  } catch (_) {}
+}
+
+function _runTest1GreenIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.setAttribute('data-test1-green-run', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1GreenRun = true;
+    _armTest1StackDelay(c);
+  } catch (_) {}
+}
+
+function _runTest1StackIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    c.setAttribute('data-test1-stack-run', '1');
+    c.setAttribute('data-test1-stack-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1StackRun = true;
+    _armTest1PillOutDelay(c);
+  } catch (_) {}
+}
+
+function _armTest1PillOutDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (!canvas.getAttribute('data-test1-stack-run')) return;
+  if (canvas.getAttribute('data-test1-pill-out')) return;
+  if (window.__mlpTest1PillOutDelayTimer) return;
+  window.__mlpTest1PillOutDelayTimer = setTimeout(function () {
+    window.__mlpTest1PillOutDelayTimer = null;
+    _runTest1PillOut();
+  }, TEST1_AFTER_STACK_MS);
+}
+
+function _runTest1PillOut() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-pill-out')) return;
+    c.setAttribute('data-test1-pill-out', '1');
+    c.setAttribute('data-test1-pill-out-animate', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1PillOut = true;
+    if (window.__mlpTest1PillOutEndTimer) clearTimeout(window.__mlpTest1PillOutEndTimer);
+    window.__mlpTest1PillOutEndTimer = setTimeout(function () {
+      window.__mlpTest1PillOutEndTimer = null;
+      try {
+        var pillCanvas = document.getElementById('canvas');
+        if (pillCanvas && pillCanvas.getAttribute('data-test-scope') === 'test1') {
+          pillCanvas.removeAttribute('data-test1-pill-out-animate');
+        }
+      } catch (_) {}
+    }, TEST1_PILL_OUT_FADE_MS);
+    if (window.__mlpTest1GradientStartTimer) return;
+    window.__mlpTest1GradientStartTimer = setTimeout(function () {
+      window.__mlpTest1GradientStartTimer = null;
+      _runTest1GradientSweep();
+    }, TEST1_PILL_OUT_FADE_MS + TEST1_PILL_OUT_GAP_MS);
+  } catch (_) {}
+}
+
+function _runTest1GradientSweep() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-gradient-run')) return;
+    c.setAttribute('data-test1-gradient-run', '1');
+    if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientRun = true;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var canvas = document.getElementById('canvas');
+          if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          canvas.setAttribute('data-test1-gradient-animate', '1');
+          if (window.__mlpTest1GradientEndTimer) return;
+          window.__mlpTest1GradientEndTimer = setTimeout(function () {
+            window.__mlpTest1GradientEndTimer = null;
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                try {
+                  var c2 = document.getElementById('canvas');
+                  if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+                  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+                  c2.setAttribute('data-test1-gradient-out-animate', '1');
+                } catch (_) {}
+              });
+            });
+            if (window.__mlpTest1GradientOutTimer) return;
+            window.__mlpTest1GradientOutTimer = setTimeout(function () {
+              window.__mlpTest1GradientOutTimer = null;
+              canvas.setAttribute('data-test1-gradient-out', '1');
+              if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientOut = true;
+              canvas.removeAttribute('data-test1-gradient-animate');
+              canvas.removeAttribute('data-test1-gradient-out-animate');
+              if (window.__mlpTestConfig) window.__mlpTestConfig.test1GradientDone = true;
+              _armTest1CodaDelay(canvas);
+            }, TEST1_GRADIENT_OUT_FADE_MS);
+          }, TEST1_GRADIENT_FLOW_MS);
+        } catch (_) {}
+      });
+    });
+  } catch (_) {}
+}
+
+function _armTest1CodaDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (canvas.getAttribute('data-test1-coda-run')) return;
+  if (window.__mlpTest1CodaTimer) return;
+  window.__mlpTest1CodaTimer = setTimeout(function () {
+    window.__mlpTest1CodaTimer = null;
+    _runTest1CodaIntro();
+  }, TEST1_AFTER_GRADIENT_CODA_MS);
+}
+
+function _runTest1CodaIntro() {
+  try {
+    var c = document.getElementById('canvas');
+    if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+    if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+    if (c.getAttribute('data-test1-coda-run')) return;
+    c.removeAttribute('data-test1-shortcuts-out');
+    c.removeAttribute('data-test1-shortcuts-animate');
+    c.setAttribute('data-test1-coda-run', '1');
+    if (window.__mlpTestConfig) {
+      window.__mlpTestConfig.test1ShortcutsOut = false;
+      window.__mlpTestConfig.test1CodaRun = true;
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        try {
+          var c2 = document.getElementById('canvas');
+          if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+          if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+          c2.setAttribute('data-test1-coda-animate', '1');
+        } catch (_) {}
+      });
+    });
+    if (window.__mlpTest1CodaEndTimer) clearTimeout(window.__mlpTest1CodaEndTimer);
+    window.__mlpTest1CodaEndTimer = setTimeout(function () {
+      window.__mlpTest1CodaEndTimer = null;
+        try {
+          var c2 = document.getElementById('canvas');
+          if (!c2 || c2.getAttribute('data-test-scope') !== 'test1') return;
+          c2.setAttribute('data-test1-coda-done', '1');
+          c2.removeAttribute('data-test1-coda-animate');
+          if (window.__mlpTestConfig) window.__mlpTestConfig.test1CodaDone = true;
+        } catch (_) {}
+    }, TEST1_CODA_FADE_IN_MS);
+  } catch (_) {}
+}
+
+function _armTest1StackDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (canvas.getAttribute('data-test1-stack-run')) return;
+  if (!canvas.getAttribute('data-test1-green-run')) return;
+  if (window.__mlpTest1StackTimer) return;
+  window.__mlpTest1StackTimer = setTimeout(function () {
+    window.__mlpTest1StackTimer = null;
+    _runTest1StackIntro();
+  }, TEST1_STACK_AFTER_GREEN_MS);
+}
+
+function _armTest1GreenDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (!canvas.getAttribute('data-test1-pill-run')) return;
+  var greenDelay = TEST1_PILL_ANIM_MS + TEST1_GREEN_AFTER_PILL_MS;
+  var shortcutDelay = Math.max(0, greenDelay - TEST1_SHORTCUTS_FADE_MS);
+  if (!canvas.getAttribute('data-test1-green-run') && !window.__mlpTest1GreenTimer) {
+    window.__mlpTest1GreenTimer = setTimeout(function () {
+      window.__mlpTest1GreenTimer = null;
+      _runTest1GreenIntro();
+    }, greenDelay);
+  }
+  if (!canvas.getAttribute('data-test1-shortcuts-out') && !window.__mlpTest1ShortcutFadeTimer) {
+    window.__mlpTest1ShortcutFadeTimer = setTimeout(function () {
+      window.__mlpTest1ShortcutFadeTimer = null;
+      _runTest1ShortcutsFade();
+    }, shortcutDelay);
+  }
+}
+
+function _armTest1PillDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (window.__mlpTest1PillTimer) return;
+  window.__mlpTest1PillTimer = setTimeout(function () {
+    window.__mlpTest1PillTimer = null;
+    _runTest1PillIntro();
+  }, TEST1_LOTTE_INTRO_MS + TEST1_PILL_AFTER_LOTTE_MS);
+}
+
+function _armTest1IntroDelay(canvas) {
+  if (!canvas || canvas.getAttribute('data-test-scope') !== 'test1') return;
+  if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+  if (window.__mlpTest1IntroTimer) return;
+  window.__mlpTest1IntroTimer = setTimeout(function () {
+    window.__mlpTest1IntroTimer = null;
+    try {
+      var c = document.getElementById('canvas');
+      if (!c || c.getAttribute('data-test-scope') !== 'test1') return;
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) return;
+      c.setAttribute('data-test1-intro-run', '1');
+      _armTest1PillDelay(c);
+    } catch (_) {}
+  }, TEST1_INTRO_DELAY_MS);
+}
+
+window.__armTest1IntroDelay = _armTest1IntroDelay;
+window.__clearTest1IntroTimer = _clearTest1IntroTimer;
+
+window.test1RevealAllComponents = function test1RevealAllComponents() {
+  if (!window.__mlpTestConfig || window.__mlpTestConfig.id !== 'test1') return;
+  _clearTest1IntroTimer();
+  window.__mlpTestConfig.test1RevealAll = true;
+  if (typeof window.generateSurfaceScenario === 'function') {
+    window.generateSurfaceScenario(window.currentSurfaceType || 'tab-root');
+  }
+};
+
 window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   const canvas = document.getElementById('canvas');
   if (!canvas) return;
@@ -9183,6 +9738,102 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
   window.expandContainerComponents(plan, layout);
   if (testScope) {
     canvas.setAttribute('data-test-scope', testScope);
+    if (testScope === 'test1') {
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll == null) {
+        window.__mlpTestConfig.test1RevealAll = false;
+      }
+      if (window.__mlpTestConfig && window.__mlpTestConfig.test1RevealAll) {
+        _clearTest1IntroTimer();
+        canvas.setAttribute('data-test1-reveal-all', '1');
+        canvas.removeAttribute('data-test1-intro');
+        canvas.removeAttribute('data-test1-intro-run');
+        canvas.removeAttribute('data-test1-pill-prep');
+        canvas.removeAttribute('data-test1-pill-run');
+        canvas.removeAttribute('data-test1-green-run');
+        canvas.removeAttribute('data-test1-stack-run');
+        canvas.removeAttribute('data-test1-stack-animate');
+        canvas.removeAttribute('data-test1-shortcuts-out');
+        canvas.removeAttribute('data-test1-shortcuts-animate');
+        canvas.removeAttribute('data-test1-pill-out');
+        canvas.removeAttribute('data-test1-pill-out-animate');
+        canvas.removeAttribute('data-test1-gradient-run');
+        canvas.removeAttribute('data-test1-gradient-animate');
+        canvas.removeAttribute('data-test1-gradient-out');
+        canvas.removeAttribute('data-test1-coda-run');
+        canvas.removeAttribute('data-test1-coda-animate');
+        canvas.removeAttribute('data-test1-coda-done');
+        if (window.__mlpTestConfig) {
+          window.__mlpTestConfig.test1GreenRun = false;
+          window.__mlpTestConfig.test1StackRun = false;
+          window.__mlpTestConfig.test1ShortcutsOut = false;
+          window.__mlpTestConfig.test1PillOut = false;
+          window.__mlpTestConfig.test1GradientRun = false;
+          window.__mlpTestConfig.test1GradientOut = false;
+          window.__mlpTestConfig.test1GradientDone = false;
+          window.__mlpTestConfig.test1CodaRun = false;
+          window.__mlpTestConfig.test1CodaDone = false;
+        }
+      } else {
+        canvas.removeAttribute('data-test1-reveal-all');
+        canvas.removeAttribute('data-test1-intro');
+        canvas.removeAttribute('data-test1-intro-run');
+        canvas.removeAttribute('data-test1-pill-prep');
+        canvas.removeAttribute('data-test1-pill-run');
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GreenRun) {
+          canvas.setAttribute('data-test1-green-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-green-run');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1StackRun) {
+          canvas.setAttribute('data-test1-stack-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-stack-run');
+          canvas.removeAttribute('data-test1-stack-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1ShortcutsOut) {
+          canvas.setAttribute('data-test1-shortcuts-out', '1');
+        } else {
+          canvas.removeAttribute('data-test1-shortcuts-out');
+          canvas.removeAttribute('data-test1-shortcuts-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1PillOut) {
+          canvas.setAttribute('data-test1-pill-out', '1');
+        } else {
+          canvas.removeAttribute('data-test1-pill-out');
+          canvas.removeAttribute('data-test1-pill-out-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GradientRun) {
+          canvas.setAttribute('data-test1-gradient-run', '1');
+        } else {
+          canvas.removeAttribute('data-test1-gradient-run');
+          canvas.removeAttribute('data-test1-gradient-animate');
+          canvas.removeAttribute('data-test1-gradient-out');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1GradientOut) {
+          canvas.setAttribute('data-test1-gradient-out', '1');
+          canvas.removeAttribute('data-test1-gradient-animate');
+        }
+        if (window.__mlpTestConfig && window.__mlpTestConfig.test1CodaRun) {
+          canvas.setAttribute('data-test1-coda-run', '1');
+          if (window.__mlpTestConfig.test1CodaDone) {
+            canvas.setAttribute('data-test1-coda-done', '1');
+          }
+        } else {
+          canvas.removeAttribute('data-test1-coda-run');
+          canvas.removeAttribute('data-test1-coda-animate');
+          canvas.removeAttribute('data-test1-coda-done');
+        }
+      }
+    } else {
+      _clearTest1IntroTimer();
+      canvas.removeAttribute('data-test1-reveal-all');
+      canvas.removeAttribute('data-test1-intro');
+      canvas.removeAttribute('data-test1-intro-run');
+      canvas.removeAttribute('data-test1-pill-prep');
+      canvas.removeAttribute('data-test1-pill-run');
+      canvas.removeAttribute('data-test1-green-run');
+      canvas.removeAttribute('data-test1-stack-run');
+    }
     if (testScope === 'test3') {
       var homeStage = window.__mlpTestConfig && window.__mlpTestConfig.homeStage;
       var shouldEnter = (homeStage === 'home') && !!window.__mlpTest3HomeEnterArmed;
@@ -9254,12 +9905,56 @@ window.generateSurfaceScenario = function generateSurfaceScenario(surfaceType) {
       window.__mlpTest3HoverPaused = false;
     }
   } else {
+    _clearTest1IntroTimer();
     canvas.removeAttribute('data-test-scope');
+    canvas.removeAttribute('data-test1-reveal-all');
     canvas.removeAttribute('data-test3-home-enter');
     canvas.removeAttribute('data-test3-home-prep');
     canvas.removeAttribute('data-test3-music-shift');
+    canvas.removeAttribute('data-test1-intro');
+    canvas.removeAttribute('data-test1-intro-run');
+    canvas.removeAttribute('data-test1-pill-prep');
+    canvas.removeAttribute('data-test1-pill-run');
+    canvas.removeAttribute('data-test1-green-run');
+    canvas.removeAttribute('data-test1-stack-run');
+    canvas.removeAttribute('data-test1-shortcuts-out');
+    canvas.removeAttribute('data-test1-shortcuts-animate');
+    canvas.removeAttribute('data-test1-pill-out');
+    canvas.removeAttribute('data-test1-pill-out-animate');
+    canvas.removeAttribute('data-test1-gradient-run');
+    canvas.removeAttribute('data-test1-gradient-animate');
+    canvas.removeAttribute('data-test1-gradient-out');
+    canvas.removeAttribute('data-test1-coda-run');
+    canvas.removeAttribute('data-test1-coda-animate');
+    canvas.removeAttribute('data-test1-coda-done');
   }
   window.renderSurfacePlan(canvas, plan, layout);
+  if (testScope === 'test1') {
+    try {
+      var pillItem = canvas.querySelector('#test1-assist-pill');
+      if (pillItem && (!pillItem.querySelector('.test1-assist-pill-icon--1') || !pillItem.querySelector('.test1-assist-pill-shell'))) {
+        for (var pi = 0; pi < plan.components.length; pi++) {
+          if (plan.components[pi].id === 'test1-assist-pill') {
+            var pillRect = window.resolveComponentRect(plan.components[pi], layout, plan);
+            pillItem.innerHTML = window.renderAtomicForRole(plan.components[pi], pillRect);
+            break;
+          }
+        }
+      }
+      if (window.__mlpTestConfig && !window.__mlpTestConfig.test1RevealAll) {
+        _armTest1IntroDelay(canvas);
+        if (canvas.getAttribute('data-test1-pill-run')) {
+          _armTest1GreenDelay(canvas);
+        }
+        if (canvas.getAttribute('data-test1-green-run')) {
+          _armTest1StackDelay(canvas);
+        }
+        if (canvas.getAttribute('data-test1-stack-run')) {
+          _armTest1PillOutDelay(canvas);
+        }
+      }
+    } catch (_) {}
+  }
   if (testScope === 'test2') {
     try {
       installTest2P2TransitionBridge(canvas);

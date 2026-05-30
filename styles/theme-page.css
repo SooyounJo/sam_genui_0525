@@ -5357,9 +5357,9 @@
     /* Widened 78→138px and moved left so the longer Korean lines
        fit on the 168px-wide orange compact card. Slightly smaller
        font (12px vs 14px) so the longest line still fits. */
-    width: 138px;
+    width: 100%;
     height: 18px;
-    left: 16px;
+    left: 0;
     top: 130.5px;
     font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: normal;
@@ -5368,6 +5368,7 @@
     line-height: 130%;
     display: flex;
     align-items: center;
+    justify-content: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -5423,16 +5424,17 @@
     z-index: 1;
     flex: none;
     order: 0;
-    width: 119px;
-    height: 57px;
-    margin: 0 auto;
+    width: 136px;
+    height: calc((15px - 0.5pt) * 1.3 * 3);
+    margin: 0 0 0 -8px;
     font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: normal;
     font-weight: 600;
-    font-size: 15px;
+    font-size: calc(15px - 0.5pt);
     line-height: 130%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     color: #FFFFFF;
     background: repeating-linear-gradient(105.31deg, #FFFFFF 0px, #FFFFFF 24px, rgba(255, 189, 139, 0.3) 66px, rgba(255, 189, 139, 0.3) 114px, #FFFFFF 156px, #FFFFFF 192px);
     background-size: 192px 100%;
@@ -5440,6 +5442,11 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: #FFFFFF;
+  }
+  .dot-music1__singerLine {
+    display: block;
+    white-space: nowrap;
+    padding-left: 5px;
   }
   .detail-stage .dot-music1__singer-name {
     animation:
@@ -5664,12 +5671,9 @@
   }
   .dot-music1__secondTitle {
     position: absolute;
-    /* Widened 78→260px so the three contextual reasoning lines
-       ("현재 페이스에 맞는 BPM", "비 오는 날에 맞는 러닝용 부드러운 톤",
-        "최근 5km 이상 러닝 때 선호한 스타일") fit on one line each. */
-    width: 260px;
+    width: 100%;
     height: 18px;
-    left: 49px;
+    left: 0;
     top: 130.5px;
     font-family: 'Inter', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
     font-style: normal;
@@ -5677,6 +5681,7 @@
     font-size: 13px;
     line-height: 130%;
     display: block;
+    text-align: center;
     background: linear-gradient(90deg, #000000 0%, #7F7F7F 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -5702,6 +5707,7 @@
     inset: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
     white-space: nowrap;
     /* Inherits the gradient text-fill from the parent. */
     background: inherit;
@@ -12928,5 +12934,1904 @@
   @keyframes p2ComponentGrow {
     from { opacity: 0; transform: scaleY(0.8) translateY(10px); }
     to { opacity: 1; transform: scaleY(1) translateY(0); }
+  }
+
+  /* test1 — full-screen Lock Screen mock (388×880 canvas, image aspect preserved) */
+  #canvas[data-test-scope="test1"] {
+    background-color: #000 !important;
+    background-image: url("/Lock%20Screen.png") !important;
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+  }
+  #canvas[data-test-scope="test1"] .canvas-item {
+    display: none !important;
+  }
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"] .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"] #test1-now-bar,
+  #canvas[data-test-scope="test1"] #test1-now-bar-b,
+  #canvas[data-test-scope="test1"] #test1-transit-card,
+  #canvas[data-test-scope="test1"] #test1-l-shortcut,
+  #canvas[data-test-scope="test1"] #test1-r-shortcut,
+  #canvas[data-test-scope="test1"] #test1-bottom-pill {
+    display: block !important;
+    pointer-events: auto !important;
+  }
+
+  /* test1 intro — hide 우리딸 until stack-run */
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-stack-run]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-stack-run]) #test1-now-bar-b {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* test1 intro — hide green until green-run */
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-green-run]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-green-run]) #test1-transit-card {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* test1 intro — assist pill hidden until prep/run */
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-pill-prep]):not([data-test1-pill-run]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-pill-prep]):not([data-test1-pill-run]) #test1-assist-pill {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-prep]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-prep]:not([data-test1-reveal-all]) #test1-assist-pill,
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    overflow: visible;
+    background: transparent;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-stage {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    opacity: 0;
+    z-index: 1;
+    transform: translate3d(-50%, 0, 0);
+    will-change: transform, opacity, left, width;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-shell {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 36px;
+    border-radius: 18px;
+    background: rgba(146, 146, 151, 0.92);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-body {
+    position: relative;
+    z-index: 1;
+    width: 127px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-assist-pill-bg,
+  #canvas[data-test-scope="test1"] .test1-assist-pill-icon {
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-assist-pill-stage {
+    left: 0;
+    width: 100%;
+    transform: none;
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-assist-pill-shell {
+    display: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] #test1-assist-pill {
+    display: block !important;
+    pointer-events: auto !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-assist-pill-bg,
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-assist-pill-icon {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-stage {
+    animation:
+      test1AssistPillFadeIn 0.532s cubic-bezier(0.33, 1, 0.68, 1) both,
+      test1AssistPillSlideLeft 1.14s cubic-bezier(0.45, 0, 0.55, 1) 0.532s both,
+      test1AssistPillExpandWidth 2.128s cubic-bezier(0.16, 1, 0.3, 1) 1.672s both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-shell {
+    animation: test1AssistPillShellColor 2.128s cubic-bezier(0.16, 1, 0.3, 1) 1.672s both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon--1 {
+    animation: test1AssistPillIcon1 3.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon--2 {
+    animation: test1AssistPillIcon2 3.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon--3 {
+    animation: test1AssistPillIcon3 3.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon--4 {
+    animation: test1AssistPillIcon4 3.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* 원 등장 14%(0.532s) 유지 → 슬라이드 14~44% → 1.672s에 expand 동시 시작 */
+  @keyframes test1AssistPillFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1AssistPillSlideLeft {
+    0% {
+      left: 50%;
+      transform: translate3d(-50%, 0, 0);
+    }
+    100% {
+      left: 0;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes test1AssistPillExpandWidth {
+    0% {
+      width: 36px;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
+  @keyframes test1AssistPillShellColor {
+    0% {
+      background-color: rgba(146, 146, 151, 0.92);
+    }
+    100% {
+      background-color: rgba(23, 23, 26, 0.6);
+    }
+  }
+
+  @keyframes test1AssistPillIcon1 {
+    0%, 48% {
+      opacity: 0;
+    }
+    62% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1AssistPillIcon2 {
+    0%, 56% {
+      opacity: 0;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1AssistPillIcon3 {
+    0%, 64% {
+      opacity: 0;
+    }
+    78% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1AssistPillIcon4 {
+    0%, 72% {
+      opacity: 0;
+    }
+    86% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-stage,
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-shell,
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-bg,
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon {
+      animation: none;
+    }
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-stage {
+      left: 0;
+      width: 100%;
+      transform: none;
+      opacity: 1;
+    }
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-shell {
+      display: none;
+    }
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-bg,
+    #canvas[data-test-scope="test1"][data-test1-pill-run]:not([data-test1-reveal-all]) .test1-assist-pill-icon {
+      opacity: 1;
+    }
+  }
+
+  /* test1 intro — 롯데마트: 3초 대기 후 intro-run 때만 등장 */
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-intro-run]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"]:not([data-test1-reveal-all]):not([data-test1-intro-run]) #test1-now-bar {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar {
+    display: block !important;
+    visibility: visible !important;
+    animation: test1LotteIntro 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  @keyframes test1LotteIntro {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 42px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+    #canvas[data-test-scope="test1"][data-test1-intro-run]:not([data-test1-reveal-all]) #test1-now-bar {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* test1 intro — green 직전 전화/카메라 shortcut fade out */
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) #test1-r-shortcut {
+    animation: test1ShortcutsFadeOut 0.48s cubic-bezier(0.33, 1, 0.68, 1) both;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-out]:not([data-test1-reveal-all]):not([data-test1-shortcuts-animate]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-out]:not([data-test1-reveal-all]):not([data-test1-shortcuts-animate]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-out]:not([data-test1-reveal-all]):not([data-test1-shortcuts-animate]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-shortcuts-out]:not([data-test1-reveal-all]):not([data-test1-shortcuts-animate]) #test1-r-shortcut {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  @keyframes test1ShortcutsFadeOut {
+    0% {
+      opacity: 1;
+      visibility: visible;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+    #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+    #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) #test1-l-shortcut,
+    #canvas[data-test-scope="test1"][data-test1-shortcuts-animate][data-test1-shortcuts-out]:not([data-test1-reveal-all]) #test1-r-shortcut {
+      animation: none;
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  /* test1 intro — green: pill 완료 1.5초 후 30px 아래에서 rise-in */
+  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-transit-card {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    animation: test1GreenIntro 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  @keyframes test1GreenIntro {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 30px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-transit-card"],
+    #canvas[data-test-scope="test1"][data-test1-green-run]:not([data-test1-reveal-all]) #test1-transit-card {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* test1 intro — green 3.5초 후 우리딸 rise-in + 롯데마트/pill 88px 아래로 (72 + 16 gap) */
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar-b {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar-b {
+    animation: test1LotteIntro 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    transform: translate3d(0, 88px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]) #test1-now-bar {
+    animation: test1StackShift 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]):not([data-test1-pill-out-animate]):not([data-test1-pill-out]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-stack-animate][data-test1-stack-run]:not([data-test1-reveal-all]):not([data-test1-gradient-out-animate]):not([data-test1-gradient-out]):not([data-test1-pill-out-animate]):not([data-test1-pill-out]) #test1-assist-pill {
+    animation: test1StackShift 0.72s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  @keyframes test1StackShift {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 88px, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar-b"],
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar-b {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar,
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+    #canvas[data-test-scope="test1"][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+      animation: none;
+      transform: translate3d(0, 88px, 0);
+    }
+  }
+
+  /* test1 intro — stack 3초 후 assist pill fade out */
+  #canvas[data-test-scope="test1"] {
+    --test1-pill-out-dur: 0.8s;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) #test1-assist-pill {
+    animation: test1PillOutFade var(--test1-pill-out-dur) cubic-bezier(0.22, 1, 0.36, 1) both;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    transform: translate3d(0, 88px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-pill-out]:not([data-test1-reveal-all]):not([data-test1-pill-out-animate]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-pill-out]:not([data-test1-reveal-all]):not([data-test1-pill-out-animate]) #test1-assist-pill {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) #test1-assist-pill {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  @keyframes test1PillOutFade {
+    0% {
+      opacity: 1;
+      visibility: visible;
+      filter: blur(0px);
+    }
+    40% {
+      opacity: 0.82;
+      filter: blur(0.45px);
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      filter: blur(2.2px);
+    }
+  }
+
+  /* test1 intro — pill fade 직후 blur + gradient sweep (per-component exact fit) */
+  @property --test1-fill {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -4%;
+  }
+
+  #canvas[data-test-scope="test1"]:not([data-test1-gradient-run]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"]:not([data-test1-gradient-run]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"]:not([data-test1-gradient-run]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"]:not([data-test1-gradient-run]) #test1-gradient-sweep-c {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-run]:not([data-test1-reveal-all]) #test1-gradient-sweep-c {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    z-index: 30;
+    overflow: visible !important;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-run] .test1-gradient-sweep {
+    opacity: 1;
+  }
+
+  /* now-bar img object-fit:contain 과 동일 pill (288:60 → 345.6×72 in 346 box) */
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--bar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--bar .test1-gradient-sweep__glass {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: min(100%, calc(72px * 288 / 60));
+    transform: translateX(-50%) translateZ(0);
+    border-radius: 9999px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* test1-transit-card 와 동일: 294×134 + scale(1.177) top-left */
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--card .test1-gradient-sweep__glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 294px;
+    height: 134px;
+    transform: scale(1.177) translateZ(0);
+    transform-origin: top left;
+    border-radius: 35px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--bar .test1-gradient-sweep__track,
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep--card .test1-gradient-sweep__track {
+    border-radius: inherit;
+  }
+
+  #canvas[data-test-scope="test1"] {
+    --test1-pass-dur: 1.667s;
+    --test1-pass-overlap: 0.24s;
+    --test1-pass-step: calc(var(--test1-pass-dur) - var(--test1-pass-overlap));
+    --test1-out-dur: 3.4s;
+  }
+
+  /* 3 passes in ~5s — next pass starts before previous ends (no pause after full cover) */
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--1 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0s forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--2 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear var(--test1-pass-step) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a .test1-gradient-sweep__track--3 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(var(--test1-pass-step) * 2) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--1 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0.1s forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--2 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step)) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b .test1-gradient-sweep__track--3 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.1s + var(--test1-pass-step) * 2) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--1 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear 0.2s forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--2 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step)) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c .test1-gradient-sweep__track--3 {
+    animation: test1GradientFillPass var(--test1-pass-dur) linear calc(0.2s + var(--test1-pass-step) * 2) forwards;
+  }
+
+  @property --test1-out-fill {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  @keyframes test1GradientFillPass {
+    0% { --test1-fill: -4%; opacity: 1; }
+    100% { --test1-fill: 128%; opacity: 1; }
+  }
+
+  /* 4th pass — airy dissolve left→right, all 3 components + sweeps together */
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-c {
+    --test1-out-fill: 0%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    animation: test1GradientFlowOut var(--test1-out-dur) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent calc(var(--test1-out-fill) - 44%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-out-fill) - 34%),
+      rgba(0, 0, 0, 0.06) calc(var(--test1-out-fill) - 26%),
+      rgba(0, 0, 0, 0.12) calc(var(--test1-out-fill) - 18%),
+      rgba(0, 0, 0, 0.22) calc(var(--test1-out-fill) - 11%),
+      rgba(0, 0, 0, 0.34) calc(var(--test1-out-fill) - 5%),
+      rgba(0, 0, 0, 0.48) calc(var(--test1-out-fill) + 2%),
+      rgba(0, 0, 0, 0.62) calc(var(--test1-out-fill) + 12%),
+      rgba(0, 0, 0, 0.76) calc(var(--test1-out-fill) + 24%),
+      rgba(0, 0, 0, 0.88) calc(var(--test1-out-fill) + 38%),
+      #000 calc(var(--test1-out-fill) + 54%),
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent calc(var(--test1-out-fill) - 44%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-out-fill) - 34%),
+      rgba(0, 0, 0, 0.06) calc(var(--test1-out-fill) - 26%),
+      rgba(0, 0, 0, 0.12) calc(var(--test1-out-fill) - 18%),
+      rgba(0, 0, 0, 0.22) calc(var(--test1-out-fill) - 11%),
+      rgba(0, 0, 0, 0.34) calc(var(--test1-out-fill) - 5%),
+      rgba(0, 0, 0, 0.48) calc(var(--test1-out-fill) + 2%),
+      rgba(0, 0, 0, 0.62) calc(var(--test1-out-fill) + 12%),
+      rgba(0, 0, 0, 0.76) calc(var(--test1-out-fill) + 24%),
+      rgba(0, 0, 0, 0.88) calc(var(--test1-out-fill) + 38%),
+      #000 calc(var(--test1-out-fill) + 54%),
+      #000 100%
+    );
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run][data-test1-stack-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run][data-test1-stack-run]:not([data-test1-reveal-all]) #test1-now-bar {
+    transform: translate3d(0, 88px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .test1-gradient-sweep__track {
+    --test1-fill: 128%;
+    opacity: 1;
+    animation: test1GradientSweepAirOut var(--test1-out-dur) cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+
+  @keyframes test1GradientFlowOut {
+    0% {
+      --test1-out-fill: -20%;
+      opacity: 1;
+      filter: blur(0px);
+    }
+    18% {
+      opacity: 0.97;
+      filter: blur(0.18px);
+    }
+    42% {
+      opacity: 0.84;
+      filter: blur(0.55px);
+    }
+    68% {
+      opacity: 0.48;
+      filter: blur(1.8px);
+    }
+    100% {
+      --test1-out-fill: 125%;
+      opacity: 0;
+      filter: blur(5px);
+    }
+  }
+
+  @keyframes test1GradientSweepAirOut {
+    0% {
+      opacity: 1;
+      filter: blur(0px);
+    }
+    30% {
+      opacity: 0.92;
+      filter: blur(0.25px);
+    }
+    62% {
+      opacity: 0.62;
+      filter: blur(1px);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(2.4px);
+    }
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-out][data-test1-gradient-run]:not([data-test1-gradient-out-animate]):not([data-test1-reveal-all]) #test1-gradient-sweep-c {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* blur + black↔white boundary that spreads softly to the right (wide blend, no hard line) */
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep__track {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    --test1-fill: -4%;
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-backdrop-filter: blur(3.6px);
+    backdrop-filter: blur(3.6px);
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.38) 0%,
+      rgba(0, 0, 0, 0.34) calc(var(--test1-fill) - 34%),
+      rgba(0, 0, 0, 0.28) calc(var(--test1-fill) - 24%),
+      rgba(0, 0, 0, 0.20) calc(var(--test1-fill) - 17%),
+      rgba(0, 0, 0, 0.12) calc(var(--test1-fill) - 11%),
+      rgba(0, 0, 0, 0.06) calc(var(--test1-fill) - 6%),
+      rgba(255, 255, 255, 0.08) calc(var(--test1-fill) - 1%),
+      rgba(255, 255, 255, 0.22) calc(var(--test1-fill) + 5%),
+      rgba(255, 255, 255, 0.18) calc(var(--test1-fill) + 11%),
+      rgba(255, 255, 255, 0.10) calc(var(--test1-fill) + 17%),
+      rgba(255, 255, 255, 0.04) calc(var(--test1-fill) + 24%),
+      rgba(0, 0, 0, 0) calc(var(--test1-fill) + 34%)
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      #000 0%,
+      #000 calc(var(--test1-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-fill) + 24%),
+      transparent calc(var(--test1-fill) + 34%)
+    );
+    mask-image: linear-gradient(
+      90deg,
+      #000 0%,
+      #000 calc(var(--test1-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-fill) + 24%),
+      transparent calc(var(--test1-fill) + 34%)
+    );
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep__track--2,
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep__track--3 {
+    z-index: 1;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-gradient-sweep__track--3 {
+    z-index: 2;
+  }
+
+  /* gradient 동안 underlying component repaint flicker 방지 (gradient visual unchanged) */
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-now-bar"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-now-bar-b"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-transit-card"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-transit-card,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .canvas-item[data-role="test1-gradient-sweep"],
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-a,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) #test1-gradient-sweep-c {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-now-bar,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-now-bar-b,
+  #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run]:not([data-test1-gradient-out]):not([data-test1-gradient-out-animate]) .test1-transit-card {
+    isolation: isolate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-assist-pill"],
+    #canvas[data-test-scope="test1"][data-test1-pill-out-animate][data-test1-pill-out]:not([data-test1-reveal-all]) #test1-assist-pill {
+      animation: none;
+      opacity: 0;
+      visibility: hidden;
+    }
+    #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run] .test1-gradient-sweep__track--1,
+    #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run] .test1-gradient-sweep__track--2 {
+      animation: none;
+      opacity: 0;
+    }
+    #canvas[data-test-scope="test1"][data-test1-gradient-animate][data-test1-gradient-run] .test1-gradient-sweep__track--3 {
+      animation: none;
+      opacity: 1;
+      --test1-fill: 128%;
+    }
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar-b"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar-b,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-now-bar"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-now-bar,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-transit-card"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-transit-card,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] .canvas-item[data-role="test1-gradient-sweep"],
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-a,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-b,
+    #canvas[data-test-scope="test1"][data-test1-gradient-out-animate][data-test1-gradient-run] #test1-gradient-sweep-c {
+      animation: none;
+      --test1-out-fill: 125%;
+      opacity: 0;
+      filter: blur(5px);
+    }
+  }
+
+  #canvas[data-test-scope="test1"] .test1-now-bar,
+  #canvas[data-test-scope="test1"] .test1-assist-pill-svg,
+  #canvas[data-test-scope="test1"] .test1-now-bar-b {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+  }
+
+  /* test1 — transit card (294×134 base, scaled to Lotte bar width) */
+  #canvas[data-test-scope="test1"] .test1-transit-card {
+    position: relative;
+    width: 294px;
+    height: 134px;
+    overflow: hidden;
+    border-radius: 35px;
+    isolation: isolate;
+    pointer-events: none;
+    transform: scale(1.177);
+    transform-origin: top left;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 35px;
+    background:
+      linear-gradient(0deg, rgba(110, 159, 121, 0.3), rgba(110, 159, 121, 0.3)),
+      linear-gradient(62.46deg, #349F4E 8.83%, #8BC499 27.21%, #CFE3AF 58.39%, #98CCA4 103.5%);
+    background-blend-mode: multiply, normal;
+    box-shadow:
+      inset 10px 15px 30px #7EBD88,
+      inset 4px 4px 20px #6BA679;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__avatar {
+    position: absolute;
+    left: 24px;
+    top: 21px;
+    width: 39px;
+    height: 39px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close {
+    position: absolute;
+    left: 241px;
+    top: 19px;
+    width: 32px;
+    height: 32px;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close-circle {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #1B6FEE;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__close-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    display: block;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__copy {
+    position: absolute;
+    left: 73px;
+    top: 23px;
+    width: 124px;
+    filter: drop-shadow(0px 0px 50px #509E62);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__title {
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__subtitle {
+    margin-top: 1px;
+    margin-left: 1px;
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__end {
+    position: absolute;
+    left: 123px;
+    top: 98px;
+    width: 49px;
+    font-family: 'Pretendard', var(--font), sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+    color: #FFFFFF;
+    white-space: nowrap;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__progress {
+    position: absolute;
+    left: 25.2px;
+    top: 63px;
+    width: 245.98px;
+    height: 31px;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__track {
+    position: absolute;
+    left: 0;
+    top: 12.51px;
+    width: 245.98px;
+    height: 7.03px;
+    border-radius: 33.3832px;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__fill {
+    position: absolute;
+    left: 0;
+    top: 12.51px;
+    width: 188px;
+    height: 7.03px;
+    border-radius: 33.3832px;
+    background: #378644;
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__thumb {
+    position: absolute;
+    left: 166.8px;
+    top: 0;
+    width: 31px;
+    height: 31px;
+    border-radius: 50%;
+    background: #1B6FEE;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0px 0px 1.9px rgba(0, 0, 0, 0.39);
+  }
+  #canvas[data-test-scope="test1"] .test1-transit-card__send {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 25px;
+    height: 25px;
+    transform: translate(calc(-50% - 1px), -50%);
+    display: block;
+  }
+
+  /* test1 — left/right shortcuts share identical 59px teal circle */
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r {
+    position: relative;
+    width: 60px;
+    height: 59px;
+    isolation: isolate;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__ellipse,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__ellipse {
+    position: absolute;
+    width: 59px;
+    height: 59px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #155E75;
+    border-radius: 50%;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__phone,
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__camera {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-l__icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    mix-blend-mode: lighten;
+    pointer-events: none;
+  }
+  #canvas[data-test-scope="test1"] .test1-lock-shortcut-r__icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* test1 — bottom search pill hidden until coda phase */
+  #canvas[data-test-scope="test1"]:not([data-test1-coda-run]):not([data-test1-reveal-all]) .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"]:not([data-test1-coda-run]):not([data-test1-reveal-all]) #test1-bottom-pill {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] #test1-bottom-pill {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__bg-base,
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__icon {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__bg-blue {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__bg-blue-cover {
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__grad-sweep {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__grad-sweep-track {
+    opacity: 1;
+    --test1-pill-grad-fill: -4%;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__text-sweep {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__text-a-stage {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-reveal-all] .test1-bottom-pill__text--b {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @font-face {
+    font-family: 'Pretendard SB';
+    src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/woff2/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 999px;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__bg {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__bg-base {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: #000;
+  }
+
+  /* Figma pill grad — full pillar, icon sits above on svg layer */
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__bg-blue {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(147deg, #155E75 0%, #EECBFF 100%);
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__bg-blue-cover {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: #155E75;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+    isolation: isolate;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__svg {
+    display: block;
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text--b,
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text--b tspan {
+    font-family: 'Pretendard SB', 'Pretendard', var(--font), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    font-synthesis: none;
+    font-size: 10.2px;
+    letter-spacing: -0.02em;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text--a {
+    fill: white;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-a-highlight {
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    isolation: isolate;
+  }
+
+  @property --test1-pill-text-a-highlight-x {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -4%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-a-highlight-track {
+    --test1-pill-text-a-highlight-x: -4%;
+    opacity: 0;
+    transform: translateX(calc((var(--test1-pill-text-a-highlight-x) + 4%) * 1.85));
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep {
+    position: absolute;
+    left: 26.5%;
+    top: 8%;
+    width: 72.5%;
+    height: 84%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    border-radius: 0 20px 20px 0;
+  }
+
+  @property --test1-pill-text-fill {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -4%;
+  }
+
+  @property --test1-pill-grad-fill {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -4%;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track--reveal {
+    display: none;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track,
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track {
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track {
+    inset: -3px;
+    border-radius: inherit;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track {
+    --test1-pill-text-fill: -4%;
+    background: #155E75;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      #000 0%,
+      #000 calc(var(--test1-pill-text-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-pill-text-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-pill-text-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-pill-text-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-pill-text-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-pill-text-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-pill-text-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-pill-text-fill) + 24%),
+      transparent calc(var(--test1-pill-text-fill) + 34%)
+    );
+    mask-image: linear-gradient(
+      90deg,
+      #000 0%,
+      #000 calc(var(--test1-pill-text-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-pill-text-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-pill-text-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-pill-text-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-pill-text-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-pill-text-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-pill-text-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-pill-text-fill) + 24%),
+      transparent calc(var(--test1-pill-text-fill) + 34%)
+    );
+  }
+
+  /* 327deg — moving teal→pink band + text-sweep dissolve mask (3 staggered tracks) */
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track {
+    --test1-pill-grad-fill: -4%;
+    --test1-pill-grad-angle: 327deg;
+    transform: translate3d(0, 0, 0);
+    background: linear-gradient(
+      var(--test1-pill-grad-angle),
+      #155E75 calc(var(--test1-pill-grad-fill) - 52%),
+      #EECBFF calc(var(--test1-pill-grad-fill) + 52%)
+    );
+    -webkit-mask-image: linear-gradient(
+      var(--test1-pill-grad-angle),
+      #000 0%,
+      #000 calc(var(--test1-pill-grad-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-pill-grad-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-pill-grad-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-pill-grad-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-pill-grad-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-pill-grad-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-pill-grad-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-pill-grad-fill) + 24%),
+      transparent calc(var(--test1-pill-grad-fill) + 34%)
+    );
+    mask-image: linear-gradient(
+      var(--test1-pill-grad-angle),
+      #000 0%,
+      #000 calc(var(--test1-pill-grad-fill) - 28%),
+      rgba(0, 0, 0, 0.94) calc(var(--test1-pill-grad-fill) - 20%),
+      rgba(0, 0, 0, 0.78) calc(var(--test1-pill-grad-fill) - 13%),
+      rgba(0, 0, 0, 0.58) calc(var(--test1-pill-grad-fill) - 7%),
+      rgba(0, 0, 0, 0.36) calc(var(--test1-pill-grad-fill) - 1%),
+      rgba(0, 0, 0, 0.18) calc(var(--test1-pill-grad-fill) + 8%),
+      rgba(0, 0, 0, 0.08) calc(var(--test1-pill-grad-fill) + 16%),
+      rgba(0, 0, 0, 0.02) calc(var(--test1-pill-grad-fill) + 24%),
+      transparent calc(var(--test1-pill-grad-fill) + 34%)
+    );
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track--1 {
+    z-index: 0;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track--2,
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track--2 {
+    z-index: 1;
+  }
+
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__grad-sweep-track--3,
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-sweep-track--3 {
+    z-index: 2;
+  }
+
+  /* test1 coda — shortcuts first, then staged pillar intro */
+  #canvas[data-test-scope="test1"] {
+    --test1-coda-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --test1-coda-in-dur: 0.82s;
+    --test1-coda-pill-w: 215px;
+    --test1-coda-pill-h: 57px;
+    --test1-coda-shortcut-size: var(--test1-coda-pill-h);
+    --test1-coda-shortcut-icon: calc(var(--test1-coda-pill-h) * 30 / 59);
+    --test1-coda-pill-left: calc((388px - var(--test1-coda-pill-w)) / 2 - 0.5px);
+    --test1-coda-pill-top: 795px;
+    --test1-pill-bg-delay: 0.55s;
+    --test1-pill-bg-in-dur: 0.95s;
+    --test1-pill-icon-text-delay: var(--test1-pill-bg-delay);
+    --test1-pill-icon-in-dur: var(--test1-pill-bg-in-dur);
+    --test1-pill-text-a-in-dur: var(--test1-pill-bg-in-dur);
+    --test1-pill-content-ease: cubic-bezier(0.33, 1, 0.68, 1);
+    --test1-pill-text-hold: 3s;
+    --test1-pill-text-a-shimmer-delay: 1s;
+    --test1-pill-text-a-shimmer-start: calc(var(--test1-pill-icon-text-delay) + var(--test1-pill-text-a-in-dur) + var(--test1-pill-text-a-shimmer-delay));
+    --test1-pill-text-a-highlight-pass-dur: 2.85s;
+    --test1-pill-text-a-highlight-pass-step: 0.5s;
+    --test1-pill-text-a-highlight-overlap: calc(var(--test1-pill-text-a-highlight-pass-dur) - var(--test1-pill-text-a-highlight-pass-step));
+    --test1-pill-text-a-shimmer-dur: calc(var(--test1-pill-text-a-highlight-pass-dur) + var(--test1-pill-text-a-highlight-pass-step) * 2);
+    --test1-pill-text-sweep-dur: calc(var(--test1-pass-dur) + var(--test1-pass-step) * 2);
+    --test1-pill-text-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --test1-pill-text-a-out-dur: 1.15s;
+    --test1-pill-text-a-out-ease: cubic-bezier(0.4, 0, 0.15, 1);
+    --test1-pill-crossfade-lead: 0.35s;
+    --test1-pill-pink-fade-dur: 1.05s;
+    --test1-pill-pink-fade-ease: cubic-bezier(0.33, 0, 0.18, 1);
+    --test1-pill-pink-sweep-start: calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-shimmer-dur));
+    --test1-pill-text-fadeout-delay: calc(var(--test1-pill-pink-sweep-start) - var(--test1-pill-crossfade-lead));
+    --test1-pill-pink-flow-delay: var(--test1-pill-pink-sweep-start);
+    --test1-pill-grad-pass-overlap: 0.62s;
+    --test1-pill-grad-pass-step: calc(var(--test1-pass-dur) - var(--test1-pill-grad-pass-overlap));
+    --test1-pill-pink-flow-dur: calc(var(--test1-pass-dur) + var(--test1-pill-grad-pass-step) * 2);
+    --test1-pill-pink-sweep-end: calc(var(--test1-pill-pink-sweep-start) + var(--test1-pill-pink-flow-dur));
+    --test1-pill-text-b-lead: 0.85s;
+    --test1-pill-cover-hold-dur: calc(var(--test1-pill-pink-flow-delay) - var(--test1-pill-bg-delay));
+    --test1-pill-text-b-dur: 1.4s;
+    --test1-pill-text-b-delay: calc(var(--test1-pill-pink-sweep-end) - var(--test1-pill-text-b-lead));
+  }
+
+  /* coda — shortcut inner shell matches pillar height (57px) */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+  }
+
+  /* coda — shortcut circles match center pill height; intro 59px must not leak */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l__ellipse,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r__ellipse {
+    width: var(--test1-coda-shortcut-size) !important;
+    height: var(--test1-coda-shortcut-size) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-l__phone,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-lock-shortcut-r__camera {
+    width: var(--test1-coda-shortcut-icon) !important;
+    height: var(--test1-coda-shortcut-icon) !important;
+  }
+
+  /* coda-only shortcut layout — same top/height as pillar (57px) */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-lock-shortcut-l"] {
+    left: 16.5px !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: 64px !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-r-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-lock-shortcut-r"] {
+    left: 307.5px !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: 64px !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  /* coda-only — pillar centered on 388px frame */
+  #canvas[data-test-scope="test1"][data-test1-coda-run] #test1-bottom-pill,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .canvas-item[data-role="test1-bottom-pill"] {
+    left: var(--test1-coda-pill-left) !important;
+    top: var(--test1-coda-pill-top) !important;
+    width: var(--test1-coda-pill-w) !important;
+    height: var(--test1-coda-pill-h) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-r-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-bottom-pill"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-reveal-all]) #test1-bottom-pill {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-lock-shortcut-r {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run]:not([data-test1-coda-animate]):not([data-test1-coda-done]):not([data-test1-reveal-all]) .test1-bottom-pill {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-r,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    animation: none;
+  }
+
+  /* coda-done — lock shortcut shell sizes (no snap back to intro 59/30) */
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-r {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-l__ellipse,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-r__ellipse {
+    width: var(--test1-coda-shortcut-size) !important;
+    height: var(--test1-coda-shortcut-size) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-l__phone,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-lock-shortcut-r__camera {
+    width: var(--test1-coda-shortcut-icon) !important;
+    height: var(--test1-coda-shortcut-icon) !important;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-r {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+    animation: test1CodaFadeIn var(--test1-coda-in-dur) var(--test1-coda-ease) forwards;
+  }
+
+  /* pillar — shortcuts first → blue pill + icon + text together */
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+    animation: test1PillShellIn var(--test1-pill-bg-in-dur) var(--test1-pill-content-ease) var(--test1-pill-bg-delay) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__bg-blue {
+    transform-origin: center;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__icon {
+    transform-box: fill-box;
+    transform-origin: 26.2791px 26.2791px;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__bg-base {
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__bg-blue {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__bg-blue-cover {
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__icon,
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__text-a-stage {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run] .test1-bottom-pill__text--b {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-base {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-blue-cover {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    opacity: 0;
+    animation: test1PillBgBlueCoverIn 0.01s linear var(--test1-pill-bg-delay) forwards,
+      test1PillBgBlueCoverHide var(--test1-pill-pink-fade-dur) var(--test1-pill-pink-fade-ease) var(--test1-pill-pink-sweep-start) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__icon {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: opacity, transform;
+    animation: test1PillIconIn var(--test1-pill-icon-in-dur) var(--test1-pill-content-ease) var(--test1-pill-icon-text-delay) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text--a {
+    animation: test1PillTextADimBase 0.4s ease var(--test1-pill-text-a-shimmer-start) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-stage {
+    opacity: 0;
+    visibility: visible;
+    will-change: opacity, transform;
+    animation: test1PillTextAIn var(--test1-pill-text-a-in-dur) var(--test1-pill-content-ease) var(--test1-pill-icon-text-delay) forwards,
+      test1PillTextAOut var(--test1-pill-text-a-out-dur) var(--test1-pill-text-a-out-ease) var(--test1-pill-text-fadeout-delay) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight {
+    animation: test1PillTextAHighlightOn 0.01s linear var(--test1-pill-text-a-shimmer-start) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight-track--1 {
+    animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear var(--test1-pill-text-a-shimmer-start) infinite;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight-track--2 {
+    animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-highlight-pass-step)) infinite;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight-track--3 {
+    animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-highlight-pass-step) * 2) infinite;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-sweep {
+    display: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep {
+    opacity: 0;
+    pointer-events: none;
+    animation: test1PillGradSweepShow var(--test1-pill-pink-fade-dur) var(--test1-pill-pink-fade-ease) var(--test1-pill-pink-sweep-start) forwards,
+      test1PillGradSweepHide 0.5s ease var(--test1-pill-pink-sweep-end) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--1 {
+    opacity: 1;
+    animation: test1PillGradFillPass var(--test1-pass-dur) linear var(--test1-pill-pink-sweep-start) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--2 {
+    opacity: 1;
+    animation: test1PillGradFillPass var(--test1-pass-dur) linear calc(var(--test1-pill-pink-sweep-start) + var(--test1-pill-grad-pass-step)) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--3 {
+    opacity: 1;
+    animation: test1PillGradFillPass var(--test1-pass-dur) linear calc(var(--test1-pill-pink-sweep-start) + var(--test1-pill-grad-pass-step) * 2) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text--b {
+    opacity: 0;
+    visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    animation: test1PillTextBIn var(--test1-pill-text-b-dur) var(--test1-pill-text-ease) var(--test1-pill-text-b-delay) forwards;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-base,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__icon {
+    opacity: 1;
+    animation: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__icon {
+    transform: scale(1);
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-blue {
+    opacity: 1;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-blue-cover {
+    opacity: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep {
+    opacity: 0;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track {
+    animation: none;
+    opacity: 0;
+    --test1-pill-grad-fill: 128%;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__text-sweep {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-stage {
+    opacity: 0;
+    visibility: hidden;
+    transform: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .test1-bottom-pill__text--b {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-l"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) .canvas-item[data-role="test1-lock-shortcut-r"],
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) #test1-l-shortcut,
+  #canvas[data-test-scope="test1"][data-test1-coda-run][data-test1-coda-done]:not([data-test1-reveal-all]) #test1-r-shortcut {
+    pointer-events: auto !important;
+  }
+
+  @keyframes test1CodaFadeIn {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+    55% {
+      opacity: 0.82;
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes test1PillShellIn {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 8px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes test1PillBgBlueCoverIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes test1PillBgBlueCoverHold {
+    0%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1PillBgBlueCoverHide {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes test1PillBgGradientIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes test1PillTextAIn {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 6px, 0);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes test1PillTextSweepIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes test1PillIconIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes test1PillTextADimBase {
+    from { fill: white; }
+    to { fill: rgba(255, 255, 255, 0.52); }
+  }
+
+  @keyframes test1PillTextAHighlightOn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes test1PillTextAHighlightPass {
+    0% { --test1-pill-text-a-highlight-x: -4%; opacity: 1; }
+    100% { --test1-pill-text-a-highlight-x: 128%; opacity: 1; }
+  }
+
+  @keyframes test1PillTextFillPass {
+    0% { --test1-pill-text-fill: -4%; opacity: 1; }
+    100% { --test1-pill-text-fill: 128%; opacity: 1; }
+  }
+
+  @keyframes test1PillGradFillPass {
+    0% { --test1-pill-grad-fill: -4%; opacity: 1; }
+    100% { --test1-pill-grad-fill: 128%; opacity: 1; }
+  }
+
+  @keyframes test1PillGradSweepShow {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes test1PillGradSweepHide {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes test1PillPinkCoverOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes test1PillBgBlueCoverOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes test1PillTextSweepOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+  }
+
+  @keyframes test1PillTextAOut {
+    0% {
+      opacity: 1;
+      visibility: visible;
+      transform: translate3d(0, 0, 0);
+    }
+    55% {
+      opacity: 0.42;
+      visibility: visible;
+      transform: translate3d(0, -0.5px, 0);
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(0, -1px, 0);
+    }
+  }
+
+  @keyframes test1PillTextBIn {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(3px);
+    }
+    1% {
+      visibility: visible;
+    }
+    100% {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-l,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-lock-shortcut-r {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-base,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-blue,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__icon,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-sweep,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text--b,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-stage,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-sweep {
+      opacity: 0;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__bg-blue-cover {
+      opacity: 0;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep {
+      opacity: 1;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track {
+      --test1-pill-grad-fill: -4%;
+      opacity: 0;
+    }
+
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--1,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--2,
+    #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__grad-sweep-track--3 {
+      opacity: 1;
+    }
   }
 

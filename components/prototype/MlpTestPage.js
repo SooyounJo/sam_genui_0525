@@ -9,13 +9,34 @@ const PHONE_H = 880;
 const PHONE_RADIUS = 30;
 const HOME_BG = "/assets/bg-new.png?v=2";
 
+// Persona 1 ring uses the same stroke palette as Persona 2 (test2).
+function syncTest1RingFromTest2() {
+  if (typeof document === "undefined") return;
+  var test2El = document.querySelector('.persona-circle[data-avatar-key="test2"]');
+  var test1El = document.querySelector('.persona-circle[data-avatar-key="test1"]');
+  if (!test2El || !test1El) return;
+  ["--persona-c1", "--persona-c2", "--persona-c3", "--persona-c4"].forEach(function (prop) {
+    var val = test2El.style.getPropertyValue(prop);
+    if (!val || !val.trim()) val = getComputedStyle(test2El).getPropertyValue(prop);
+    val = val && val.trim();
+    if (val) test1El.style.setProperty(prop, val);
+  });
+  var custom = test2El.style.getPropertyValue("--persona-custom-gradient").trim();
+  if (custom) test1El.style.setProperty("--persona-custom-gradient", custom);
+  else test1El.style.removeProperty("--persona-custom-gradient");
+}
+
 const TESTS = [
   {
-    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona-1.png?v=3", disabled: true,
-    name: "Junseo",
-    age: "32, Office Worker",
-    bio: "효율적인 일상을 추구하는 직장인.\n짧은 시간 안에 최대의 효과를 얻는 운동을 선호.",
-    interests: ["Quick HIIT", "Meal prep", "Sleep tracking"],
+    id: "test1", href: "/test1", label: "Persona 1", img: "/assets/persona01.png",
+    name: "지수",
+    age: "45",
+    role: "Teacher",
+    bioLines: [
+      "중학교 국어 교사, 매일 오후 6시 퇴근하며 딸과 둘이 거주.",
+      "냉장고 재료 기반으로 직접 저녁 준비, 식단을 계획적으로 관리.",
+    ],
+    interests: ["Evening routine", "Home cooking", "SmartThings user"],
   },
   {
     id: "test2", href: "/test2", label: "Persona 2", img: "/assets/persona-2.png?v=3",
@@ -148,6 +169,7 @@ export default function MlpTestPage({
         const el = document.querySelector(`.persona-circle[data-avatar-key="${aid}"]`);
         if (el) el.style.removeProperty("--persona-custom-gradient");
       });
+      syncTest1RingFromTest2();
       return undefined;
     }
     ["test2", "test3"].forEach((aid) => {
@@ -159,6 +181,7 @@ export default function MlpTestPage({
       const el = document.querySelector(`.persona-circle[data-avatar-key="${aid}"]`);
       if (el) el.style.setProperty("--persona-custom-gradient", gradient);
     });
+    syncTest1RingFromTest2();
     return undefined;
   }, [gradEditorOpen, gradEditorAvatar, gradEditorTime, gradConfigs]);
 
@@ -279,6 +302,20 @@ export default function MlpTestPage({
   // falls back to the active badge.
   const activeIdx   = TESTS.findIndex(t => t.id === testId && !t.disabled);
   const focusIdx    = hoveredIdx >= 0 ? hoveredIdx : activeIdx;
+  // Badge stack spacing stays on flex gap: 24px — never shift on hover.
+  const shouldOffsetStack = false;
+
+  const renderPersonaAvatar = (test) => {
+    if (test.id === "test1") {
+      return (
+        <span className="persona-avatar-fill" aria-hidden="true">
+          <span className="persona-avatar-fill__ellipse" />
+          <img src={test.img} alt={test.label} className="persona-img persona-img--test1" />
+        </span>
+      );
+    }
+    return <img src={test.img} alt={test.label} className="persona-img" />;
+  };
 
   // Per-badge palette extracted from each avatar image. Colors stay
   // close to the portrait (background, skin, clothing) — no forced
@@ -372,6 +409,9 @@ export default function MlpTestPage({
       } catch (_) { return null; }
     }
     function apply(badge) {
+      var key = badge.getAttribute("data-avatar-key");
+      // test1 ring palette is mirrored from test2 — skip image extraction.
+      if (key === "test1") return;
       var img = badge.querySelector("img.persona-img");
       if (!img) return;
       function go() {
@@ -381,6 +421,7 @@ export default function MlpTestPage({
         badge.style.setProperty("--persona-c2", colors[1]);
         badge.style.setProperty("--persona-c3", colors[2]);
         badge.style.setProperty("--persona-c4", colors[3]);
+        if (key === "test2") syncTest1RingFromTest2();
       }
       if (img.complete && img.naturalWidth > 0) go();
       else img.addEventListener("load", go, { once: true });
@@ -647,6 +688,28 @@ export default function MlpTestPage({
             bottom: 0 !important;
             z-index: 10 !important;
           }
+          /* Flex slot grows with the 1.8× badge so gap: 24px is kept
+             between slots and neighbours never overlap. */
+          .persona-slot {
+            --persona-badge-size: 76px;
+            --persona-hover-scale: 1.8;
+            width: var(--persona-badge-size) !important;
+            height: var(--persona-badge-size) !important;
+            flex: 0 0 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            transition: width 0.52s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        height 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+          }
+          .persona-slot:has(.persona-circle:not(.is-disabled):hover),
+          .persona-slot:has(.persona-circle:not(.is-disabled).is-hovered),
+          .persona-slot:has(.persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"])) {
+            width: calc(var(--persona-badge-size) * var(--persona-hover-scale)) !important;
+            height: calc(var(--persona-badge-size) * var(--persona-hover-scale)) !important;
+            z-index: 4 !important;
+          }
           .persona-circle {
             width: 76px !important;
             height: 76px !important;
@@ -720,6 +783,8 @@ export default function MlpTestPage({
             transition: opacity 220ms cubic-bezier(0.2, 0, 0, 1);
             pointer-events: none;
             will-change: --persona-ring-angle, padding, opacity, filter;
+            /* Above avatar fill/img so the stroke ring stays visible on test1. */
+            z-index: 1;
           }
           /* Border-glow cone — a focused spotlight that races around
              the ring on top of the colorful gradient. Previously the
@@ -771,21 +836,69 @@ export default function MlpTestPage({
             pointer-events: none !important;
             box-shadow: none !important;
           }
+          .persona-circle[data-avatar-key="test1"] {
+            background: #E0F2C4 !important;
+          }
+          /* test1 stroke matches test2 palette + spin (synced in JS). */
+          .persona-circle[data-avatar-key="test1"]::before {
+            background: var(
+              --persona-custom-gradient,
+              conic-gradient(
+                from 0deg,
+                var(--persona-c1, #FF66FF)   0deg,
+                var(--persona-c2, #FF6666)  90deg,
+                var(--persona-c3, #FFFFFF) 180deg,
+                var(--persona-c4, #F1F158) 270deg,
+                var(--persona-c1, #FF66FF) 360deg
+              )
+            );
+          }
+          .persona-circle[data-avatar-key="test1"] .persona-avatar-fill {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+          }
+          .persona-circle[data-avatar-key="test1"] .persona-avatar-fill__ellipse {
+            display: none;
+          }
+          .persona-circle[data-avatar-key="test1"] .persona-img--test1 {
+            position: absolute;
+            width: 100% !important;
+            height: 100% !important;
+            left: 0 !important;
+            top: 0 !important;
+            object-fit: cover !important;
+            object-position: center center !important;
+            border-radius: 50%;
+            /* Slight overfill hides sub-pixel gaps at the circle edge. */
+            transform: scale(1.04);
+          }
+          .persona-circle[data-avatar-key="test1"]:not(:hover):not(.is-hovered)::before {
+            animation: none !important;
+            opacity: 0 !important;
+            padding: 2px !important;
+            filter: none !important;
+            transform: none !important;
+          }
+          .persona-circle[data-avatar-key="test2"]:not(:hover):not(.is-hovered)::before {
+            animation: none !important;
+            opacity: 0 !important;
+            padding: 2px !important;
+            filter: none !important;
+            transform: none !important;
+          }
+          .persona-circle[data-avatar-key="test1"]:not(:hover):not(.is-hovered) {
+            transform: none !important;
+          }
           .persona-circle:not(.is-disabled):hover,
           .persona-circle:not(.is-disabled).is-hovered,
-          .persona-circle:not(.is-disabled).is-active {
-            /* Enlarged state — applied for:
-                 :hover / .is-hovered → user pointing at a non-active badge
-                                        (preview state)
-                 .is-active           → the badge whose scenario is the
-                                        CURRENT page (the "you are here"
-                                        indicator per user direction
-                                        "enlarged when that scenario is
-                                        appeared on mobile screen").
-               Same 1.8× scale for both so they share the same focal
-               weight; the 22 px sibling-offset (set elsewhere) gives
-               the enlarged badge room to grow without overlapping its
-               neighbours regardless of trigger. */
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"]) {
+            /* Enlarged state — 1.8× scale; the parent .persona-slot grows
+               in flex layout by the same factor so gap: 24px between
+               slots is preserved and neighbours never overlap. */
             transform: scale(1.8) !important;
           }
           .persona-circle:not(.is-disabled):hover::before,
@@ -806,7 +919,7 @@ export default function MlpTestPage({
               personaCircleHoverSpin 8s linear 1 forwards,
               personaCircleHoverRotate 1.6s linear 5 forwards;
           }
-          .persona-circle:not(.is-disabled).is-active::before {
+          .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"])::before {
             /* INITIAL state of active badge — rotates on page load as
                a "look here, this scenario is yours" signal. Same
                animation as hover (infinite spin + rotate). The
@@ -814,6 +927,9 @@ export default function MlpTestPage({
                badge stack by hovering at least one badge (see the
                .has-interacted override below), after which the active
                badge becomes static when un-hovered.
+
+               Persona 1 (test1) is excluded — its ring only appears
+               on hover, never at rest.
 
                Per user direction: "when the scenario is played... when
                mouse is not hovered, the enlarged batch should not
@@ -823,7 +939,7 @@ export default function MlpTestPage({
               personaCircleHoverSpin 8s linear infinite,
               personaCircleHoverRotate 1.6s linear infinite;
           }
-          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active::before {
+          .mlp-left.has-interacted .persona-circle:not(.is-disabled).is-active:not([data-avatar-key="test1"]):not([data-avatar-key="test2"])::before {
             /* AFTER the user has hovered any badge at least once, the
                active badge falls back to a quiet STATIC state when
                un-hovered. User has demonstrated awareness of the badge
@@ -1159,6 +1275,40 @@ export default function MlpTestPage({
           .persona-profile-card--test2.is-visible .persona-profile-card__bio {
             animation: personaCardTextRise 320ms cubic-bezier(0.2, 0, 0.05, 1) 540ms both;
           }
+          /* test1 (지수) — test2 card shell, mint age/role row */
+          .persona-profile-card--test2.persona-profile-card--test1 {
+            width: 392px;
+            padding: 22px 24px 20px;
+          }
+          .persona-profile-card--test1 .persona-profile-card__age {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 4px;
+          }
+          .persona-profile-card--test1 .persona-profile-card__age-num,
+          .persona-profile-card--test1 .persona-profile-card__age-role {
+            color: #BDE5EC;
+            opacity: 0.6;
+          }
+          .persona-profile-card--test1 .persona-profile-card__tag {
+            color: #282A2C;
+            background: #BDE5EC;
+            border: none;
+          }
+          .persona-profile-card--test1 .persona-profile-card__bio {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 0;
+            font-size: 14.9292px;
+            line-height: 1.5;
+            white-space: normal;
+            word-break: keep-all;
+          }
+          .persona-profile-card--test1 .persona-profile-card__bio-line {
+            display: block;
+          }
           /* test3 (유진) — solid card, mint tags, bio below tags */
           .persona-profile-card--test3 {
             display: flex;
@@ -1407,21 +1557,8 @@ export default function MlpTestPage({
         </nav>
 
         <div className="mlp-workspace">
-          <aside className={`mlp-left${(hoveredId || activeIdx >= 0) ? " is-hovering" : ""}${hasInteracted ? " has-interacted" : ""}`}>
+          <aside className={`mlp-left${shouldOffsetStack ? " is-hovering" : ""}${hasInteracted ? " has-interacted" : ""}`}>
             {TESTS.map((test, idx) => {
-              // Each badge's `data-hover-offset` is one of: -1 (above the
-              // hovered badge — nudge up), 0 (the hovered badge or no
-              // hover — stay still), 1 (below the hovered badge — nudge
-              // down). The CSS rules below translate those positions
-              // into translateY values, so the badges visually push out
-              // of the way of the hovered one's profile card.
-              // focusIdx = the badge currently driving the enlarged state.
-              // Falls back to the ACTIVE badge (= current page's scenario)
-              // when nothing is hovered — so on /test3 the persona-3 badge
-              // is the "focus" by default and neighbouring badges offset
-              // around it just as they would under a hover. Hover takes
-              // precedence so previewing a different persona still moves
-              // the focus.
               const offset = focusIdx < 0 || idx === focusIdx
                 ? 0
                 : (idx < focusIdx ? -1 : 1);
@@ -1434,30 +1571,32 @@ export default function MlpTestPage({
               const onMouseLeave = test.disabled ? undefined : () => setHoveredId(prev => prev === test.id ? null : prev);
               if (test.disabled) {
                 return (
-                  <span
-                    key={test.id}
-                    className={className}
-                    aria-disabled="true"
-                    title="준비 중"
-                    data-hover-offset={offset}
-                    data-avatar-key={test.id}
-                  >
-                    <img src={test.img} alt={test.label} className="persona-img" />
-                  </span>
+                  <div key={test.id} className="persona-slot">
+                    <span
+                      className={className}
+                      aria-disabled="true"
+                      title="준비 중"
+                      data-hover-offset={offset}
+                      data-avatar-key={test.id}
+                    >
+                      {renderPersonaAvatar(test)}
+                    </span>
+                  </div>
                 );
               }
               return (
-                <Link
-                  key={test.id}
-                  href={test.href}
-                  className={className}
-                  data-hover-offset={offset}
-                  data-avatar-key={test.id}
-                  onMouseEnter={onMouseEnter}
-                  onMouseLeave={onMouseLeave}
-                >
-                  <img src={test.img} alt={test.label} className="persona-img" />
-                </Link>
+                <div key={test.id} className="persona-slot">
+                  <Link
+                    href={test.href}
+                    className={className}
+                    data-hover-offset={offset}
+                    data-avatar-key={test.id}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                  >
+                    {renderPersonaAvatar(test)}
+                  </Link>
+                </div>
               );
             })}
             {/* Profile card — slides in from the right of the hovered
@@ -1466,7 +1605,7 @@ export default function MlpTestPage({
                 currently hovered. */}
             <div
               ref={profileCardRef}
-              className={`persona-profile-card${cardVisible ? " is-visible" : ""}${hoveredTest?.id === "test2" ? " persona-profile-card--test2" : ""}${hoveredTest?.id === "test3" ? " persona-profile-card--test3" : ""}`}
+              className={`persona-profile-card${cardVisible ? " is-visible" : ""}${hoveredTest?.id === "test2" || hoveredTest?.id === "test1" ? " persona-profile-card--test2" : ""}${hoveredTest?.id === "test1" ? " persona-profile-card--test1" : ""}${hoveredTest?.id === "test3" ? " persona-profile-card--test3" : ""}`}
               style={{ "--hover-idx": Math.max(0, hoveredIdx) }}
               aria-hidden={cardVisible ? "false" : "true"}
             >
@@ -1475,10 +1614,17 @@ export default function MlpTestPage({
                   <div className="persona-profile-card__head">
                     <div className="persona-profile-card__heading">
                       <div className="persona-profile-card__name">{hoveredTest.name}</div>
-                      <div className="persona-profile-card__age">{hoveredTest.age}</div>
+                      {hoveredTest.id === "test1" ? (
+                        <div className="persona-profile-card__age">
+                          <span className="persona-profile-card__age-num">{hoveredTest.age},</span>
+                          <span className="persona-profile-card__age-role">{hoveredTest.role}</span>
+                        </div>
+                      ) : (
+                        <div className="persona-profile-card__age">{hoveredTest.age}</div>
+                      )}
                     </div>
                   </div>
-                  {hoveredTest.id === "test2" || hoveredTest.id === "test3" ? (
+                  {hoveredTest.id === "test2" || hoveredTest.id === "test3" || hoveredTest.id === "test1" ? (
                     <>
                       {hoveredTest.interests && hoveredTest.interests.length > 0 && (
                         <ul className="persona-profile-card__interests">
@@ -1487,7 +1633,15 @@ export default function MlpTestPage({
                           ))}
                         </ul>
                       )}
-                      <p className="persona-profile-card__bio">{hoveredTest.bio}</p>
+                      {hoveredTest.id === "test1" && hoveredTest.bioLines ? (
+                        <p className="persona-profile-card__bio">
+                          {hoveredTest.bioLines.map((line) => (
+                            <span key={line} className="persona-profile-card__bio-line">{line}</span>
+                          ))}
+                        </p>
+                      ) : (
+                        <p className="persona-profile-card__bio">{hoveredTest.bio}</p>
+                      )}
                     </>
                   ) : (
                     <>
