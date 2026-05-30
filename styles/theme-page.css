@@ -14043,10 +14043,8 @@
     --test1-pill-text-hold: 3s;
     --test1-pill-text-a-shimmer-delay: 1s;
     --test1-pill-text-a-shimmer-start: calc(var(--test1-pill-icon-text-delay) + var(--test1-pill-text-a-in-dur) + var(--test1-pill-text-a-shimmer-delay));
-    --test1-pill-text-a-highlight-pass-dur: 3.35s;
-    --test1-pill-text-a-highlight-overlap: 2.78s;
-    --test1-pill-text-a-highlight-pass-step: calc(var(--test1-pill-text-a-highlight-pass-dur) - var(--test1-pill-text-a-highlight-overlap));
-    --test1-pill-text-a-shimmer-dur: calc(var(--test1-pill-text-a-highlight-pass-dur) + var(--test1-pill-text-a-highlight-pass-step) * 2);
+    --test1-pill-text-a-highlight-pass-dur: 2.85s;
+    --test1-pill-text-a-shimmer-hold: calc(var(--test1-pill-text-hold) + var(--test1-pill-text-a-highlight-pass-dur));
     --test1-pill-text-sweep-dur: calc(var(--test1-pass-dur) + var(--test1-pass-step) * 2);
     --test1-pill-text-ease: cubic-bezier(0.22, 1, 0.36, 1);
     --test1-pill-text-a-out-dur: 1.15s;
@@ -14054,7 +14052,7 @@
     --test1-pill-crossfade-lead: 0.35s;
     --test1-pill-pink-fade-dur: 1.05s;
     --test1-pill-pink-fade-ease: cubic-bezier(0.33, 0, 0.18, 1);
-    --test1-pill-pink-sweep-start: calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-shimmer-dur));
+    --test1-pill-pink-sweep-start: calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-shimmer-hold));
     --test1-pill-text-fadeout-delay: calc(var(--test1-pill-pink-sweep-start) - var(--test1-pill-crossfade-lead));
     --test1-pill-pink-flow-delay: var(--test1-pill-pink-sweep-start);
     --test1-pill-grad-pass-overlap: 0.62s;
@@ -14259,12 +14257,9 @@
     animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear var(--test1-pill-text-a-shimmer-start) infinite;
   }
 
-  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight-track--2 {
-    animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-highlight-pass-step)) infinite;
-  }
-
-  #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-a-highlight-track--3 {
-    animation: test1PillTextAHighlightPass var(--test1-pill-text-a-highlight-pass-dur) linear calc(var(--test1-pill-text-a-shimmer-start) + var(--test1-pill-text-a-highlight-pass-step) * 2) infinite;
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-a-highlight-track--2,
+  #canvas[data-test-scope="test1"] .test1-bottom-pill__text-a-highlight-track--3 {
+    display: none;
   }
 
   #canvas[data-test-scope="test1"][data-test1-coda-animate][data-test1-coda-run]:not([data-test1-reveal-all]) .test1-bottom-pill__text-sweep {

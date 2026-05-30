@@ -5885,12 +5885,6 @@ window.renderAtomicForRole = function renderAtomicForRole(comp, rect) {
                 '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--1">' +
                   '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
                 '</g>' +
-                '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--2">' +
-                  '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
-                '</g>' +
-                '<g class="test1-bottom-pill__text-a-highlight-track test1-bottom-pill__text-a-highlight-track--3">' +
-                  '<rect x="-54" y="9" width="108" height="35" fill="url(#test1bp_text_a_highlight)"/>' +
-                '</g>' +
               '</g>' +
             '</g>' +
             '<text class="test1-bottom-pill__text test1-bottom-pill__text--b" fill="white" font-family="Pretendard SB, sans-serif" font-size="10.2" font-weight="600" letter-spacing="-0.02em">' +
@@ -9284,11 +9278,9 @@ var TEST1_PILL_TEXT_B_DUR_MS = 1400;
 var TEST1_PILL_TEXT_B_LEAD_MS = 850;
 var TEST1_PILL_TEXT_A_SHIMMER_DELAY_MS = 1000;
 var TEST1_PILL_TEXT_A_SHIMMER_START_MS = TEST1_PILL_ICON_TEXT_DELAY_MS + TEST1_PILL_TEXT_A_IN_MS + TEST1_PILL_TEXT_A_SHIMMER_DELAY_MS;
-var TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS = 3350;
-var TEST1_PILL_TEXT_A_HIGHLIGHT_OVERLAP_MS = 2780;
-var TEST1_PILL_TEXT_A_HIGHLIGHT_STEP_MS = TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS - TEST1_PILL_TEXT_A_HIGHLIGHT_OVERLAP_MS;
-var TEST1_PILL_TEXT_A_SHIMMER_DUR_MS = TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS + TEST1_PILL_TEXT_A_HIGHLIGHT_STEP_MS * 2;
-var TEST1_PILL_PINK_FLOW_DELAY_MS = TEST1_PILL_TEXT_A_SHIMMER_START_MS + TEST1_PILL_TEXT_A_SHIMMER_DUR_MS;
+var TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS = 2850;
+var TEST1_PILL_TEXT_A_SHIMMER_HOLD_MS = TEST1_PILL_TEXT_HOLD_MS + TEST1_PILL_TEXT_A_HIGHLIGHT_PASS_MS;
+var TEST1_PILL_PINK_FLOW_DELAY_MS = TEST1_PILL_TEXT_A_SHIMMER_START_MS + TEST1_PILL_TEXT_A_SHIMMER_HOLD_MS;
 var TEST1_PILL_PINK_SWEEP_START_MS = TEST1_PILL_PINK_FLOW_DELAY_MS;
 var TEST1_PILL_TEXT_B_DELAY_MS = TEST1_PILL_PINK_FLOW_DELAY_MS + TEST1_PILL_PINK_FLOW_MS - TEST1_PILL_TEXT_B_LEAD_MS;
 var TEST1_CODA_FADE_IN_MS = TEST1_PILL_TEXT_B_DELAY_MS + TEST1_PILL_TEXT_B_DUR_MS + 500;
